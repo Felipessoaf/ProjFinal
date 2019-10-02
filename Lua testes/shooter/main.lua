@@ -1,5 +1,17 @@
 -- from [LÖVE tutorial, part 2](http://www.headchant.com/2010/12/31/love2d-%E2%80%93-tutorial-part-2-pew-pew/)
 
+local pathOfThisFile = ...
+local folderOfThisFile = (...):match("(.-)[^%.]+$")
+
+local rx = require (folderOfThisFile .. 'RxLove.RxLua.rx')
+require (folderOfThisFile .. 'RxLove.rx-love')
+
+love.keypressed
+  :filter(function(key) return key == ' ' end)
+  :subscribe(function()
+    print('You pressed the space bar')
+  end)
+
 function love.load(arg)
   if arg and arg[#arg] == "-debug" then require("mobdebug").start() end
   hero = {} -- new table for the hero
@@ -23,9 +35,9 @@ end
 
 function love.keyreleased(key)
   -- in v0.9.2 and earlier space is represented by the actual space character ' ', so check for both
-  if (key == " " or key == "space") then
-    shoot()
-  end
+  -- if (key == " " or key == "space") then
+  --   shoot()
+  -- end
 end
 
 function love.update(dt)
