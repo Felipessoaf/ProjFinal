@@ -24,6 +24,8 @@ local keyMap = {
 
 local state
 
+
+
 -- Declare initial state of game
 function love.load()
   state = {
