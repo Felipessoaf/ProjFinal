@@ -11,7 +11,7 @@ local keyMap = {
 
 -- Declare initial state of game
 function love.load(arg)
-  if arg and arg[#arg] == "-debug" then require("mobdebug").start() end
+  -- if arg and arg[#arg] == "-debug" then require("mobdebug").start() end
   hero = {} -- new table for the hero
   hero.x = 300 -- x,y coordinates of the hero
   hero.y = 450
@@ -36,20 +36,17 @@ local function identity(...) return ... end
 local function const(val) return function() return val end end
 local function dt() return love.update:getValue() end
 local function move(dt, direction)
-  print("asdasd")
   hero.x = hero.x + hero.speed*dt*direction
 end
 
 -- Respond to key presses to move players
 -- keyboard actions for our hero
 for _, key in pairs({'a', 'd', 'left', 'right'}) do
-  print(key)
   love.update
     :filter(function()
       return love.keyboard.isDown(key)
     end)
     :map(function(dt)
-      print(key)
       return dt, unpack(keyMap[key])
     end)
     :subscribe(move)
@@ -61,51 +58,51 @@ love.keypressed
     shoot()
   end)
 
-function love.update(dt)
-  local remEnemy = {}
-  local remShot = {}
+-- function love.update(dt)
+--   local remEnemy = {}
+--   local remShot = {}
 
-  -- update the shots
-  for i,v in ipairs(hero.shots) do
-    -- move them up up up
-    v.y = v.y - dt * 100
+--   -- update the shots
+--   for i,v in ipairs(hero.shots) do
+--     -- move them up up up
+--     v.y = v.y - dt * 100
 
-    -- mark shots that are not visible for removal
-    if v.y < 0 then
-      table.insert(remShot, i)
-    end
+--     -- mark shots that are not visible for removal
+--     if v.y < 0 then
+--       table.insert(remShot, i)
+--     end
 
-    -- check for collision with enemies
-    for ii,vv in ipairs(enemies) do
-      if CheckCollision(v.x,v.y,2,5,vv.x,vv.y,vv.width,vv.height) then
-        -- mark that enemy for removal
-        table.insert(remEnemy, ii)
-        -- mark the shot to be removed
-        table.insert(remShot, i)
-      end
-    end
-  end
+--     -- check for collision with enemies
+--     for ii,vv in ipairs(enemies) do
+--       if CheckCollision(v.x,v.y,2,5,vv.x,vv.y,vv.width,vv.height) then
+--         -- mark that enemy for removal
+--         table.insert(remEnemy, ii)
+--         -- mark the shot to be removed
+--         table.insert(remShot, i)
+--       end
+--     end
+--   end
 
-  -- remove the marked enemies
-  for i,v in ipairs(remEnemy) do
-    table.remove(enemies, v)
-  end
+--   -- remove the marked enemies
+--   for i,v in ipairs(remEnemy) do
+--     table.remove(enemies, v)
+--   end
 
-  for i,v in ipairs(remShot) do
-    table.remove(hero.shots, v)
-  end
+--   for i,v in ipairs(remShot) do
+--     table.remove(hero.shots, v)
+--   end
 
-  -- update those evil enemies
-  for i,v in ipairs(enemies) do
-    -- let them fall down slowly
-    v.y = v.y + dt
+--   -- update those evil enemies
+--   for i,v in ipairs(enemies) do
+--     -- let them fall down slowly
+--     v.y = v.y + dt
 
-    -- check for collision with ground
-    if v.y > 465 then
-      -- you loose!!!
-    end
-  end
-end
+--     -- check for collision with ground
+--     if v.y > 465 then
+--       -- you loose!!!
+--     end
+--   end
+-- end
 
 function love.draw()
   -- let's draw a background
