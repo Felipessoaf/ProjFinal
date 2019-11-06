@@ -126,9 +126,10 @@ for _, key in pairs({'a', 'd'}) do
 end
 
 love.keyreleased
-    :filter(function(key) return key in {'a', 'd'} end)
+    :filter(function(key) return key == 'a' or  key == 'd' end)
     :subscribe(function()
-        
+        currentVelX, currentVelY = objects.hero.body:getLinearVelocity()
+        objects.hero.body:setLinearVelocity(0, currentVelY)
     end)
 
 love.keypressed
