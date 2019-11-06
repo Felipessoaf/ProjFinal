@@ -11,7 +11,7 @@ local keyMap = {
 
 -- Declare initial state of game
 love.load:subscribe(function (arg)
-    hero = {} -- new table for the hero
+    hero = rx.BehaviorSubject.create() -- new table for the hero
     hero.x = 300 -- x,y coordinates of the hero
     hero.y = 450
     hero.width = 30
@@ -47,6 +47,8 @@ end)
 -- Helper functions
 local function move(dt, direction)
     hero.x = hero.x + hero.speed*dt*direction
+
+    hero:onNext()
 end
 
 -- Respond to key presses to move players
@@ -69,6 +71,13 @@ love.keypressed
     end)
 
 love.update:subscribe(function (dt)
+    hero:filter(function()
+            return hero.x < 0
+        end)
+        :subscribe(function()
+            hero.x = 0
+        end)
+
     -- update the shots
     shotsFired = rx.Observable.fromTable(hero.shots, pairs, false)
         :filter(function(shot)
@@ -119,6 +128,7 @@ love.update:subscribe(function (dt)
             -- let them fall down slowly
             enemy.y = enemy.y + dt * enemy.speed
         end)
+
 end)
 
 love.draw:subscribe(function ()
