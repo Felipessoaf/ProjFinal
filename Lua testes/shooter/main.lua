@@ -95,12 +95,9 @@ love.update:subscribe(function (dt)
     shotsFired:subscribe(function(shot)
         enemiesAlive
             :filter(function(enemy)
-                print("shotsFired alive? " .. enemy.x)
-                return CheckCollision(shot.x,shot.y,shot.width,shot.height,
-                enemy.x,enemy.y,enemy.width,enemy.height)
+                return CheckCollision(shot.x,shot.y,shot.width,shot.height, enemy.x,enemy.y,enemy.width,enemy.height)
             end)
             :subscribe(function()
-                print("enemy dead " .. enemy.x)
                 -- mark that enemy dead
                 enemy.alive = false
                 -- mark the shot not visible
@@ -138,31 +135,37 @@ love.draw:subscribe(function ()
 
     -- let's draw our heros shots
     love.graphics.setColor(255,255,255,255)
-    for i,shot in ipairs(hero.shots) do
-        if shot.fired then
+    rx.Observable.fromTable(hero.shots, pairs, false)
+        :filter(function(shot)
+            return shot.fired
+        end)
+        :subscribe(function(shot)
             love.graphics.rectangle("fill", shot.x, shot.y, shot.width, shot.height)
-        end
-    end
+        end)
 
     -- let's draw our enemies
     love.graphics.setColor(0,255,255,255)
-    for i,enemy in ipairs(enemies) do
-        if enemy.alive then
+    rx.Observable.fromTable(enemies, pairs, false)
+        :filter(function(enemy)
+            return enemy.alive
+        end)
+        :subscribe(function(enemy)
             love.graphics.rectangle("fill", enemy.x, enemy.y, enemy.width, enemy.height)
-        end
-    end
+        end)
 end)
 
 function shoot()
     --filter not fired. first.
-    for i,shot in ipairs(hero.shots) do 
-        if not shot.fired then
+    rx.Observable.fromTable(hero.shots, pairs, false)
+        :filter(function(shot)
+            return not shot.fired
+        end)
+        :first()
+        :subscribe(function(shot)
             shot.x = hero.x+hero.width/2
             shot.y = hero.y
             shot.fired = true
-            break
-        end
-    end
+        end)
 end
 
 -- Collision detection function.
@@ -170,6 +173,5 @@ end
 -- w and h mean width and height.
 function CheckCollision(ax1,ay1,aw,ah, bx1,by1,bw,bh)
   local ax2,ay2,bx2,by2 = ax1 + aw, ay1 + ah, bx1 + bw, by1 + bh
-  print("CheckCollision " .. ay1 .. " " .. bx1)
   return ax1 < bx2 and ax2 > bx1 and ay1 < by2 and ay2 > by1
 end
