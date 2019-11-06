@@ -112,6 +112,15 @@ local function move(dt, direction)
     --     end)
 end
 
+local function stopHorMove()
+    currentVelX, currentVelY = objects.hero.body:getLinearVelocity()
+    objects.hero.body:setLinearVelocity(0, currentVelY)
+end
+
+local function jump()
+    objects.hero.body:applyLinearImpulse(0, -50)
+end
+
 -- Respond to key presses to move players
 -- keyboard actions for our objects.hero
 for _, key in pairs({'a', 'd'}) do
@@ -128,8 +137,7 @@ end
 love.keyreleased
     :filter(function(key) return key == 'a' or  key == 'd' end)
     :subscribe(function()
-        currentVelX, currentVelY = objects.hero.body:getLinearVelocity()
-        objects.hero.body:setLinearVelocity(0, currentVelY)
+        stopHorMove()
     end)
 
 love.keypressed
@@ -137,6 +145,12 @@ love.keypressed
     :subscribe(function()
         currentVelX, currentVelY = objects.hero.body:getLinearVelocity()
         objects.hero.body:setLinearVelocity(0, currentVelY)
+    end)
+
+love.keypressed
+    :filter(function(key) return key == 'w' end)
+    :subscribe(function()
+        jump()
     end)
 
 love.update:subscribe(function (dt)
@@ -212,7 +226,9 @@ love.update:subscribe(function (dt)
 end)
 
 love.draw:subscribe(function ()
-                            
+
+    print(objects.hero.body:getWorldPoints(objects.hero.body:getPosition()))
+    -- love.graphics.translate( objects.hero.body:getPosition() )
     -- let's draw a background
     -- love.graphics.setColor(255,255,255,255)
 
