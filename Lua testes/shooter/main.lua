@@ -10,7 +10,7 @@ local keyMap = {
 }
 
 -- Declare initial state of game
-function love.load(arg)
+love.load:subscribe(function (arg)
   -- if arg and arg[#arg] == "-debug" then require("mobdebug").start() end
   hero = {} -- new table for the hero
   hero.x = 300 -- x,y coordinates of the hero
@@ -19,22 +19,38 @@ function love.load(arg)
   hero.height = 15
   hero.speed = 150
   hero.shots = {} -- holds our fired shots
+  hero.shotsToFire = {} -- holds our shots to fire
 
-  enemies = {}
-  for i=0,7 do
-    local enemy = {}
-    enemy.width = 40
-    enemy.height = 20
-    enemy.x = i * (enemy.width + 60) + 100
-    enemy.y = enemy.height + 100
-    table.insert(enemies, enemy)
-  end
-end
+--   rx.Observable.fromRange(1, 5)
+--     :subscribe(function ()
+--       local shot = {}
+--       shot.x = 0
+--       shot.y = 0
+--       table.insert(hero.shotsToFire, shot)    
+--     end)
+
+    enemies = {}
+    rx.Observable.fromRange(0, 6)
+    :subscribe(function ()
+        local enemy = {}
+        enemy.width = 40
+        enemy.height = 20
+        enemy.x = i * (enemy.width + 60) + 100
+        enemy.y = enemy.height + 100
+        table.insert(enemies, enemy)  
+    end)
+
+--   for i=0,7 do
+--     local enemy = {}
+--     enemy.width = 40
+--     enemy.height = 20
+--     enemy.x = i * (enemy.width + 60) + 100
+--     enemy.y = enemy.height + 100
+--     table.insert(enemies, enemy)
+--   end
+end)
 
 -- Helper functions
-local function identity(...) return ... end
-local function const(val) return function() return val end end
-local function dt() return love.update:getValue() end
 local function move(dt, direction)
   hero.x = hero.x + hero.speed*dt*direction
 end
@@ -58,53 +74,53 @@ love.keypressed
     shoot()
   end)
 
--- function love.update(dt)
---   local remEnemy = {}
---   local remShot = {}
+love.update:subscribe(function (dt)
+  local remEnemy = {}
+  local remShot = {}
 
---   -- update the shots
---   for i,v in ipairs(hero.shots) do
---     -- move them up up up
---     v.y = v.y - dt * 100
+  -- update the shots
+  for i,v in ipairs(hero.shots) do
+    -- move them up up up
+    v.y = v.y - dt * 100
 
---     -- mark shots that are not visible for removal
---     if v.y < 0 then
---       table.insert(remShot, i)
---     end
+    -- mark shots that are not visible for removal
+    if v.y < 0 then
+      table.insert(remShot, i)
+    end
 
---     -- check for collision with enemies
---     for ii,vv in ipairs(enemies) do
---       if CheckCollision(v.x,v.y,2,5,vv.x,vv.y,vv.width,vv.height) then
---         -- mark that enemy for removal
---         table.insert(remEnemy, ii)
---         -- mark the shot to be removed
---         table.insert(remShot, i)
---       end
---     end
---   end
+    -- check for collision with enemies
+    for ii,vv in ipairs(enemies) do
+      if CheckCollision(v.x,v.y,2,5,vv.x,vv.y,vv.width,vv.height) then
+        -- mark that enemy for removal
+        table.insert(remEnemy, ii)
+        -- mark the shot to be removed
+        table.insert(remShot, i)
+      end
+    end
+  end
 
---   -- remove the marked enemies
---   for i,v in ipairs(remEnemy) do
---     table.remove(enemies, v)
---   end
+  -- remove the marked enemies
+  for i,v in ipairs(remEnemy) do
+    table.remove(enemies, v)
+  end
 
---   for i,v in ipairs(remShot) do
---     table.remove(hero.shots, v)
---   end
+  for i,v in ipairs(remShot) do
+    table.remove(hero.shots, v)
+  end
 
---   -- update those evil enemies
---   for i,v in ipairs(enemies) do
---     -- let them fall down slowly
---     v.y = v.y + dt
+  -- update those evil enemies
+  for i,v in ipairs(enemies) do
+    -- let them fall down slowly
+    v.y = v.y + dt
 
---     -- check for collision with ground
---     if v.y > 465 then
---       -- you loose!!!
---     end
---   end
--- end
+    -- check for collision with ground
+    if v.y > 465 then
+      -- you loose!!!
+    end
+  end
+end)
 
-function love.draw()
+love.draw:subscribe(function ()
   -- let's draw a background
   love.graphics.setColor(255,255,255,255)
 
@@ -127,7 +143,7 @@ function love.draw()
   for i,v in ipairs(enemies) do
     love.graphics.rectangle("fill", v.x, v.y, v.width, v.height)
   end
-end
+end)
 
 function shoot()
   if #hero.shots >= 5 then return end

@@ -74,7 +74,7 @@ function love.update(dt)
 
     -- check for collision with ground
     if v.y > 465 then
-      -- you loose!!!
+      love.load()
     end
   end
 end
@@ -96,3 +96,20 @@ function love.draw()
   for i,v in ipairs(hero.shots) do
     love.graphics.rectangle("fill", v.x, v.y, 2, 5)
   end
+end
+
+function shoot()
+  if #hero.shots >= 5 then return end
+  local shot = {}
+  shot.x = hero.x+hero.width/2
+  shot.y = hero.y
+  table.insert(hero.shots, shot)
+end
+
+-- Collision detection function.
+-- Checks if a and b overlap.
+-- w and h mean width and height.
+function CheckCollision(ax1,ay1,aw,ah, bx1,by1,bw,bh)
+  local ax2,ay2,bx2,by2 = ax1 + aw, ay1 + ah, bx1 + bw, by1 + bh
+  return ax1 < bx2 and ax2 > bx1 and ay1 < by2 and ay2 > by1
+end

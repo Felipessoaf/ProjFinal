@@ -26,7 +26,8 @@ local events = {
   'threaderror',
   'update',
   'visible',
-  'wheelmoved'
+  'wheelmoved',
+  'load'
 }
 
 for _, event in pairs(events) do
