@@ -4,9 +4,7 @@ require 'rx-love'
 -- Maps keys to players and directions
 local keyMap = {
   a = {-1},
-  d = {1},
-  left = {-1},
-  right = {1}
+  d = {1}
 }
 
 -- Declare initial state of game
@@ -55,13 +53,17 @@ love.load:subscribe(function (arg)
     -- set the background color to a nice blue
     love.graphics.setBackgroundColor(0.41, 0.53, 0.97)
 
-    hero = rx.BehaviorSubject.create() -- new table for the hero
-    hero.x = 300 -- x,y coordinates of the hero
-    hero.y = 450
-    hero.width = 30
-    hero.height = 15
-    hero.speed = 150
-    hero.shots = {} -- holds our shots
+    objects.hero = rx.BehaviorSubject.create() -- new table for the objects.hero
+    objects.hero.initX = 300
+    objects.hero.initY = 450
+    objects.hero.width = 30
+    objects.hero.height = 15
+    objects.hero.speed = 150
+    objects.hero.shots = {} -- holds our shots
+    objects.hero.body = love.physics.newBody(world, objects.hero.initX, objects.hero.initY, "dynamic")
+    objects.hero.body:setFixedRotation(true)
+    objects.hero.shape = love.physics.newRectangleShape(0, 0, objects.hero.width, objects.hero.height)
+    objects.hero.fixture = love.physics.newFixture(objects.hero.body, objects.hero.shape, 2)
 
     rx.Observable.fromRange(1, 5)
         :subscribe(function ()
@@ -71,7 +73,7 @@ love.load:subscribe(function (arg)
             shot.width = 2
             shot.height = 5
             shot.fired = true
-            table.insert(hero.shots, shot)    
+            table.insert(objects.hero.shots, shot)    
         end)
 
     enemies = {}
@@ -90,28 +92,29 @@ end)
 
 -- Helper functions
 local function move(dt, direction)
-    hero.x = hero.x + hero.speed*dt*direction
+    currentVelX, currentVelY = objects.hero.body:getLinearVelocity()
+    objects.hero.body:setLinearVelocity(objects.hero.speed*direction, currentVelY)
 
-    hero:onNext()
+    objects.hero:onNext()
     
-    hero:filter(function()
-            return hero.x < 0
-        end)
-        :subscribe(function()
-            hero.x = 0
-        end)
+    -- objects.hero:filter(function()
+    --         return objects.hero.x < 0
+    --     end)
+    --     :subscribe(function()
+    --         objects.hero.x = 0
+    --     end)
     
-    hero:filter(function()
-            return hero.x + hero.width > love.graphics.getWidth()
-        end)
-        :subscribe(function()
-            hero.x = love.graphics.getWidth() - hero.width
-        end)
+    -- objects.hero:filter(function()
+    --         return objects.hero.x + objects.hero.width > love.graphics.getWidth()
+    --     end)
+    --     :subscribe(function()
+    --         objects.hero.x = love.graphics.getWidth() - objects.hero.width
+    --     end)
 end
 
 -- Respond to key presses to move players
--- keyboard actions for our hero
-for _, key in pairs({'a', 'd', 'left', 'right'}) do
+-- keyboard actions for our objects.hero
+for _, key in pairs({'a', 'd'}) do
     love.update
         :filter(function()
             return love.keyboard.isDown(key)
@@ -122,10 +125,17 @@ for _, key in pairs({'a', 'd', 'left', 'right'}) do
         :subscribe(move)
 end
 
+love.keyreleased
+    :filter(function(key) return key in {'a', 'd'} end)
+    :subscribe(function()
+        
+    end)
+
 love.keypressed
     :filter(function(key) return key == 'space' end)
     :subscribe(function()
-        shoot()
+        currentVelX, currentVelY = objects.hero.body:getLinearVelocity()
+        objects.hero.body:setLinearVelocity(0, currentVelY)
     end)
 
 love.update:subscribe(function (dt)
@@ -148,7 +158,7 @@ love.update:subscribe(function (dt)
     end
 
     -- update the shots
-    shotsFired = rx.Observable.fromTable(hero.shots, pairs, false)
+    shotsFired = rx.Observable.fromTable(objects.hero.shots, pairs, false)
         :filter(function(shot)
             return shot.fired
         end)
@@ -213,27 +223,24 @@ love.draw:subscribe(function ()
     
     -- set the drawing color to red for the ball
     love.graphics.setColor(0.76, 0.18, 0.05)
-    love.graphics.circle("fill", objects.ball.body:getX(),
-                        objects.ball.body:getY(), objects.ball.shape:getRadius())
+    love.graphics.circle("fill", objects.ball.body:getX(), objects.ball.body:getY(), objects.ball.shape:getRadius())
     
     -- set the drawing color to grey for the blocks
     love.graphics.setColor(0.20, 0.20, 0.20)
-    love.graphics.polygon("fill", objects.block1.body:getWorldPoints(
-                            objects.block1.shape:getPoints()))
-    love.graphics.polygon("fill", objects.block2.body:getWorldPoints(
-                            objects.block2.shape:getPoints()))
+    love.graphics.polygon("fill", objects.block1.body:getWorldPoints(objects.block1.shape:getPoints()))
+    love.graphics.polygon("fill", objects.block2.body:getWorldPoints(objects.block2.shape:getPoints()))
 
     -- let's draw some ground
     -- love.graphics.setColor(0,255,0,255)
     -- love.graphics.rectangle("fill", 0, 465, 800, 150)
 
-    -- let's draw our hero
+    -- let's draw our objects.hero
     love.graphics.setColor(255,255,0,255)
-    love.graphics.rectangle("fill", hero.x, hero.y, hero.width, hero.height)
+    love.graphics.polygon("fill", objects.hero.body:getWorldPoints(objects.hero.shape:getPoints()))
 
-    -- let's draw our heros shots
+    -- let's draw our objects.heros shots
     love.graphics.setColor(255,255,255,255)
-    rx.Observable.fromTable(hero.shots, pairs, false)
+    rx.Observable.fromTable(objects.hero.shots, pairs, false)
         :filter(function(shot)
             return shot.fired
         end)
@@ -254,14 +261,14 @@ end)
 
 function shoot()
     --filter not fired. first.
-    rx.Observable.fromTable(hero.shots, pairs, false)
+    rx.Observable.fromTable(objects.hero.shots, pairs, false)
         :filter(function(shot)
             return not shot.fired
         end)
         :first()
         :subscribe(function(shot)
-            shot.x = hero.x+hero.width/2
-            shot.y = hero.y
+            shot.x = objects.hero.x+objects.hero.width/2
+            shot.y = objects.hero.y
             shot.fired = true
         end)
 end
