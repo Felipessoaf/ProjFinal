@@ -23,7 +23,8 @@ love.load:subscribe(function (arg)
     endContact = rx.Subject.create()
     preSolve = rx.Subject.create()
     postSolve = rx.Subject.create()
-    beginContact:subscribe(function(a, b, coll) print("\n"..a:getUserData().." colliding with "..b:getUserData()) end)
+    beginContact:filter(function(a, b, coll) return a:getUserData() == "Ground" and b:getUserData() == "Hero" end)
+                :subscribe(function() objects.hero.grounded = true end)
 
     objects = {} -- table to hold all our physical objects
     objects.ground = {}
@@ -105,16 +106,14 @@ love.load:subscribe(function (arg)
         end)
 end)
 
+--Collision callbacks 
 function bC(a, b, coll)   
     beginContact:onNext(a, b, coll)
 end
- 
-
 function eC(a, b, coll)
     -- persisting = 0
     endContact:onNext(a, b, coll)
 end
- 
 function preS(a, b, coll)
     -- if persisting == 0 then    -- only say when they first start touching
         
@@ -124,7 +123,6 @@ function preS(a, b, coll)
     -- persisting = persisting + 1    -- keep track of how many updates they've been touching for
     preSolve:onNext(a, b, coll)
 end
- 
 function postS(a, b, coll, normalimpulse, tangentimpulse)
     postSolve:onNext(a, b, coll, normalimpulse, tangentimpulse)
 end
