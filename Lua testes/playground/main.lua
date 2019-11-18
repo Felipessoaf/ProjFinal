@@ -204,6 +204,12 @@ love.update:subscribe(function (dt)
         end)
 
     enemiesAlive
+        :subscribe(function(enemy)
+            -- let them fall down slowly
+            enemy.y = enemy.y + dt * enemy.speed
+        end)
+
+    enemiesAlive
         :filter(function(enemy)
             return enemy.y > 465
         end)
@@ -212,20 +218,12 @@ love.update:subscribe(function (dt)
             -- love.load()
         end)
 
-    enemiesAlive
-        :subscribe(function(enemy)
-            -- let them fall down slowly
-            enemy.y = enemy.y + dt * enemy.speed
-        end)
-
 end)
 
 love.draw:subscribe(function ()
 
     heroPosX, heroPosY = objects.hero.body:getPosition();
     love.graphics.translate(-heroPosX + love.graphics.getWidth()/2, -heroPosY + love.graphics.getHeight() * 3/4)
-    -- let's draw a background
-    -- love.graphics.setColor(255,255,255,255)
 
     -- set the drawing color to green for the ground
     love.graphics.setColor(0.28, 0.63, 0.05)
@@ -237,10 +235,6 @@ love.draw:subscribe(function ()
     love.graphics.setColor(0.20, 0.20, 0.20)
     love.graphics.polygon("fill", objects.block1.body:getWorldPoints(objects.block1.shape:getPoints()))
     love.graphics.polygon("fill", objects.block2.body:getWorldPoints(objects.block2.shape:getPoints()))
-
-    -- let's draw some ground
-    -- love.graphics.setColor(0,255,0,255)
-    -- love.graphics.rectangle("fill", 0, 465, 800, 150)
 
     -- let's draw our objects.hero
     love.graphics.setColor(255,255,0,255)
