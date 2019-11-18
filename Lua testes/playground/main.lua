@@ -72,12 +72,15 @@ love.load:subscribe(function (arg)
     rx.Observable.fromRange(1, 5)
         :subscribe(function ()
             local shot = {}
-            shot.x = 0
-            shot.y = 0
             shot.width = 2
             shot.height = 5
             shot.fired = true
-            table.insert(objects.hero.shots, shot)    
+            shot.body = love.physics.newBody(world, 0, 0, "dynamic")
+            shot.body:setFixedRotation(true)
+            shot.shape = love.physics.newRectangleShape(0, 0, shot.width, shot.height)
+            shot.fixture = love.physics.newFixture(shot.body, shot.shape, 2)
+            shot.fixture:setUserData("Shot")
+            table.insert(objects.hero.shots, shot)
         end)
 
     enemies = {}
@@ -124,8 +127,7 @@ local function jump()
     objects.hero.grounded = false
 end
 
--- Respond to key presses to move players
--- keyboard actions for our objects.hero
+-- keyboard actions for our hero
 for _, key in pairs({'a', 'd'}) do
     love.update
         :filter(function()
