@@ -214,7 +214,7 @@ love.update:subscribe(function (dt)
         end)
         :subscribe(function()
             -- you lose!!!
-            love.load()
+            -- love.load()
         end)
 
     enemiesAlive
@@ -227,8 +227,10 @@ end)
 
 love.draw:subscribe(function ()
 
-    print(objects.hero.body:getWorldPoints(objects.hero.body:getPosition()))
-    -- love.graphics.translate( objects.hero.body:getPosition() )
+    -- print(objects.hero.body:getWorldPoints(objects.hero.body:getPosition()))
+
+    heroPosX, heroPosY = objects.hero.body:getPosition();
+    love.graphics.translate(-heroPosX + love.graphics.getWidth()/2, -heroPosY + love.graphics.getHeight() * 3/4)
     -- let's draw a background
     -- love.graphics.setColor(255,255,255,255)
 
