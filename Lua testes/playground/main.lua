@@ -99,16 +99,9 @@ function bC(a, b, coll)
     beginContact:onNext(a, b, coll)
 end
 function eC(a, b, coll)
-    -- persisting = 0
     endContact:onNext(a, b, coll)
 end
 function preS(a, b, coll)
-    -- if persisting == 0 then    -- only say when they first start touching
-        
-    -- elseif persisting < 20 then    -- then just start counting
-        
-    -- end
-    -- persisting = persisting + 1    -- keep track of how many updates they've been touching for
     preSolve:onNext(a, b, coll)
 end
 function postS(a, b, coll, normalimpulse, tangentimpulse)
