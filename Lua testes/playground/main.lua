@@ -3,8 +3,8 @@ require 'rx-love'
 
 -- Maps keys to players and directions
 local keyMap = {
-  a = {-1},
-  d = {1}
+  a = -1,
+  d = 1
 }
 
 -- Declare initial state of game
@@ -16,6 +16,15 @@ love.load:subscribe(function (arg)
     -- of 0 and vertical gravity of 9.81
     world = love.physics.newWorld(0, 9.81*64, true)
 
+    --Collision callbacks:
+    world:setCallbacks(bC, eC, preS, postS)
+
+    beginContact = rx.Subject.create()
+    endContact = rx.Subject.create()
+    preSolve = rx.Subject.create()
+    postSolve = rx.Subject.create()
+    beginContact:subscribe(function(a, b, coll) print("\n"..a:getUserData().." colliding with "..b:getUserData()) end)
+
     objects = {} -- table to hold all our physical objects
     objects.ground = {}
     -- remember, the shape (the rectangle we create next) anchors to the
@@ -25,6 +34,7 @@ love.load:subscribe(function (arg)
     objects.ground.shape = love.physics.newRectangleShape(650, 150)
     -- attach shape to body
     objects.ground.fixture = love.physics.newFixture(objects.ground.body, objects.ground.shape)
+    objects.ground.fixture:setUserData("Ground")
 
     -- let's create a ball
     objects.ball = {}
@@ -36,6 +46,7 @@ love.load:subscribe(function (arg)
     -- Attach fixture to body and give it a density of 1.
     objects.ball.fixture = love.physics.newFixture(objects.ball.body, objects.ball.shape, 1)
     objects.ball.fixture:setRestitution(0.9) -- let the ball bounce
+    objects.ball.fixture:setUserData("Ball")
 
     -- let's create a couple blocks to play around with
     objects.block1 = {}
@@ -43,11 +54,13 @@ love.load:subscribe(function (arg)
     objects.block1.shape = love.physics.newRectangleShape(0, 0, 50, 100)
     -- A higher density gives it more mass.
     objects.block1.fixture = love.physics.newFixture(objects.block1.body, objects.block1.shape, 5)
+    objects.block1.fixture:setUserData("Block")
 
     objects.block2 = {}
     objects.block2.body = love.physics.newBody(world, 200, 400, "dynamic")
     objects.block2.shape = love.physics.newRectangleShape(0, 0, 100, 50)
     objects.block2.fixture = love.physics.newFixture(objects.block2.body, objects.block2.shape, 2)
+    objects.block2.fixture:setUserData("Block")
     
     -- initial graphics setup
     -- set the background color to a nice blue
@@ -64,6 +77,8 @@ love.load:subscribe(function (arg)
     objects.hero.body:setFixedRotation(true)
     objects.hero.shape = love.physics.newRectangleShape(0, 0, objects.hero.width, objects.hero.height)
     objects.hero.fixture = love.physics.newFixture(objects.hero.body, objects.hero.shape, 2)
+    objects.hero.fixture:setUserData("Hero")
+    objects.hero.grounded = true
 
     rx.Observable.fromRange(1, 5)
         :subscribe(function ()
@@ -90,12 +105,36 @@ love.load:subscribe(function (arg)
         end)
 end)
 
+function bC(a, b, coll)   
+    beginContact:onNext(a, b, coll)
+end
+ 
+
+function eC(a, b, coll)
+    -- persisting = 0
+    endContact:onNext(a, b, coll)
+end
+ 
+function preS(a, b, coll)
+    -- if persisting == 0 then    -- only say when they first start touching
+        
+    -- elseif persisting < 20 then    -- then just start counting
+        
+    -- end
+    -- persisting = persisting + 1    -- keep track of how many updates they've been touching for
+    preSolve:onNext(a, b, coll)
+end
+ 
+function postS(a, b, coll, normalimpulse, tangentimpulse)
+    postSolve:onNext(a, b, coll, normalimpulse, tangentimpulse)
+end
+
 -- Helper functions
-local function move(dt, direction)
+local function move(direction)
     currentVelX, currentVelY = objects.hero.body:getLinearVelocity()
     objects.hero.body:setLinearVelocity(objects.hero.speed*direction, currentVelY)
 
-    objects.hero:onNext()
+    -- objects.hero:onNext()
     
     -- objects.hero:filter(function()
     --         return objects.hero.x < 0
@@ -119,6 +158,7 @@ end
 
 local function jump()
     objects.hero.body:applyLinearImpulse(0, -50)
+    objects.hero.grounded = false
 end
 
 -- Respond to key presses to move players
@@ -129,7 +169,7 @@ for _, key in pairs({'a', 'd'}) do
             return love.keyboard.isDown(key)
         end)
         :map(function(dt)
-            return dt, unpack(keyMap[key])
+            return keyMap[key]
         end)
         :subscribe(move)
 end
@@ -148,7 +188,7 @@ love.keypressed
     end)
 
 love.keypressed
-    :filter(function(key) return key == 'w' end)
+    :filter(function(key) return key == 'w' and objects.hero.grounded end)
     :subscribe(function()
         jump()
     end)
@@ -227,8 +267,6 @@ end)
 
 love.draw:subscribe(function ()
 
-    -- print(objects.hero.body:getWorldPoints(objects.hero.body:getPosition()))
-
     heroPosX, heroPosY = objects.hero.body:getPosition();
     love.graphics.translate(-heroPosX + love.graphics.getWidth()/2, -heroPosY + love.graphics.getHeight() * 3/4)
     -- let's draw a background
@@ -290,12 +328,4 @@ function shoot()
             shot.y = objects.hero.y
             shot.fired = true
         end)
-end
-
--- Collision detection function.
--- Checks if a and b overlap.
--- w and h mean width and height.
-function CheckCollision(ax1,ay1,aw,ah, bx1,by1,bw,bh)
-    local ax2,ay2,bx2,by2 = ax1 + aw, ay1 + ah, bx1 + bw, by1 + bh
-    return ax1 < bx2 and ax2 > bx1 and ay1 < by2 and ay2 > by1
 end
