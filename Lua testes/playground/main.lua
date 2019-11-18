@@ -67,6 +67,7 @@ love.load:subscribe(function (arg)
     objects.hero.shape = love.physics.newRectangleShape(0, 0, objects.hero.width, objects.hero.height)
     objects.hero.fixture = love.physics.newFixture(objects.hero.body, objects.hero.shape, 2)
     objects.hero.fixture:setUserData("Hero")
+    objects.hero.fixture:setCategory(2)
     objects.hero.grounded = true
 
     rx.Observable.fromRange(1, 5)
@@ -74,12 +75,16 @@ love.load:subscribe(function (arg)
             local shot = {}
             shot.width = 2
             shot.height = 5
-            shot.fired = true
-            shot.body = love.physics.newBody(world, 0, 0, "dynamic")
+            shot.fired = false
+            shot.speed = 50
+            shot.body = love.physics.newBody(world, 0, 0, "kinematic")
             shot.body:setFixedRotation(true)
+            shot.body:setLinearVelocity(0, 0)
+            shot.body:setGravityScale(0)
             shot.shape = love.physics.newRectangleShape(0, 0, shot.width, shot.height)
             shot.fixture = love.physics.newFixture(shot.body, shot.shape, 2)
             shot.fixture:setUserData("Shot")
+            shot.fixture:setMask(2)
             table.insert(objects.hero.shots, shot)
         end)
 
@@ -148,6 +153,7 @@ love.keyreleased
 love.keypressed
     :filter(function(key) return key == 'space' end)
     :subscribe(function()
+        shoot()
         currentVelX, currentVelY = objects.hero.body:getLinearVelocity()
         objects.hero.body:setLinearVelocity(0, currentVelY)
     end)
@@ -162,40 +168,9 @@ love.update:subscribe(function (dt)
 
     world:update(dt) -- this puts the world into motion
 
-    -- update the shots
-    shotsFired = rx.Observable.fromTable(objects.hero.shots, pairs, false)
-        :filter(function(shot)
-            return shot.fired
-        end)
-    
-    shotsFired:subscribe(function(shot)
-        shot.y = shot.y - dt * 100
-    end)
-    
-    shotsFired
-        :filter(function(shot)
-            return shot.y < 0
-        end)
-        :subscribe(function(shot)
-            shot.fired = false
-        end)
-
     enemiesAlive = rx.Observable.fromTable(enemies, pairs, false)
         :filter(function(enemy)
             return enemy.alive
-        end)
-
-    shotsFired:subscribe(function(shot)
-        enemiesAlive
-            :filter(function(enemy)
-                return CheckCollision(shot.x,shot.y,shot.width,shot.height, enemy.x,enemy.y,enemy.width,enemy.height)
-            end)
-            :subscribe(function(enemy)
-                -- mark that enemy dead
-                enemy.alive = false
-                -- mark the shot not visible
-                shot.fired = false
-            end)
         end)
 
     enemiesAlive
@@ -242,7 +217,7 @@ love.draw:subscribe(function ()
             return shot.fired
         end)
         :subscribe(function(shot)
-            love.graphics.rectangle("fill", shot.x, shot.y, shot.width, shot.height)
+            love.graphics.polygon("fill", shot.body:getWorldPoints(shot.shape:getPoints()))
         end)
 
     -- let's draw our enemies
@@ -257,15 +232,14 @@ love.draw:subscribe(function ()
 end)
 
 function shoot()
-    --filter not fired. first.
     rx.Observable.fromTable(objects.hero.shots, pairs, false)
         :filter(function(shot)
             return not shot.fired
         end)
         :first()
         :subscribe(function(shot)
-            shot.x = objects.hero.x+objects.hero.width/2
-            shot.y = objects.hero.y
+            shot.body:setLinearVelocity(0, -shot.speed)
+            shot.body:setPosition(objects.hero.body:getX(), objects.hero.body:getY())
             shot.fired = true
         end)
 end
