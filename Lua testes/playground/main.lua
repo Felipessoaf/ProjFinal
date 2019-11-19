@@ -23,11 +23,22 @@ love.load:subscribe(function (arg)
     endContact = rx.Subject.create()
     preSolve = rx.Subject.create()
     postSolve = rx.Subject.create()
-    beginContact:filter(function(a, b, coll) return a:getUserData() == "Ground" and b:getUserData() == "Hero" end)
+    beginContact:filter(function(a, b, coll) return a:getUserData().tag == "Ground" and b:getUserData().tag == "Hero" end)
                 :subscribe(function() objects.hero.grounded = true end)
+
+    shotHit = beginContact:filter(function(a, b, coll) return a:getUserData().tag == "Shot" or b:getUserData().tag == "Shot" end)
+    shotHitEnemy, shotHitOther = shotHit:partition(function(a, b, coll) return a:getUserData().tag == "Shot" and b:getUserData().tag == "Enemy" end)
+    shotHit:subscribe(function(a, b, coll) 
+        b:getUserData().fired = false 
+    end)
+    shotHitEnemy:subscribe(function(a, b, coll)
+        a:getUserData().fired = false 
+        b:getUserData().alive = false
+    end)
 
     objects = {} -- table to hold all our physical objects
     objects.ground = {}
+    objects.ground.tag = "Ground"
     -- remember, the shape (the rectangle we create next) anchors to the
     -- body from its center, so we have to move it to (650/2, 650-50/2)
     objects.ground.body = love.physics.newBody(world, 650/2, 650-50/2)
@@ -35,27 +46,30 @@ love.load:subscribe(function (arg)
     objects.ground.shape = love.physics.newRectangleShape(650, 150)
     -- attach shape to body
     objects.ground.fixture = love.physics.newFixture(objects.ground.body, objects.ground.shape)
-    objects.ground.fixture:setUserData("Ground")
+    objects.ground.fixture:setUserData(objects.ground)
 
     -- let's create a couple blocks to play around with
     objects.block1 = {}
+    objects.block1.tag = "Block"
     objects.block1.body = love.physics.newBody(world, 200, 550, "dynamic")
     objects.block1.shape = love.physics.newRectangleShape(0, 0, 50, 100)
     -- A higher density gives it more mass.
     objects.block1.fixture = love.physics.newFixture(objects.block1.body, objects.block1.shape, 5)
-    objects.block1.fixture:setUserData("Block")
+    objects.block1.fixture:setUserData(objects.block1)
 
     objects.block2 = {}
+    objects.block2.tag = "Block"
     objects.block2.body = love.physics.newBody(world, 200, 400, "dynamic")
     objects.block2.shape = love.physics.newRectangleShape(0, 0, 100, 50)
     objects.block2.fixture = love.physics.newFixture(objects.block2.body, objects.block2.shape, 2)
-    objects.block2.fixture:setUserData("Block")
+    objects.block2.fixture:setUserData(objects.block2)
     
     -- initial graphics setup
     -- set the background color to a nice blue
     love.graphics.setBackgroundColor(0.41, 0.53, 0.97)
 
     objects.hero = {} -- rx.BehaviorSubject.create() -- new table for the objects.hero
+    objects.hero.tag = "Hero"
     objects.hero.initX = 300
     objects.hero.initY = 450
     objects.hero.width = 30
@@ -66,13 +80,14 @@ love.load:subscribe(function (arg)
     objects.hero.body:setFixedRotation(true)
     objects.hero.shape = love.physics.newRectangleShape(0, 0, objects.hero.width, objects.hero.height)
     objects.hero.fixture = love.physics.newFixture(objects.hero.body, objects.hero.shape, 2)
-    objects.hero.fixture:setUserData("Hero")
+    objects.hero.fixture:setUserData(objects.hero)
     objects.hero.fixture:setCategory(2)
     objects.hero.grounded = true
 
     rx.Observable.fromRange(1, 5)
         :subscribe(function ()
             local shot = {}
+            shot.tag = "Shot"
             shot.width = 2
             shot.height = 5
             shot.fired = false
@@ -83,7 +98,7 @@ love.load:subscribe(function (arg)
             shot.body:setGravityScale(0)
             shot.shape = love.physics.newRectangleShape(0, 0, shot.width, shot.height)
             shot.fixture = love.physics.newFixture(shot.body, shot.shape, 2)
-            shot.fixture:setUserData("Shot")
+            shot.fixture:setUserData(shot)
             shot.fixture:setMask(2)
             table.insert(objects.hero.shots, shot)
         end)
@@ -92,12 +107,18 @@ love.load:subscribe(function (arg)
     rx.Observable.fromRange(0, 6)
         :subscribe(function (i)
             local enemy = {}
+            enemy.tag = "Enemy"
             enemy.width = 40
             enemy.height = 20
-            enemy.x = i * (enemy.width + 60) + 100
-            enemy.y = enemy.height + 100
             enemy.alive = true
             enemy.speed = 10
+            enemy.body = love.physics.newBody(world, i * (enemy.width + 60) + 100, enemy.height + 100, "dynamic")
+            enemy.body:setFixedRotation(true)
+            enemy.body:setLinearVelocity(0, enemy.speed)
+            enemy.body:setGravityScale(0)
+            enemy.shape = love.physics.newRectangleShape(0, 0, enemy.width, enemy.height)
+            enemy.fixture = love.physics.newFixture(enemy.body, enemy.shape, 2)
+            enemy.fixture:setUserData(enemy)
             table.insert(enemies, enemy)  
         end)
 end)
@@ -165,29 +186,7 @@ love.keypressed
     end)
 
 love.update:subscribe(function (dt)
-
     world:update(dt) -- this puts the world into motion
-
-    enemiesAlive = rx.Observable.fromTable(enemies, pairs, false)
-        :filter(function(enemy)
-            return enemy.alive
-        end)
-
-    enemiesAlive
-        :subscribe(function(enemy)
-            -- let them fall down slowly
-            enemy.y = enemy.y + dt * enemy.speed
-        end)
-
-    enemiesAlive
-        :filter(function(enemy)
-            return enemy.y > 465
-        end)
-        :subscribe(function()
-            -- you lose!!!
-            -- love.load()
-        end)
-
 end)
 
 love.draw:subscribe(function ()
@@ -227,7 +226,7 @@ love.draw:subscribe(function ()
             return enemy.alive
         end)
         :subscribe(function(enemy)
-            love.graphics.rectangle("fill", enemy.x, enemy.y, enemy.width, enemy.height)
+            love.graphics.polygon("fill", enemy.body:getWorldPoints(enemy.shape:getPoints()))
         end)
 end)
 
