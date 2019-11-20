@@ -24,7 +24,7 @@ love.load:subscribe(function (arg)
     preSolve = rx.Subject.create()
     postSolve = rx.Subject.create()
     beginContact:filter(function(a, b, coll) return (a:getUserData().tag == "Ground" or a:getUserData().tag == "Platform") and b:getUserData().tag == "Hero" end)
-                :subscribe(function() objects.hero.grounded = true end)
+                :subscribe(function() hero.grounded = true end)
 
     shotHit = beginContact:filter(function(a, b, coll) return a:getUserData().tag == "Shot" or b:getUserData().tag == "Shot" end)
     shotHitEnemy, shotHitOther = shotHit:partition(function(a, b, coll) return a:getUserData().tag == "Shot" and b:getUserData().tag == "Enemy" end)
@@ -104,22 +104,24 @@ love.load:subscribe(function (arg)
 
     love.graphics.setBackgroundColor(0.41, 0.53, 0.97)
 
-    objects.hero = {} -- rx.BehaviorSubject.create() -- new table for the objects.hero
-    objects.hero.tag = "Hero"
-    objects.hero.health = 100
-    objects.hero.initX = 300
-    objects.hero.initY = 450
-    objects.hero.width = 30
-    objects.hero.height = 15
-    objects.hero.speed = 150
-    objects.hero.shots = {} -- holds our shots
-    objects.hero.body = love.physics.newBody(world, objects.hero.initX, objects.hero.initY, "dynamic")
-    objects.hero.body:setFixedRotation(true)
-    objects.hero.shape = love.physics.newRectangleShape(0, 0, objects.hero.width, objects.hero.height)
-    objects.hero.fixture = love.physics.newFixture(objects.hero.body, objects.hero.shape, 2)
-    objects.hero.fixture:setUserData(objects.hero)
-    objects.hero.fixture:setCategory(2)
-    objects.hero.grounded = true
+    hero = {} -- rx.BehaviorSubject.create() -- new table for the hero
+    hero.tag = "Hero"
+    hero.health = 100
+    hero.initX = 300
+    hero.initY = 450
+    hero.width = 20
+    hero.height = 30
+    hero.speed = 150
+    hero.shots = {} -- holds our shots
+    hero.body = love.physics.newBody(world, hero.initX, hero.initY, "dynamic")
+    hero.body:setFixedRotation(true)
+    hero.shape = love.physics.newRectangleShape(hero.width, hero.height)
+    hero.fixture = love.physics.newFixture(hero.body, hero.shape, 2)
+    hero.fixture:setUserData(hero)
+    hero.fixture:setCategory(2)
+    hero.grounded = true
+    
+    table.insert(objects, hero)
 
     rx.Observable.fromRange(1, 5)
         :subscribe(function ()
@@ -137,7 +139,7 @@ love.load:subscribe(function (arg)
             shot.fixture = love.physics.newFixture(shot.body, shot.shape, 2)
             shot.fixture:setUserData(shot)
             shot.fixture:setMask(2)
-            table.insert(objects.hero.shots, shot)
+            table.insert(hero.shots, shot)
         end)
 
     enemies = {}
@@ -158,6 +160,8 @@ love.load:subscribe(function (arg)
             enemy.fixture:setUserData(enemy)
             table.insert(enemies, enemy)  
         end)
+    
+    table.insert(objects, enemies)
 end)
 
 --Collision callbacks 
@@ -176,32 +180,32 @@ end
 
 -- Helper functions
 local function move(direction)
-    currentVelX, currentVelY = objects.hero.body:getLinearVelocity()
-    objects.hero.body:setLinearVelocity(objects.hero.speed*direction, currentVelY)
+    currentVelX, currentVelY = hero.body:getLinearVelocity()
+    hero.body:setLinearVelocity(hero.speed*direction, currentVelY)
 end
 
 local function stopHorMove()
-    currentVelX, currentVelY = objects.hero.body:getLinearVelocity()
-    objects.hero.body:setLinearVelocity(0, currentVelY)
+    currentVelX, currentVelY = hero.body:getLinearVelocity()
+    hero.body:setLinearVelocity(0, currentVelY)
 end
 
 local function jump()
-    objects.hero.body:applyLinearImpulse(0, -70)
-    objects.hero.grounded = false
+    hero.body:applyLinearImpulse(0, -100)
+    hero.grounded = false
 end
 
 function shoot()
-    rx.Observable.fromTable(objects.hero.shots, pairs, false)
+    rx.Observable.fromTable(hero.shots, pairs, false)
         :filter(function(shot)
             return not shot.fired
         end)
         :first()
         :subscribe(function(shot)
             shot.body:setLinearVelocity(0, -shot.speed)
-            shot.body:setPosition(objects.hero.body:getX(), objects.hero.body:getY())
+            shot.body:setPosition(hero.body:getX(), hero.body:getY())
             shot.fired = true
             
-            objects.hero.health = objects.hero.health - 10
+            hero.health = hero.health - 10
         end)
 end
 
@@ -227,12 +231,12 @@ love.keypressed
     :filter(function(key) return key == 'space' end)
     :subscribe(function()
         shoot()
-        currentVelX, currentVelY = objects.hero.body:getLinearVelocity()
-        objects.hero.body:setLinearVelocity(0, currentVelY)
+        currentVelX, currentVelY = hero.body:getLinearVelocity()
+        hero.body:setLinearVelocity(0, currentVelY)
     end)
 
 love.keypressed
-    :filter(function(key) return key == 'w' and objects.hero.grounded end)
+    :filter(function(key) return key == 'w' and hero.grounded end)
     :subscribe(function()
         jump()
     end)
@@ -243,7 +247,7 @@ end)
 
 love.draw:subscribe(function ()
 
-    heroPosX, heroPosY = objects.hero.body:getPosition();
+    heroPosX, heroPosY = hero.body:getPosition();
     love.graphics.translate(-heroPosX + love.graphics.getWidth()/2, -heroPosY + love.graphics.getHeight() * 3/4)
 
     -- draw a "filled in" polygon using the mapObjs coordinates
@@ -253,13 +257,13 @@ love.draw:subscribe(function ()
             love.graphics.polygon("fill", obj.body:getWorldPoints(obj.shape:getPoints()))
         end)
 
-    -- let's draw our objects.hero
-    love.graphics.setColor(255,255,0,255)
-    love.graphics.polygon("fill", objects.hero.body:getWorldPoints(objects.hero.shape:getPoints()))
+    -- let's draw our hero
+    love.graphics.setColor(117/255, 186/255, 60/255)
+    love.graphics.polygon("fill", hero.body:getWorldPoints(hero.shape:getPoints()))
 
-    -- let's draw our objects.heros shots
+    -- let's draw our heros shots
     love.graphics.setColor(255,255,255,255)
-    rx.Observable.fromTable(objects.hero.shots, pairs, false)
+    rx.Observable.fromTable(hero.shots, pairs, false)
         :filter(function(shot)
             return shot.fired
         end)
@@ -268,7 +272,7 @@ love.draw:subscribe(function ()
         end)
 
     -- let's draw our enemies
-    love.graphics.setColor(0,255,255,255)
+    love.graphics.setColor(191/255, 11/255, 11/255)
     rx.Observable.fromTable(enemies, pairs, false)
         :filter(function(enemy)
             return enemy.alive
@@ -281,7 +285,7 @@ love.draw:subscribe(function ()
     love.graphics.translate(-(-heroPosX + love.graphics.getWidth()/2), -(-heroPosY + love.graphics.getHeight() * 3/4))
     -- Health bar
     love.graphics.setColor(255,0,0,255)
-    love.graphics.rectangle("fill", 20, 20, objects.hero.health, 20)
+    love.graphics.rectangle("fill", 20, 20, hero.health, 20)
     love.graphics.setColor(0,0,0,255)
     love.graphics.rectangle("line", 20, 20, 100, 20)
 end)
