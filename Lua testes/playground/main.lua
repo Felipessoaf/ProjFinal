@@ -7,6 +7,8 @@ local keyMap = {
   d = 1
 }
 
+local scheduler = rx.CooperativeScheduler.create()
+
 -- Declare initial state of game
 love.load:subscribe(function (arg)
     -- the height of a meter our worlds will be 64px
@@ -104,9 +106,15 @@ love.load:subscribe(function (arg)
 
     love.graphics.setBackgroundColor(0.41, 0.53, 0.97)
 
-    hero = {} -- rx.BehaviorSubject.create() -- new table for the hero
+    hero = {}
     hero.tag = "Hero"
-    hero.health = 100
+    hero.health = rx.BehaviorSubject.create(100)
+    hero.health:delay(1, scheduler)
+               :subscribe(function (val)
+                    hero.backHealth = val
+                    print(val)
+                end)
+    hero.backHealth = 100
     hero.initX = 300
     hero.initY = 450
     hero.width = 20
@@ -202,10 +210,10 @@ function shoot()
         :first()
         :subscribe(function(shot)
             shot.body:setLinearVelocity(0, -shot.speed)
-            shot.body:setPosition(hero.body:getX(), hero.body:getY())
+            shot.body:setPosition(hero.body:getX(), hero.body:getY() - hero.height/2)
             shot.fired = true
             
-            hero.health = hero.health - 10
+            hero.health:onNext(hero.health:getValue() - 10)
         end)
 end
 
@@ -257,10 +265,6 @@ love.draw:subscribe(function ()
             love.graphics.polygon("fill", obj.body:getWorldPoints(obj.shape:getPoints()))
         end)
 
-    -- let's draw our hero
-    love.graphics.setColor(117/255, 186/255, 60/255)
-    love.graphics.polygon("fill", hero.body:getWorldPoints(hero.shape:getPoints()))
-
     -- let's draw our heros shots
     love.graphics.setColor(255,255,255,255)
     rx.Observable.fromTable(hero.shots, pairs, false)
@@ -271,8 +275,12 @@ love.draw:subscribe(function ()
             love.graphics.polygon("fill", shot.body:getWorldPoints(shot.shape:getPoints()))
         end)
 
+    -- let's draw our hero
+    love.graphics.setColor(117/255, 186/255, 60/255)
+    love.graphics.polygon("fill", hero.body:getWorldPoints(hero.shape:getPoints()))
+
     -- let's draw our enemies
-    love.graphics.setColor(191/255, 11/255, 11/255)
+    love.graphics.setColor(135/255, 0, 168/255)
     rx.Observable.fromTable(enemies, pairs, false)
         :filter(function(enemy)
             return enemy.alive
@@ -284,8 +292,14 @@ love.draw:subscribe(function ()
     -- Move camera back to original pos
     love.graphics.translate(-(-heroPosX + love.graphics.getWidth()/2), -(-heroPosY + love.graphics.getHeight() * 3/4))
     -- Health bar
+    love.graphics.setColor(242/255, 178/255, 0)
+    love.graphics.rectangle("fill", 20, 20, hero.backHealth, 20)
     love.graphics.setColor(255,0,0,255)
-    love.graphics.rectangle("fill", 20, 20, hero.health, 20)
+    love.graphics.rectangle("fill", 20, 20, hero.health:getValue(), 20)
     love.graphics.setColor(0,0,0,255)
     love.graphics.rectangle("line", 20, 20, 100, 20)
 end)
+
+repeat
+    scheduler:update(0.25)
+until scheduler.currentTime >= 10
