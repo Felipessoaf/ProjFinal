@@ -23,7 +23,7 @@ love.load:subscribe(function (arg)
     endContact = rx.Subject.create()
     preSolve = rx.Subject.create()
     postSolve = rx.Subject.create()
-    beginContact:filter(function(a, b, coll) return a:getUserData().tag == "Ground" and b:getUserData().tag == "Hero" end)
+    beginContact:filter(function(a, b, coll) return (a:getUserData().tag == "Ground" or a:getUserData().tag == "Platform") and b:getUserData().tag == "Hero" end)
                 :subscribe(function() objects.hero.grounded = true end)
 
     shotHit = beginContact:filter(function(a, b, coll) return a:getUserData().tag == "Shot" or b:getUserData().tag == "Shot" end)
@@ -41,33 +41,82 @@ love.load:subscribe(function (arg)
 
     ground1 = {}
     ground1.tag = "Ground"
-    -- remember, the shape (the rectangle we create next) anchors to the
-    -- body from its center, so we have to move it to (650/2, 650-50/2)
-    ground1.body = love.physics.newBody(world, 650/2, 650-50/2)
-    -- make a rectangle with a width of 650 and a height of 50
+    ground1.color = {112/250, 72/250, 7/250}
+    ground1.body = love.physics.newBody(world, -100, 650)
     ground1.shape = love.physics.newRectangleShape(650, 150)
     -- attach shape to body
     ground1.fixture = love.physics.newFixture(ground1.body, ground1.shape)
     ground1.fixture:setUserData(ground1)
 
     table.insert(mapObjs, ground1)
+
+    ground2 = {}
+    ground2.tag = "Ground"
+    ground2.color = {112/250, 72/250, 7/250}
+    ground2.body = love.physics.newBody(world, 550, 650)
+    ground2.shape = love.physics.newRectangleShape(650, 300)
+    -- attach shape to body
+    ground2.fixture = love.physics.newFixture(ground2.body, ground2.shape)
+    ground2.fixture:setUserData(ground2)
+
+    table.insert(mapObjs, ground2)
+
+    wall1 = {}
+    wall1.tag = "Wall"
+    wall1.color = {9/250, 84/250, 9/250}
+    wall1.body = love.physics.newBody(world, -550, 225)
+    wall1.shape = love.physics.newRectangleShape(650, 1000)
+    -- attach shape to body
+    wall1.fixture = love.physics.newFixture(wall1.body, wall1.shape)
+    wall1.fixture:setUserData(wall1)
+
+    table.insert(mapObjs, wall1)
+
+    wall2 = {}
+    wall2.tag = "Wall"
+    wall2.color = {9/250, 84/250, 9/250}
+    wall2.body = love.physics.newBody(world, 1200, 225)
+    wall2.shape = love.physics.newRectangleShape(650, 1000)
+    -- attach shape to body
+    wall2.fixture = love.physics.newFixture(wall2.body, wall2.shape)
+    wall2.fixture:setUserData(wall2)
+
+    table.insert(mapObjs, wall2)
+
+    plat1 = {}
+    plat1.tag = "Platform"
+    plat1.body = love.physics.newBody(world, 200, 550, "dynamic")
+    plat1.shape = love.physics.newRectangleShape(0, 0, 50, 100)
+    -- A higher density gives it more mass.
+    plat1.fixture = love.physics.newFixture(plat1.body, plat1.shape, 5)
+    plat1.fixture:setUserData(plat1)
+
+    table.insert(mapObjs, wall2)
+
+    -- objects.block2 = {}
+    -- objects.block2.tag = "Block"
+    -- objects.block2.body = love.physics.newBody(world, 200, 400, "dynamic")
+    -- objects.block2.shape = love.physics.newRectangleShape(0, 0, 100, 50)
+    -- objects.block2.fixture = love.physics.newFixture(objects.block2.body, objects.block2.shape, 2)
+    -- objects.block2.fixture:setUserData(objects.block2)
+
     table.insert(objects, mapObjs)
 
-    -- let's create a couple blocks to play around with
-    objects.block1 = {}
-    objects.block1.tag = "Block"
-    objects.block1.body = love.physics.newBody(world, 200, 550, "dynamic")
-    objects.block1.shape = love.physics.newRectangleShape(0, 0, 50, 100)
-    -- A higher density gives it more mass.
-    objects.block1.fixture = love.physics.newFixture(objects.block1.body, objects.block1.shape, 5)
-    objects.block1.fixture:setUserData(objects.block1)
+    -- -- let's create a couple blocks to play around with
+    -- objects.block1 = {}
+    -- objects.block1.tag = "Block"
+    -- objects.block1.body = love.physics.newBody(world, 200, 550, "dynamic")
+    -- objects.block1.shape = love.physics.newRectangleShape(0, 0, 50, 100)
+    -- -- A higher density gives it more mass.
+    -- objects.block1.fixture = love.physics.newFixture(objects.block1.body, objects.block1.shape, 5)
+    -- objects.block1.fixture:setUserData(objects.block1)
 
-    objects.block2 = {}
-    objects.block2.tag = "Block"
-    objects.block2.body = love.physics.newBody(world, 200, 400, "dynamic")
-    objects.block2.shape = love.physics.newRectangleShape(0, 0, 100, 50)
-    objects.block2.fixture = love.physics.newFixture(objects.block2.body, objects.block2.shape, 2)
-    objects.block2.fixture:setUserData(objects.block2)
+    -- objects.block2 = {}
+    -- objects.block2.tag = "Block"
+    -- objects.block2.body = love.physics.newBody(world, 200, 400, "dynamic")
+    -- objects.block2.shape = love.physics.newRectangleShape(0, 0, 100, 50)
+    -- objects.block2.fixture = love.physics.newFixture(objects.block2.body, objects.block2.shape, 2)
+    -- objects.block2.fixture:setUserData(objects.block2)
     
     -- initial graphics setup
     -- set the background color to a nice blue
@@ -155,7 +204,7 @@ local function stopHorMove()
 end
 
 local function jump()
-    objects.hero.body:applyLinearImpulse(0, -50)
+    objects.hero.body:applyLinearImpulse(0, -70)
     objects.hero.grounded = false
 end
 
@@ -215,20 +264,13 @@ love.draw:subscribe(function ()
     heroPosX, heroPosY = objects.hero.body:getPosition();
     love.graphics.translate(-heroPosX + love.graphics.getWidth()/2, -heroPosY + love.graphics.getHeight() * 3/4)
 
-    -- set the drawing color to green for the ground
-    love.graphics.setColor(0.28, 0.63, 0.05)
-    -- draw a "filled in" polygon using the ground's coordinates
+    -- draw a "filled in" polygon using the mapObjs coordinates
     rx.Observable.fromTable(mapObjs, pairs, false)
         :subscribe(function(obj)
+            love.graphics.setColor(unpack(obj.color))
+            -- love.graphics.setColor(0.20, 0.20, 0.20)
             love.graphics.polygon("fill", obj.body:getWorldPoints(obj.shape:getPoints()))
         end)
-    -- love.graphics.polygon("fill", objects.ground.body:getWorldPoints(
-    --                         objects.ground.shape:getPoints()))
-    
-    -- set the drawing color to grey for the blocks
-    love.graphics.setColor(0.20, 0.20, 0.20)
-    love.graphics.polygon("fill", objects.block1.body:getWorldPoints(objects.block1.shape:getPoints()))
-    love.graphics.polygon("fill", objects.block2.body:getWorldPoints(objects.block2.shape:getPoints()))
 
     -- let's draw our objects.hero
     love.graphics.setColor(255,255,0,255)
