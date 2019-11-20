@@ -37,16 +37,21 @@ love.load:subscribe(function (arg)
     end)
 
     objects = {} -- table to hold all our physical objects
-    objects.ground = {}
-    objects.ground.tag = "Ground"
+    mapObjs = {} -- table to hold all our map objects
+
+    ground1 = {}
+    ground1.tag = "Ground"
     -- remember, the shape (the rectangle we create next) anchors to the
     -- body from its center, so we have to move it to (650/2, 650-50/2)
-    objects.ground.body = love.physics.newBody(world, 650/2, 650-50/2)
+    ground1.body = love.physics.newBody(world, 650/2, 650-50/2)
     -- make a rectangle with a width of 650 and a height of 50
-    objects.ground.shape = love.physics.newRectangleShape(650, 150)
+    ground1.shape = love.physics.newRectangleShape(650, 150)
     -- attach shape to body
-    objects.ground.fixture = love.physics.newFixture(objects.ground.body, objects.ground.shape)
-    objects.ground.fixture:setUserData(objects.ground)
+    ground1.fixture = love.physics.newFixture(ground1.body, ground1.shape)
+    ground1.fixture:setUserData(ground1)
+
+    table.insert(mapObjs, ground1)
+    table.insert(objects, mapObjs)
 
     -- let's create a couple blocks to play around with
     objects.block1 = {}
@@ -70,6 +75,7 @@ love.load:subscribe(function (arg)
 
     objects.hero = {} -- rx.BehaviorSubject.create() -- new table for the objects.hero
     objects.hero.tag = "Hero"
+    objects.hero.health = 100
     objects.hero.initX = 300
     objects.hero.initY = 450
     objects.hero.width = 30
@@ -153,6 +159,21 @@ local function jump()
     objects.hero.grounded = false
 end
 
+function shoot()
+    rx.Observable.fromTable(objects.hero.shots, pairs, false)
+        :filter(function(shot)
+            return not shot.fired
+        end)
+        :first()
+        :subscribe(function(shot)
+            shot.body:setLinearVelocity(0, -shot.speed)
+            shot.body:setPosition(objects.hero.body:getX(), objects.hero.body:getY())
+            shot.fired = true
+            
+            objects.hero.health = objects.hero.health - 10
+        end)
+end
+
 -- keyboard actions for our hero
 for _, key in pairs({'a', 'd'}) do
     love.update
@@ -197,8 +218,12 @@ love.draw:subscribe(function ()
     -- set the drawing color to green for the ground
     love.graphics.setColor(0.28, 0.63, 0.05)
     -- draw a "filled in" polygon using the ground's coordinates
-    love.graphics.polygon("fill", objects.ground.body:getWorldPoints(
-                            objects.ground.shape:getPoints()))
+    rx.Observable.fromTable(mapObjs, pairs, false)
+        :subscribe(function(obj)
+            love.graphics.polygon("fill", obj.body:getWorldPoints(obj.shape:getPoints()))
+        end)
+    -- love.graphics.polygon("fill", objects.ground.body:getWorldPoints(
+    --                         objects.ground.shape:getPoints()))
     
     -- set the drawing color to grey for the blocks
     love.graphics.setColor(0.20, 0.20, 0.20)
@@ -228,17 +253,12 @@ love.draw:subscribe(function ()
         :subscribe(function(enemy)
             love.graphics.polygon("fill", enemy.body:getWorldPoints(enemy.shape:getPoints()))
         end)
-end)
 
-function shoot()
-    rx.Observable.fromTable(objects.hero.shots, pairs, false)
-        :filter(function(shot)
-            return not shot.fired
-        end)
-        :first()
-        :subscribe(function(shot)
-            shot.body:setLinearVelocity(0, -shot.speed)
-            shot.body:setPosition(objects.hero.body:getX(), objects.hero.body:getY())
-            shot.fired = true
-        end)
-end
+    -- Move camera back to original pos
+    love.graphics.translate(-(-heroPosX + love.graphics.getWidth()/2), -(-heroPosY + love.graphics.getHeight() * 3/4))
+    -- Health bar
+    love.graphics.setColor(255,0,0,255)
+    love.graphics.rectangle("fill", 20, 20, objects.hero.health, 20)
+    love.graphics.setColor(0,0,0,255)
+    love.graphics.rectangle("line", 20, 20, 100, 20)
+end)
