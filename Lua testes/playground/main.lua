@@ -83,43 +83,25 @@ love.load:subscribe(function (arg)
 
     table.insert(mapObjs, wall2)
 
-    plat1 = {}
-    plat1.tag = "Platform"
-    plat1.body = love.physics.newBody(world, 200, 550, "dynamic")
-    plat1.shape = love.physics.newRectangleShape(0, 0, 50, 100)
-    -- A higher density gives it more mass.
-    plat1.fixture = love.physics.newFixture(plat1.body, plat1.shape, 5)
-    plat1.fixture:setUserData(plat1)
+    platforms = {{50, 400}, {150, 450}, {500, 450}, {600, 400}}
+    
+    rx.Observable.fromTable(platforms, pairs, false)
+        :subscribe(function(platPos)
+            plat = {}
+            plat.tag = "Platform"
+            plat.color = {0.20, 0.20, 0.20}
+            x,y = unpack(platPos)
+            plat.body = love.physics.newBody(world, x, y, "kinematic")
+            plat.shape = love.physics.newRectangleShape(100, 25)
+            -- A higher density gives it more mass.
+            plat.fixture = love.physics.newFixture(plat.body, plat.shape, 5)
+            plat.fixture:setUserData(plat)
 
-    table.insert(mapObjs, wall2)
-
-    -- objects.block2 = {}
-    -- objects.block2.tag = "Block"
-    -- objects.block2.body = love.physics.newBody(world, 200, 400, "dynamic")
-    -- objects.block2.shape = love.physics.newRectangleShape(0, 0, 100, 50)
-    -- objects.block2.fixture = love.physics.newFixture(objects.block2.body, objects.block2.shape, 2)
-    -- objects.block2.fixture:setUserData(objects.block2)
+            table.insert(mapObjs, plat)
+        end)
 
     table.insert(objects, mapObjs)
 
-    -- -- let's create a couple blocks to play around with
-    -- objects.block1 = {}
-    -- objects.block1.tag = "Block"
-    -- objects.block1.body = love.physics.newBody(world, 200, 550, "dynamic")
-    -- objects.block1.shape = love.physics.newRectangleShape(0, 0, 50, 100)
-    -- -- A higher density gives it more mass.
-    -- objects.block1.fixture = love.physics.newFixture(objects.block1.body, objects.block1.shape, 5)
-    -- objects.block1.fixture:setUserData(objects.block1)
-
-    -- objects.block2 = {}
-    -- objects.block2.tag = "Block"
-    -- objects.block2.body = love.physics.newBody(world, 200, 400, "dynamic")
-    -- objects.block2.shape = love.physics.newRectangleShape(0, 0, 100, 50)
-    -- objects.block2.fixture = love.physics.newFixture(objects.block2.body, objects.block2.shape, 2)
-    -- objects.block2.fixture:setUserData(objects.block2)
-    
-    -- initial graphics setup
-    -- set the background color to a nice blue
     love.graphics.setBackgroundColor(0.41, 0.53, 0.97)
 
     objects.hero = {} -- rx.BehaviorSubject.create() -- new table for the objects.hero
@@ -268,7 +250,6 @@ love.draw:subscribe(function ()
     rx.Observable.fromTable(mapObjs, pairs, false)
         :subscribe(function(obj)
             love.graphics.setColor(unpack(obj.color))
-            -- love.graphics.setColor(0.20, 0.20, 0.20)
             love.graphics.polygon("fill", obj.body:getWorldPoints(obj.shape:getPoints()))
         end)
 
