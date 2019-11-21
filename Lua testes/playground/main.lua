@@ -150,24 +150,36 @@ love.load:subscribe(function (arg)
         end)
 
     enemies = {}
-    rx.Observable.fromRange(0, 6)
-        :subscribe(function (i)
-            local enemy = {}
-            enemy.tag = "Enemy"
-            enemy.width = 40
-            enemy.height = 20
-            enemy.alive = true
-            enemy.speed = 10
-            enemy.body = love.physics.newBody(world, i * (enemy.width + 60) + 100, enemy.height + 100, "dynamic")
-            enemy.body:setFixedRotation(true)
-            enemy.body:setLinearVelocity(0, enemy.speed)
-            enemy.body:setGravityScale(0)
-            enemy.shape = love.physics.newRectangleShape(0, 0, enemy.width, enemy.height)
-            enemy.fixture = love.physics.newFixture(enemy.body, enemy.shape, 2)
-            enemy.fixture:setUserData(enemy)
-            table.insert(enemies, enemy)  
-        end)
+    -- rx.Observable.fromRange(0, 6)
+    --     :subscribe(function (i)
+    --         local enemy = {}
+    --         enemy.tag = "Enemy"
+    --         enemy.width = 40
+    --         enemy.height = 20
+    --         enemy.alive = true
+    --         enemy.speed = 10
+    --         enemy.body = love.physics.newBody(world, i * (enemy.width + 60) + 100, enemy.height + 100, "dynamic")
+    --         enemy.body:setFixedRotation(true)
+    --         enemy.body:setLinearVelocity(0, enemy.speed)
+    --         enemy.body:setGravityScale(0)
+    --         enemy.shape = love.physics.newRectangleShape(0, 0, enemy.width, enemy.height)
+    --         enemy.fixture = love.physics.newFixture(enemy.body, enemy.shape, 2)
+    --         enemy.fixture:setUserData(enemy)
+    --         table.insert(enemies, enemy)  
+    --     end)
     
+    local enemy = {}
+    enemy.tag = "Enemy"
+    enemy.width = 40
+    enemy.height = 20
+    enemy.alive = true
+    enemy.body = love.physics.newBody(world, 700, 450, "dynamic")
+    enemy.body:setFixedRotation(true)
+    enemy.shape = love.physics.newRectangleShape(enemy.width, enemy.height)
+    enemy.fixture = love.physics.newFixture(enemy.body, enemy.shape, 2)
+    enemy.fixture:setUserData(enemy)
+    table.insert(enemies, enemy)  
+
     table.insert(objects, enemies)
 end)
 
