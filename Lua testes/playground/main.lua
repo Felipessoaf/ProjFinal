@@ -21,23 +21,6 @@ love.load:subscribe(function (arg)
     --Collision callbacks:
     world:setCallbacks(bC, eC, preS, postS)
 
-    beginContact = rx.Subject.create()
-    endContact = rx.Subject.create()
-    preSolve = rx.Subject.create()
-    postSolve = rx.Subject.create()
-    beginContact:filter(function(a, b, coll) return (a:getUserData().tag == "Ground" or a:getUserData().tag == "Platform") and b:getUserData().tag == "Hero" end)
-                :subscribe(function() hero.grounded = true end)
-
-    shotHit = beginContact:filter(function(a, b, coll) return a:getUserData().tag == "Shot" or b:getUserData().tag == "Shot" end)
-    shotHitEnemy, shotHitOther = shotHit:partition(function(a, b, coll) return a:getUserData().tag == "Shot" and b:getUserData().tag == "Enemy" end)
-    shotHit:subscribe(function(a, b, coll) 
-        b:getUserData().fired = false 
-    end)
-    shotHitEnemy:subscribe(function(a, b, coll)
-        a:getUserData().fired = false 
-        b:getUserData().alive = false
-    end)
-
     objects = {} -- table to hold all our physical objects
     mapObjs = {} -- table to hold all our map objects
 
@@ -137,7 +120,7 @@ love.load:subscribe(function (arg)
             shot.width = 2
             shot.height = 5
             shot.fired = false
-            shot.speed = 50
+            shot.speed = 80
             shot.body = love.physics.newBody(world, 0, 0, "kinematic")
             shot.body:setFixedRotation(true)
             shot.body:setLinearVelocity(0, 0)
@@ -150,29 +133,13 @@ love.load:subscribe(function (arg)
         end)
 
     enemies = {}
-    -- rx.Observable.fromRange(0, 6)
-    --     :subscribe(function (i)
-    --         local enemy = {}
-    --         enemy.tag = "Enemy"
-    --         enemy.width = 40
-    --         enemy.height = 20
-    --         enemy.alive = true
-    --         enemy.speed = 10
-    --         enemy.body = love.physics.newBody(world, i * (enemy.width + 60) + 100, enemy.height + 100, "dynamic")
-    --         enemy.body:setFixedRotation(true)
-    --         enemy.body:setLinearVelocity(0, enemy.speed)
-    --         enemy.body:setGravityScale(0)
-    --         enemy.shape = love.physics.newRectangleShape(0, 0, enemy.width, enemy.height)
-    --         enemy.fixture = love.physics.newFixture(enemy.body, enemy.shape, 2)
-    --         enemy.fixture:setUserData(enemy)
-    --         table.insert(enemies, enemy)  
-    --     end)
     
     local enemy = {}
     enemy.tag = "Enemy"
     enemy.width = 40
     enemy.height = 20
     enemy.alive = true
+    enemy.shots = {}
     enemy.body = love.physics.newBody(world, 700, 450, "dynamic")
     enemy.body:setFixedRotation(true)
     enemy.shape = love.physics.newRectangleShape(enemy.width, enemy.height)
@@ -180,7 +147,43 @@ love.load:subscribe(function (arg)
     enemy.fixture:setUserData(enemy)
     table.insert(enemies, enemy)  
 
+    rx.Observable.fromRange(1, 10)
+        :subscribe(function ()
+            local shot = {}
+            shot.tag = "EnemyShot"
+            shot.width = 2
+            shot.height = 5
+            shot.fired = false
+            shot.speed = 50
+            shot.body = love.physics.newBody(world, 0, 0, "kinematic")
+            shot.body:setFixedRotation(true)
+            shot.body:setLinearVelocity(-shot.speed, 0)
+            shot.body:setGravityScale(0)
+            shot.shape = love.physics.newRectangleShape(0, 0, shot.width, shot.height)
+            shot.fixture = love.physics.newFixture(shot.body, shot.shape, 2)
+            shot.fixture:setUserData(shot)
+            shot.fixture:setMask(2)
+            table.insert(enemy.shots, shot)
+        end)
+
     table.insert(objects, enemies)
+
+    beginContact = rx.Subject.create()
+    endContact = rx.Subject.create()
+    preSolve = rx.Subject.create()
+    postSolve = rx.Subject.create()
+    beginContact:filter(function(a, b, coll) return (a:getUserData().tag == "Ground" or a:getUserData().tag == "Platform") and b:getUserData().tag == "Hero" end)
+                :subscribe(function() hero.grounded = true end)
+
+    shotHit = beginContact:filter(function(a, b, coll) return a:getUserData().tag == "Shot" or b:getUserData().tag == "Shot" end)
+    shotHitEnemy, shotHitOther = shotHit:partition(function(a, b, coll) return a:getUserData().tag == "Shot" and b:getUserData().tag == "Enemy" end)
+    shotHit:subscribe(function(a, b, coll) 
+        b:getUserData().fired = false 
+    end)
+    shotHitEnemy:subscribe(function(a, b, coll)
+        a:getUserData().fired = false 
+        b:getUserData().alive = false
+    end)
 end)
 
 --Collision callbacks 
