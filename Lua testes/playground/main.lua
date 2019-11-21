@@ -109,10 +109,9 @@ love.load:subscribe(function (arg)
     hero = {}
     hero.tag = "Hero"
     hero.health = rx.BehaviorSubject.create(100)
-    hero.health:delay(1, scheduler)
+    hero.health:debounce(1, scheduler)
                :subscribe(function (val)
                     hero.backHealth = val
-                    print(val)
                 end)
     hero.backHealth = 100
     hero.initX = 300
@@ -251,6 +250,7 @@ love.keypressed
 
 love.update:subscribe(function (dt)
     world:update(dt) -- this puts the world into motion
+    scheduler:update(dt)
 end)
 
 love.draw:subscribe(function ()
@@ -299,7 +299,3 @@ love.draw:subscribe(function ()
     love.graphics.setColor(0,0,0,255)
     love.graphics.rectangle("line", 20, 20, 100, 20)
 end)
-
-repeat
-    scheduler:update(0.25)
-until scheduler.currentTime >= 10
