@@ -121,7 +121,7 @@ love.load:subscribe(function (arg)
             shot.height = 5
             shot.fired = false
             shot.speed = 80
-            shot.body = love.physics.newBody(world, 0, 0, "kinematic")
+            shot.body = love.physics.newBody(world, 0, 0, "dynamic")
             shot.body:setFixedRotation(true)
             shot.body:setLinearVelocity(0, 0)
             shot.body:setGravityScale(0)
@@ -136,33 +136,36 @@ love.load:subscribe(function (arg)
     
     local enemy = {}
     enemy.tag = "Enemy"
+    enemy.initX = 700
+    enemy.initY = 480
     enemy.width = 40
     enemy.height = 20
     enemy.alive = true
     enemy.shots = {}
-    enemy.body = love.physics.newBody(world, 700, 450, "dynamic")
+    enemy.body = love.physics.newBody(world, enemy.initX, enemy.initY, "dynamic")
     enemy.body:setFixedRotation(true)
     enemy.shape = love.physics.newRectangleShape(enemy.width, enemy.height)
     enemy.fixture = love.physics.newFixture(enemy.body, enemy.shape, 2)
     enemy.fixture:setUserData(enemy)
+    enemy.fixture:setCategory(3)
     table.insert(enemies, enemy)  
 
-    rx.Observable.fromRange(1, 10)
+    rx.Observable.fromRange(1, 1)
         :subscribe(function ()
             local shot = {}
             shot.tag = "EnemyShot"
-            shot.width = 2
-            shot.height = 5
-            shot.fired = false
+            shot.width = 3
+            shot.height = 3
+            shot.fired = true
             shot.speed = 50
-            shot.body = love.physics.newBody(world, 0, 0, "kinematic")
+            shot.body = love.physics.newBody(world, enemy.initX, enemy.initY, "dynamic")
             shot.body:setFixedRotation(true)
             shot.body:setLinearVelocity(-shot.speed, 0)
             shot.body:setGravityScale(0)
-            shot.shape = love.physics.newRectangleShape(0, 0, shot.width, shot.height)
+            shot.shape = love.physics.newRectangleShape(shot.width, shot.height)
             shot.fixture = love.physics.newFixture(shot.body, shot.shape, 2)
             shot.fixture:setUserData(shot)
-            shot.fixture:setMask(2)
+            shot.fixture:setMask(3)
             table.insert(enemy.shots, shot)
         end)
 
@@ -172,17 +175,41 @@ love.load:subscribe(function (arg)
     endContact = rx.Subject.create()
     preSolve = rx.Subject.create()
     postSolve = rx.Subject.create()
+
+    -- Trata reset do grounded para pulo
     beginContact:filter(function(a, b, coll) return (a:getUserData().tag == "Ground" or a:getUserData().tag == "Platform") and b:getUserData().tag == "Hero" end)
                 :subscribe(function() hero.grounded = true end)
 
+    -- Trata colisao de tiro do player
     shotHit = beginContact:filter(function(a, b, coll) return a:getUserData().tag == "Shot" or b:getUserData().tag == "Shot" end)
     shotHitEnemy, shotHitOther = shotHit:partition(function(a, b, coll) return a:getUserData().tag == "Shot" and b:getUserData().tag == "Enemy" end)
     shotHit:subscribe(function(a, b, coll) 
         b:getUserData().fired = false 
+        -- print("shotHitOther")
+        -- b:getUserData().body:setPosition(10,10)
     end)
     shotHitEnemy:subscribe(function(a, b, coll)
         a:getUserData().fired = false 
+        -- print("shotHitEnemy")
+        -- a:getUserData().body:setPosition(10000,10000)
         b:getUserData().alive = false
+        -- b:getUserData().body:setPosition(10000,10000)
+    end)
+
+    -- Trata colisao de tiro do inimigo
+    enemyShotHit = beginContact:filter(function(a, b, coll) return a:getUserData().tag == "EnemyShot" or b:getUserData().tag == "EnemyShot" end)
+    enemyShotHitHero, enemyShotHitOther = enemyShotHit:partition(function(a, b, coll) return a:getUserData().tag == "Hero" end)
+    enemyShotHitOther:subscribe(function(a, b, coll) 
+        b:getUserData().fired = false 
+        -- b:getUserData().body:setPosition(10000,10000)
+        -- print("enemyShotHit")
+    end)
+    enemyShotHitHero:subscribe(function(a, b, coll)
+        b:getUserData().fired = false 
+        -- b:getUserData().body:setPosition(10000,10000)
+        -- print("enemyShotHitHero")
+            
+        a:getUserData().health:onNext(hero.health:getValue() - 10)
     end)
 end)
 
@@ -226,8 +253,6 @@ function shoot()
             shot.body:setLinearVelocity(0, -shot.speed)
             shot.body:setPosition(hero.body:getX(), hero.body:getY() - hero.height/2)
             shot.fired = true
-            
-            hero.health:onNext(hero.health:getValue() - 10)
         end)
 end
 
@@ -302,6 +327,16 @@ love.draw:subscribe(function ()
         end)
         :subscribe(function(enemy)
             love.graphics.polygon("fill", enemy.body:getWorldPoints(enemy.shape:getPoints()))
+
+            -- let's draw our enemy shots
+            love.graphics.setColor(0, 0, 0)
+            rx.Observable.fromTable(enemy.shots, pairs, false)
+                :filter(function(shot)
+                    return shot.fired
+                end)
+                :subscribe(function(shot)
+                    love.graphics.polygon("fill", shot.body:getWorldPoints(shot.shape:getPoints()))
+                end)
         end)
 
     -- Move camera back to original pos
