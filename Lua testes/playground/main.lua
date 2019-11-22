@@ -120,7 +120,7 @@ love.load:subscribe(function (arg)
             shot.width = 2
             shot.height = 5
             shot.fired = false
-            shot.speed = 80
+            shot.speed = math.random(10,80)
             shot.body = love.physics.newBody(world, 0, 0, "dynamic")
             shot.body:setFixedRotation(true)
             shot.body:setLinearVelocity(0, 0)
@@ -128,6 +128,7 @@ love.load:subscribe(function (arg)
             shot.shape = love.physics.newRectangleShape(0, 0, shot.width, shot.height)
             shot.fixture = love.physics.newFixture(shot.body, shot.shape, 2)
             shot.fixture:setUserData(shot)
+            shot.fixture:setCategory(2)
             shot.fixture:setMask(2)
             table.insert(hero.shots, shot)
         end)
@@ -157,23 +158,33 @@ love.load:subscribe(function (arg)
             shot.width = 3
             shot.height = 3
             shot.fired = false
-            shot.speed = 50
+            shot.speed = 100
             shot.body = love.physics.newBody(world, enemy.initX, enemy.initY, "dynamic")
             shot.body:setFixedRotation(true)
-            shot.body:setLinearVelocity(-shot.speed, 0)
             shot.body:setGravityScale(0)
             shot.shape = love.physics.newRectangleShape(shot.width, shot.height)
             shot.fixture = love.physics.newFixture(shot.body, shot.shape, 2)
             shot.fixture:setUserData(shot)
+            shot.fixture:setCategory(3)
             shot.fixture:setMask(3)
             table.insert(enemy.shots, shot)
         end)
 
     scheduler:schedule(function()
-        while true do
-
             coroutine.yield(1)
-        end
+            while true do
+                rx.Observable.fromTable(enemy.shots, pairs, false)
+                    :filter(function(shot)
+                        return not shot.fired
+                    end)
+                    :first()
+                    :subscribe(function(shot)
+                        shot.body:setLinearVelocity(-shot.speed, 0)
+                        shot.body:setPosition(enemy.body:getX(), enemy.body:getY())
+                        shot.fired = true
+                    end)
+                coroutine.yield(1)
+            end
         end)
 
     table.insert(objects, enemies)
@@ -250,15 +261,15 @@ local function jump()
     hero.grounded = false
 end
 
-function shoot(table, pos, speed)
-    rx.Observable.fromTable(table, pairs, false)
+function shoot()
+    rx.Observable.fromTable(hero.shots, pairs, false)
         :filter(function(shot)
             return not shot.fired
         end)
         :first()
         :subscribe(function(shot)
-            shot.body:setLinearVelocity(unpack(speed))
-            shot.body:setPosition(unpack(pos))
+            shot.body:setLinearVelocity(0, -shot.speed)
+            shot.body:setPosition(hero.body:getX(), hero.body:getY() - hero.height/2)
             shot.fired = true
         end)
 end
@@ -284,7 +295,7 @@ love.keyreleased
 love.keypressed
     :filter(function(key) return key == 'space' end)
     :subscribe(function()
-        shoot(hero.shots, {hero.body:getX(), hero.body:getY() - hero.height/2}, {0, -shot.speed})
+        shoot()
         currentVelX, currentVelY = hero.body:getLinearVelocity()
         hero.body:setLinearVelocity(0, currentVelY)
     end)
