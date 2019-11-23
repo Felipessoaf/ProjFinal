@@ -185,18 +185,8 @@ love.load:subscribe(function (arg)
 
     scheduler:schedule(function()
             coroutine.yield(1)
-            while true do
-                rx.Observable.fromTable(enemy.shots, pairs, false)
-                    :filter(function(shot)
-                        return not shot.fired
-                    end)
-                    :first()
-                    :subscribe(function(shot)
-                        shot.body:setLinearVelocity(-shot.speed, 0)
-                        shot.body:setPosition(enemy.body:getX(), enemy.body:getY())
-                        shot.fired = true
-                        shot.body:setActive(true)
-                    end)
+            while true and enemy.alive do
+                enemyShoot(enemy.shots, {enemy.body:getX(), enemy.body:getY()})
                 coroutine.yield(1)
             end
         end)
@@ -221,8 +211,6 @@ love.load:subscribe(function (arg)
     shotHitEnemy, shotHitOther = shotHit:partition(function(a, b, coll) return a:getUserData().tag == "Shot" and b:getUserData().tag == "Enemy" end)
     shotHit:subscribe(function(a, b, coll) 
         b:getUserData().fired = false 
-        -- b:getUserData().
-        -- b:getUserData().body:setPosition(10,10)
         scheduler:schedule(function()
             coroutine.yield(.1)
             b:getUserData().body:setActive(false)
@@ -230,14 +218,12 @@ love.load:subscribe(function (arg)
     end)
     shotHitEnemy:subscribe(function(a, b, coll)
         a:getUserData().fired = false 
-        -- print("shotHitEnemy")
-        -- a:getUserData().body:setPosition(10000,10000)
         b:getUserData().alive = false
         rx.Observable.fromTable(b:getUserData().shots, pairs, false)
             :subscribe(function(shot)
                 shot.body:setActive(false)
             end)
-        -- b:getUserData().body:setPosition(10000,10000)
+        b:getUserData().shots = {}
     end)
 
     -- Trata colisao de tiro do inimigo
@@ -245,8 +231,6 @@ love.load:subscribe(function (arg)
     enemyShotHitHero, enemyShotHitOther = enemyShotHit:partition(function(a, b, coll) return a:getUserData().tag == "Hero" end)
     enemyShotHitOther:subscribe(function(a, b, coll) 
         b:getUserData().fired = false 
-        -- b:getUserData().body:setPosition(10000,10000)
-        -- print("enemyShotHitOther")
         scheduler:schedule(function()
             coroutine.yield(.1)
             b:getUserData().body:setActive(false)
@@ -254,8 +238,6 @@ love.load:subscribe(function (arg)
     end)
     enemyShotHitHero:subscribe(function(a, b, coll)
         b:getUserData().fired = false 
-        -- b:getUserData().body:setPosition(10000,10000)
-        -- print("enemyShotHitHero")
         scheduler:schedule(function()
             coroutine.yield(.1)
             b:getUserData().body:setActive(false)
@@ -310,6 +292,20 @@ function shoot()
             shot.body:setPosition(hero.body:getX(), hero.body:getY())
             shot.fired = true
             shot.fixture:setMask(2)
+            shot.body:setActive(true)
+        end)
+end
+
+function enemyShoot(shotsTable, pos)
+    rx.Observable.fromTable(shotsTable, pairs, false)
+        :filter(function(shot)
+            return not shot.fired
+        end)
+        :first()
+        :subscribe(function(shot)
+            shot.body:setLinearVelocity(-shot.speed, 0)
+            shot.body:setPosition(unpack(pos))
+            shot.fired = true
             shot.body:setActive(true)
         end)
 end
