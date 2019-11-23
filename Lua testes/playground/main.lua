@@ -143,6 +143,7 @@ love.load:subscribe(function (arg)
             shot.fixture:setUserData(shot)
             shot.fixture:setCategory(2)
             shot.fixture:setMask(2)
+            shot.fixture:setSensor(true)
             table.insert(hero.shots, shot)
         end)
 
@@ -186,17 +187,52 @@ love.load:subscribe(function (arg)
             shot.fixture:setUserData(shot)
             shot.fixture:setCategory(3)
             shot.fixture:setMask(3)
+            shot.fixture:setSensor(true)
             table.insert(enemy.shots, shot)
         end)
 
+    -- Atira
     scheduler:schedule(function()
             coroutine.yield(1)
             while true and enemy.alive do
                 enemyShoot(enemy.shots, {enemy.body:getX(), enemy.body:getY()})
-                coroutine.yield(1)
+                coroutine.yield(math.random(.5,2))
             end
+        end)
+
+    -- Checa alerta perigo
+    alertaPerigo = {}
+    alertaPerigo.cor = {0,0,0,0}
+    alertaPerigo.y = 0
+    enemiesShotsPos = rx.Subject.create()
+    enemyShotsAlertRange = enemiesShotsPos:filter(function(pos)
+            local rightSide = hero.body:getX() + love.graphics.getWidth()/2
+            return pos[1] > rightSide and pos[1] < rightSide + 150
+        end)
+
+    enemyShotsAlertRange:subscribe(function (pos)
+        alertaPerigo.cor = {1,0,0,1}
+        alertaPerigo.y = pos[2]
+    end)
+
+    enemyShotsAlertRange:debounce(1, scheduler)
+        :subscribe(function (pos)
+            alertaPerigo.cor = {0,0,0,0}
+        end)
+
+    -- Atualiza pos dos tiros
+    scheduler:schedule(function()
             coroutine.yield(1)
-            print("n shots "..#enemy.shots)
+            while true and enemy.alive do
+                rx.Observable.fromTable(enemy.shots, pairs, false)
+                    :filter(function(shot)
+                        return shot.fired
+                    end)
+                    :subscribe(function(shot)
+                        enemiesShotsPos:onNext({shot.body:getPosition()})
+                    end)
+                coroutine.yield(.5)
+            end
         end)
 
     table.insert(objects, enemies)
@@ -297,14 +333,12 @@ local function jump()
 end
 
 function shoot()
-    print("n shots "..#hero.shots)
     rx.Observable.fromTable(hero.shots, pairs, false)
         :filter(function(shot)
             return not shot.fired
         end)
         :first()
         :subscribe(function(shot)
-            print("shot not fired")
             dirX, dirY = unpack(hero.dir)
             shot.body:setLinearVelocity(dirX * shot.speed, dirY * shot.speed)
             shot.body:setPosition(hero.body:getX(), hero.body:getY())
@@ -335,7 +369,6 @@ function killEnemy(enemy)
         :subscribe(function(shot)
             shot.body:setActive(false)
             shot.fixture:setMask(2,3)
-            shot.fixture:setSensor()
             print("shot: "..shot)
         end)
     enemy.shots = {}
@@ -407,11 +440,12 @@ love.draw:subscribe(function ()
 
     -- let's draw our enemies
     love.graphics.setColor(135/255, 0, 168/255)
-    rx.Observable.fromTable(enemies, pairs, false)
-        :filter(function(enemy)
-            return enemy.alive
-        end)
-        :subscribe(function(enemy)
+    local enemiesAlive = rx.Observable.fromTable(enemies, pairs, false)
+                            :filter(function(enemy)
+                                return enemy.alive
+                            end)
+    
+    enemiesAlive:subscribe(function(enemy)
             love.graphics.polygon("fill", enemy.body:getWorldPoints(enemy.shape:getPoints()))
 
             -- let's draw our enemy shots
@@ -434,4 +468,8 @@ love.draw:subscribe(function ()
     love.graphics.rectangle("fill", 20, 20, hero.health:getValue(), 20)
     love.graphics.setColor(0,0,0,255)
     love.graphics.rectangle("line", 20, 20, 100, 20)
+
+    -- Alerta perigo
+    love.graphics.setColor(unpack(alertaPerigo.cor))
+    love.graphics.rectangle("line", love.graphics.getWidth()-20, alertaPerigo.y, 20, 20)
 end)
