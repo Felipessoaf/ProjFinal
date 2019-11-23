@@ -215,7 +215,7 @@ love.load:subscribe(function (arg)
         alertaPerigo.y = pos[2]
     end)
 
-    enemyShotsAlertRange:debounce(1, scheduler)
+    enemyShotsAlertRange:debounce(.2, scheduler)
         :subscribe(function (pos)
             alertaPerigo.cor = {0,0,0,0}
         end)
@@ -231,7 +231,7 @@ love.load:subscribe(function (arg)
                     :subscribe(function(shot)
                         enemiesShotsPos:onNext({shot.body:getPosition()})
                     end)
-                coroutine.yield(.5)
+                coroutine.yield(.3)
             end
         end)
 
@@ -471,5 +471,5 @@ love.draw:subscribe(function ()
 
     -- Alerta perigo
     love.graphics.setColor(unpack(alertaPerigo.cor))
-    love.graphics.rectangle("line", love.graphics.getWidth()-20, alertaPerigo.y, 20, 20)
+    love.graphics.rectangle("line", love.graphics.getWidth()-20, alertaPerigo.y -heroPosY + love.graphics.getHeight() * 3/4, 20, 20)
 end)
