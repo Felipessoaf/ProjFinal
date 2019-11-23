@@ -8,6 +8,10 @@ local keyMap = {
 }
 
 local scheduler = rx.CooperativeScheduler.create()
+local HERO_CATEGORY = 3
+local HERO_SHOT_CATEGORY = 4
+local ENEMY_CATEGORY = 5
+local ENEMY_SHOT_CATEGORY = 6
 
 -- Declare initial state of game
 love.load:subscribe(function (arg)
@@ -115,7 +119,7 @@ love.load:subscribe(function (arg)
     hero.shape = love.physics.newRectangleShape(hero.width, hero.height)
     hero.fixture = love.physics.newFixture(hero.body, hero.shape, 2)
     hero.fixture:setUserData(hero)
-    hero.fixture:setCategory(2)
+    hero.fixture:setCategory(HERO_CATEGORY)
     hero.grounded = true
     
     table.insert(objects, hero)
@@ -136,8 +140,8 @@ love.load:subscribe(function (arg)
             shot.shape = love.physics.newRectangleShape(0, 0, shot.width, shot.height)
             shot.fixture = love.physics.newFixture(shot.body, shot.shape, 2)
             shot.fixture:setUserData(shot)
-            shot.fixture:setCategory(2)
-            shot.fixture:setMask(2)
+            shot.fixture:setCategory(HERO_SHOT_CATEGORY)
+            shot.fixture:setMask(HERO_CATEGORY, HERO_SHOT_CATEGORY, ENEMY_SHOT_CATEGORY)
             table.insert(hero.shots, shot)
         end)
 
@@ -160,7 +164,7 @@ love.load:subscribe(function (arg)
     enemy.shape = love.physics.newRectangleShape(enemy.width, enemy.height)
     enemy.fixture = love.physics.newFixture(enemy.body, enemy.shape, 2)
     enemy.fixture:setUserData(enemy)
-    enemy.fixture:setCategory(3)
+    enemy.fixture:setCategory(ENEMY_CATEGORY)
     table.insert(enemies, enemy)  
 
     rx.Observable.fromRange(1, 10)
@@ -171,15 +175,16 @@ love.load:subscribe(function (arg)
             shot.height = 3
             shot.fired = false
             shot.speed = 100
-            shot.body = love.physics.newBody(world, enemy.initX, enemy.initY, "dynamic")
+            shot.body = love.physics.newBody(world, -8000, -8000, "dynamic")
+            shot.body:setActive(false)
             shot.body:setFixedRotation(true)
             shot.body:setGravityScale(0)
             shot.body:setSleepingAllowed(true)
             shot.shape = love.physics.newRectangleShape(shot.width, shot.height)
             shot.fixture = love.physics.newFixture(shot.body, shot.shape, 2)
             shot.fixture:setUserData(shot)
-            shot.fixture:setCategory(3)
-            shot.fixture:setMask(3)
+            shot.fixture:setCategory(ENEMY_SHOT_CATEGORY)
+            shot.fixture:setMask(ENEMY_CATEGORY, ENEMY_SHOT_CATEGORY, HERO_SHOT_CATEGORY)
             table.insert(enemy.shots, shot)
         end)
 
@@ -189,6 +194,8 @@ love.load:subscribe(function (arg)
                 enemyShoot(enemy.shots, {enemy.body:getX(), enemy.body:getY()})
                 coroutine.yield(1)
             end
+            coroutine.yield(1)
+            print("n shots "..#enemy.shots)
         end)
 
     table.insert(objects, enemies)
@@ -217,13 +224,9 @@ love.load:subscribe(function (arg)
         end)
     end)
     shotHitEnemy:subscribe(function(a, b, coll)
-        a:getUserData().fired = false 
-        b:getUserData().alive = false
-        rx.Observable.fromTable(b:getUserData().shots, pairs, false)
-            :subscribe(function(shot)
-                shot.body:setActive(false)
-            end)
-        b:getUserData().shots = {}
+        a:getUserData().fired = false
+        print("killEnemy: "..b:getUserData())
+        killEnemy(b:getUserData()) 
     end)
 
     -- Trata colisao de tiro do inimigo
@@ -310,6 +313,19 @@ function enemyShoot(shotsTable, pos)
         end)
 end
 
+function killEnemy(enemy)
+    -- print("killEnemy: "..enemy)
+    enemy.alive = false
+    rx.Observable.fromTable(enemy.shots, pairs, false)
+        :subscribe(function(shot)
+            shot.body:setActive(false)
+            shot.fixture:setMask(2,3)
+            shot.fixture:setSensor()
+            print("shot: "..shot)
+        end)
+    enemy.shots = {}
+end
+
 -- keyboard actions for our hero
 for _, key in pairs({'a', 'd'}) do
     love.update
@@ -362,9 +378,9 @@ love.draw:subscribe(function ()
     -- let's draw our heros shots
     love.graphics.setColor(255,255,255,255)
     rx.Observable.fromTable(hero.shots, pairs, false)
-        -- :filter(function(shot)
-        --     return shot.fired
-        -- end)
+        :filter(function(shot)
+            return shot.fired
+        end)
         :subscribe(function(shot)
             love.graphics.polygon("fill", shot.body:getWorldPoints(shot.shape:getPoints()))
         end)
@@ -385,9 +401,9 @@ love.draw:subscribe(function ()
             -- let's draw our enemy shots
             love.graphics.setColor(0, 0, 0)
             rx.Observable.fromTable(enemy.shots, pairs, false)
-                -- :filter(function(shot)
-                --     return shot.fired
-                -- end)
+                :filter(function(shot)
+                    return shot.fired
+                end)
                 :subscribe(function(shot)
                     love.graphics.polygon("fill", shot.body:getWorldPoints(shot.shape:getPoints()))
                 end)
