@@ -8,13 +8,14 @@ local keyMap = {
 }
 
 local scheduler = rx.CooperativeScheduler.create()
-local HERO_CATEGORY = 3
-local HERO_SHOT_CATEGORY = 4
-local ENEMY_CATEGORY = 5
-local ENEMY_SHOT_CATEGORY = 6
 
 -- Declare initial state of game
 love.load:subscribe(function (arg)
+    local HERO_CATEGORY = 3
+    local HERO_SHOT_CATEGORY = 4
+    local ENEMY_CATEGORY = 5
+    local ENEMY_SHOT_CATEGORY = 6
+
     -- the height of a meter our worlds will be 64px
     love.physics.setMeter(64)
 
@@ -119,7 +120,7 @@ love.load:subscribe(function (arg)
     hero.shape = love.physics.newRectangleShape(hero.width, hero.height)
     hero.fixture = love.physics.newFixture(hero.body, hero.shape, 2)
     hero.fixture:setUserData(hero)
-    hero.fixture:setCategory(HERO_CATEGORY)
+    hero.fixture:setCategory(2)
     hero.grounded = true
     
     table.insert(objects, hero)
@@ -140,8 +141,8 @@ love.load:subscribe(function (arg)
             shot.shape = love.physics.newRectangleShape(0, 0, shot.width, shot.height)
             shot.fixture = love.physics.newFixture(shot.body, shot.shape, 2)
             shot.fixture:setUserData(shot)
-            shot.fixture:setCategory(HERO_SHOT_CATEGORY)
-            shot.fixture:setMask(HERO_CATEGORY, HERO_SHOT_CATEGORY, ENEMY_SHOT_CATEGORY)
+            shot.fixture:setCategory(2)
+            shot.fixture:setMask(2)
             table.insert(hero.shots, shot)
         end)
 
@@ -164,7 +165,7 @@ love.load:subscribe(function (arg)
     enemy.shape = love.physics.newRectangleShape(enemy.width, enemy.height)
     enemy.fixture = love.physics.newFixture(enemy.body, enemy.shape, 2)
     enemy.fixture:setUserData(enemy)
-    enemy.fixture:setCategory(ENEMY_CATEGORY)
+    enemy.fixture:setCategory(3)
     table.insert(enemies, enemy)  
 
     rx.Observable.fromRange(1, 10)
@@ -183,8 +184,8 @@ love.load:subscribe(function (arg)
             shot.shape = love.physics.newRectangleShape(shot.width, shot.height)
             shot.fixture = love.physics.newFixture(shot.body, shot.shape, 2)
             shot.fixture:setUserData(shot)
-            shot.fixture:setCategory(ENEMY_SHOT_CATEGORY)
-            shot.fixture:setMask(ENEMY_CATEGORY, ENEMY_SHOT_CATEGORY, HERO_SHOT_CATEGORY)
+            shot.fixture:setCategory(3)
+            shot.fixture:setMask(3)
             table.insert(enemy.shots, shot)
         end)
 
@@ -217,15 +218,27 @@ love.load:subscribe(function (arg)
     shotHit = beginContact:filter(function(a, b, coll) return a:getUserData().tag == "Shot" or b:getUserData().tag == "Shot" end)
     shotHitEnemy, shotHitOther = shotHit:partition(function(a, b, coll) return a:getUserData().tag == "Shot" and b:getUserData().tag == "Enemy" end)
     shotHit:subscribe(function(a, b, coll) 
-        b:getUserData().fired = false 
+        local shot = {}
+        if a:getUserData().tag == "Shot" then
+            shot = a:getUserData()
+        else
+            shot = b:getUserData()
+        end
+
+        shot.fired = false 
         scheduler:schedule(function()
-            coroutine.yield(.1)
-            b:getUserData().body:setActive(false)
+            coroutine.yield(.01)
+            shot.body:setActive(false)
+            shot.body:setPosition(-8000,-8000)
         end)
     end)
     shotHitEnemy:subscribe(function(a, b, coll)
         a:getUserData().fired = false
-        print("killEnemy: "..b:getUserData())
+        scheduler:schedule(function()
+            coroutine.yield(.01)
+            a:getUserData().body:setActive(false)
+            a:getUserData().body:setPosition(-8000,-8000)
+        end)
         killEnemy(b:getUserData()) 
     end)
 
@@ -235,14 +248,14 @@ love.load:subscribe(function (arg)
     enemyShotHitOther:subscribe(function(a, b, coll) 
         b:getUserData().fired = false 
         scheduler:schedule(function()
-            coroutine.yield(.1)
+            coroutine.yield(.01)
             b:getUserData().body:setActive(false)
         end)
     end)
     enemyShotHitHero:subscribe(function(a, b, coll)
         b:getUserData().fired = false 
         scheduler:schedule(function()
-            coroutine.yield(.1)
+            coroutine.yield(.01)
             b:getUserData().body:setActive(false)
         end)
             
@@ -284,12 +297,14 @@ local function jump()
 end
 
 function shoot()
+    print("n shots "..#hero.shots)
     rx.Observable.fromTable(hero.shots, pairs, false)
         :filter(function(shot)
             return not shot.fired
         end)
         :first()
         :subscribe(function(shot)
+            print("shot not fired")
             dirX, dirY = unpack(hero.dir)
             shot.body:setLinearVelocity(dirX * shot.speed, dirY * shot.speed)
             shot.body:setPosition(hero.body:getX(), hero.body:getY())
@@ -324,6 +339,7 @@ function killEnemy(enemy)
             print("shot: "..shot)
         end)
     enemy.shots = {}
+    enemy.body:setActive(false)
 end
 
 -- keyboard actions for our hero
