@@ -33,7 +33,7 @@ love.load:subscribe(function (arg)
 
     ground1 = {}
     ground1.tag = "Ground"
-    ground1.color = {112/250, 72/250, 7/250}
+    ground1.color = {112/255, 72/255, 7/255}
     ground1.body = love.physics.newBody(world, -100, 650)
     ground1.shape = love.physics.newRectangleShape(650, 150)
     -- attach shape to body
@@ -44,7 +44,7 @@ love.load:subscribe(function (arg)
 
     ground2 = {}
     ground2.tag = "Ground"
-    ground2.color = {112/250, 72/250, 7/250}
+    ground2.color = {112/255, 72/255, 7/255}
     ground2.body = love.physics.newBody(world, 550, 650)
     ground2.shape = love.physics.newRectangleShape(650, 300)
     -- attach shape to body
@@ -55,7 +55,7 @@ love.load:subscribe(function (arg)
 
     wall1 = {}
     wall1.tag = "Wall"
-    wall1.color = {9/250, 84/250, 9/250}
+    wall1.color = {9/255, 84/255, 9/255}
     wall1.body = love.physics.newBody(world, -550, 225)
     wall1.shape = love.physics.newRectangleShape(650, 1000)
     -- attach shape to body
@@ -66,7 +66,7 @@ love.load:subscribe(function (arg)
 
     wall2 = {}
     wall2.tag = "Wall"
-    wall2.color = {9/250, 84/250, 9/250}
+    wall2.color = {9/255, 84/255, 9/255}
     wall2.body = love.physics.newBody(world, 1200, 225)
     wall2.shape = love.physics.newRectangleShape(650, 1000)
     -- attach shape to body
@@ -130,14 +130,15 @@ love.load:subscribe(function (arg)
         :subscribe(function ()
             local shot = {}
             shot.tag = "Shot"
-            shot.width = 2
-            shot.height = 5
+            shot.width = 3
+            shot.height = 3
             shot.fired = false
             shot.speed = 180--math.random(10,80)
             shot.body = love.physics.newBody(world, 0, 0, "dynamic")
             shot.body:setFixedRotation(true)
             shot.body:setLinearVelocity(0, 0)
             shot.body:setGravityScale(0)
+            shot.body:setBullet(true)
             shot.shape = love.physics.newRectangleShape(0, 0, shot.width, shot.height)
             shot.fixture = love.physics.newFixture(shot.body, shot.shape, 2)
             shot.fixture:setUserData(shot)
@@ -168,6 +169,8 @@ love.load:subscribe(function (arg)
     enemy.fixture:setUserData(enemy)
     enemy.fixture:setCategory(3)
     table.insert(enemies, enemy)  
+        
+    table.insert(objects, enemies)
 
     rx.Observable.fromRange(1, 10)
         :subscribe(function ()
@@ -182,6 +185,7 @@ love.load:subscribe(function (arg)
             shot.body:setFixedRotation(true)
             shot.body:setGravityScale(0)
             shot.body:setSleepingAllowed(true)
+            shot.body:setBullet(true)
             shot.shape = love.physics.newRectangleShape(shot.width, shot.height)
             shot.fixture = love.physics.newFixture(shot.body, shot.shape, 2)
             shot.fixture:setUserData(shot)
@@ -235,7 +239,22 @@ love.load:subscribe(function (arg)
             end
         end)
 
-    table.insert(objects, enemies)
+    -- Area alcance visao
+    enemyRange = {}
+    enemyRange.tag = "EnemyRange"
+    enemyRange.color = {1, 132/255, 0, 0.5}
+    enemyRange.outRangeColor = {1, 132/255, 0, 0.5}
+    enemyRange.safeColor = {0, 1, 0, 0.5}
+    enemyRange.dangerColor = {1, 0, 0, 0.5}
+    enemyRange.body = love.physics.newBody(world, enemy.initX, enemy.initY)
+    enemyRange.shape = love.physics.newRectangleShape(300, 100)
+    -- attach shape to body
+    enemyRange.fixture = love.physics.newFixture(enemyRange.body, enemyRange.shape)
+    enemyRange.fixture:setUserData(enemyRange)
+    enemyRange.fixture:setSensor(true)
+
+    table.insert(objects, enemyRange)
+
 
     --enemies----enemies----enemies----enemies----enemies----enemies----enemies----enemies----enemies----enemies----enemies----enemies----enemies----enemies----enemies--
 
@@ -249,6 +268,79 @@ love.load:subscribe(function (arg)
     -- Trata reset do grounded para pulo
     beginContact:filter(function(a, b, coll) return (a:getUserData().tag == "Ground" or a:getUserData().tag == "Platform") and b:getUserData().tag == "Hero" end)
                 :subscribe(function() hero.grounded = true end)
+
+    -- Trata colisao player com enemyRange
+    enterRange = beginContact
+        :filter(function(a, b, coll) 
+            return a:getUserData().tag == "Hero" and b:getUserData().tag == "EnemyRange" 
+        end)
+        :map(function ()
+            return "enter"
+        end)
+
+    exitRange = endContact
+        :filter(function(a, b, coll) 
+            return a:getUserData().tag == "Hero" and b:getUserData().tag == "EnemyRange" 
+        end)
+        :map(function ()
+            return "exit"
+        end)
+
+    rangeState = enterRange:merge(exitRange)
+
+    enterRange:subscribe(function ()
+        enemyRange.color = enemyRange.dangerColor
+    end)
+
+    exitRange:subscribe(function ()
+        enemyRange.color = enemyRange.outRangeColor
+    end)
+
+    -- inRange = enterRange:flatMap(function (value)
+    --     return rx.Observable.replicate(true)
+    -- end)
+    -- inRange:subscribe(function() 
+    --     -- print("inrange")
+    -- end)
+    -- enterRange:subscribe(function() 
+    -- end)
+
+    --combineLatest
+    cPressed = love.keypressed
+        :filter(function(key) return key == 'c' end)
+        :map(function ()
+            return "pressed"
+        end)
+    cReleased = love.keyreleased
+        :filter(function(key) return key == 'c' end)
+        :map(function ()
+            return "not pressed"
+        end)
+
+    cPressState = cPressed:merge(cReleased)
+
+    heroSafe, heroNotSafe = rangeState
+        :combineLatest(cPressState, function (a, b)
+            return a == "enter" and b == "pressed"
+        end)
+        :partition(function(value) 
+            return value
+        end)
+    
+    heroSafe:subscribe(function() 
+        enemyRange.color = enemyRange.safeColor
+    end)
+    
+    heroNotSafe:subscribe(function() 
+        enemyRange.color = enemyRange.dangerColor
+    end)
+
+
+    -- heroSafe = enterRange
+    --     :merge(exitRange)
+    --     :subscribe(function(state) 
+    --         print("state: "..state)
+    --     end)
 
     -- Trata colisao de tiro do player
     shotHit = beginContact:filter(function(a, b, coll) return a:getUserData().tag == "Shot" or b:getUserData().tag == "Shot" end)
@@ -363,7 +455,7 @@ function enemyShoot(shotsTable, pos)
 end
 
 function killEnemy(enemy)
-    -- print("killEnemy: "..enemy)
+    print("killEnemy: "..enemy)
     enemy.alive = false
     rx.Observable.fromTable(enemy.shots, pairs, false)
         :subscribe(function(shot)
@@ -458,6 +550,9 @@ love.draw:subscribe(function ()
                     love.graphics.polygon("fill", shot.body:getWorldPoints(shot.shape:getPoints()))
                 end)
         end)
+
+    love.graphics.setColor(unpack(enemyRange.color))
+    love.graphics.polygon("fill", enemyRange.body:getWorldPoints(enemyRange.shape:getPoints()))
 
     -- Move camera back to original pos
     love.graphics.translate(-(-heroPosX + love.graphics.getWidth()/2), -(-heroPosY + love.graphics.getHeight() * 3/4))
