@@ -319,13 +319,17 @@ love.load:subscribe(function (arg)
 
     cPressState = cPressed:merge(cReleased)
 
-    heroSafe, heroNotSafe = rangeState
+    heroRangeState = rangeState
         :combineLatest(cPressState, function (a, b)
-            return a == "enter" and b == "pressed"
+            return a,b-- == "enter" and b == "pressed"
         end)
-        :partition(function(value) 
-            return value
-        end)
+
+    heroSafe = heroRangeState:filter(function(a,b)
+        return a == "enter" and b == "pressed"
+    end)
+    heroNotSafe = heroRangeState:filter(function(a,b)
+        return a == "enter" and b == "not pressed"
+    end)
     
     heroSafe:subscribe(function() 
         enemyRange.color = enemyRange.safeColor
