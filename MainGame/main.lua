@@ -117,63 +117,38 @@ love.load:subscribe(function (arg)
 		end
 	end
 	
-	-- Create player object
-	local sprite = love.graphics.newImage("player.png")
-	layer.player = {
-		sprite = sprite,
-		x      = spawn.x,
-		y      = spawn.y,
-		ox     = sprite:getWidth() / 2,
-		oy     = sprite:getHeight() / 1.35
-	}
+	hero = {}
+	playerLayer.hero = hero
 
-	-- hero = {}
-	-- playerLayer.hero = hero
-
-    -- hero.tag = "Hero"
-    -- hero.health = rx.BehaviorSubject.create(100)
-    -- hero.health:debounce(1, scheduler)
-    --            :subscribe(function (val)
-    --                 hero.backHealth = val
-    --             end)
-    -- hero.backHealth = 100
-    -- hero.dir = {1,0}
-    -- hero.initX = 300
-    -- hero.initY = 450
-    -- hero.width = 20
-    -- hero.height = 30
-    -- hero.speed = 150
-    -- hero.shots = {} -- holds our shots
-    -- hero.body = love.physics.newBody(world, hero.initX, hero.initY, "dynamic")
-    -- hero.body:setFixedRotation(true)
-    -- hero.shape = love.physics.newRectangleShape(hero.width, hero.height)
-    -- hero.fixture = love.physics.newFixture(hero.body, hero.shape, 2)
-    -- hero.fixture:setUserData(hero)
-    -- hero.fixture:setCategory(2)
-	-- hero.grounded = true
+    hero.tag = "Hero"
+    hero.health = rx.BehaviorSubject.create(100)
+    hero.health:debounce(1, scheduler)
+               :subscribe(function (val)
+                    hero.backHealth = val
+                end)
+    hero.backHealth = 100
+    hero.dir = {1,0}
+    hero.initX = spawn.x
+    hero.initY = spawn.y
+    hero.width = 20
+    hero.height = 30
+    hero.speed = 150
+    hero.shots = {} -- holds our shots
+    hero.body = love.physics.newBody(world, hero.initX, hero.initY, "dynamic")
+    hero.body:setFixedRotation(true)
+    hero.shape = love.physics.newRectangleShape(hero.width, hero.height)
+    hero.fixture = love.physics.newFixture(hero.body, hero.shape, 2)
+    hero.fixture:setUserData(hero)
+    hero.fixture:setCategory(2)
+	hero.grounded = true
 
 	-- Draw player
 	playerLayer.draw = function(self)
-		love.graphics.draw(
-			self.player.sprite,
-			math.floor(self.player.x),
-			math.floor(self.player.y),
-			0,
-			1,
-			1,
-			self.player.ox,
-			self.player.oy
-		)
 
 		-- Temporarily draw a point at our location so we know
 		-- that our sprite is offset properly
 		love.graphics.setPointSize(5)
-		love.graphics.points(math.floor(self.player.x), math.floor(self.player.y))
-
-		-- Temporarily draw a point at our location so we know
-		-- that our sprite is offset properly
-		-- love.graphics.setPointSize(5)
-		-- love.graphics.points(math.floor(self.hero.body:getX()), math.floor(self.hero.body:getY()))
+		love.graphics.points(math.floor(self.hero.body:getX()), math.floor(self.hero.body:getY()))
 	end
 	
 	-- Remove unneeded object layer
@@ -560,7 +535,7 @@ love.keypressed
     end)
 
 love.update:subscribe(function (dt)
-    -- world:update(dt) -- this puts the world into motion
+    world:update(dt) -- this puts the world into motion
 	-- scheduler:update(dt)
 	
 	-- Update world map
