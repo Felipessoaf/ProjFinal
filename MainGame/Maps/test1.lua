@@ -8,8 +8,8 @@ return {
   height = 10,
   tilewidth = 32,
   tileheight = 32,
-  nextlayerid = 5,
-  nextobjectid = 1,
+  nextlayerid = 7,
+  nextobjectid = 4,
   properties = {},
   tilesets = {
     {
@@ -94,30 +94,29 @@ return {
       }
     },
     {
-      type = "tilelayer",
-      id = 4,
+      type = "objectgroup",
+      id = 5,
       name = "spawn",
-      x = 0,
-      y = 0,
-      width = 10,
-      height = 10,
       visible = true,
       opacity = 1,
       offsetx = 0,
       offsety = 0,
+      draworder = "topdown",
       properties = {},
-      encoding = "lua",
-      data = {
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 566, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+      objects = {
+        {
+          id = 1,
+          name = "spawn",
+          type = "",
+          shape = "rectangle",
+          x = 79.3333,
+          y = 78.6667,
+          width = 0,
+          height = 0,
+          rotation = 0,
+          visible = true,
+          properties = {}
+        }
       }
     }
   }
