@@ -19,7 +19,7 @@ love.load:subscribe(function (arg)
 	local ENEMY_SHOT_CATEGORY = 6
 	
 	-- load map
-	map = sti("Maps/test1.lua", { "box2d" })
+	map = sti("Maps/mainMap.lua", { "box2d" })
 
     -- the height of a meter our worlds will be 64px
     love.physics.setMeter(64)
