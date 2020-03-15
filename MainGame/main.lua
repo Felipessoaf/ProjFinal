@@ -19,7 +19,7 @@ love.load:subscribe(function (arg)
 	local ENEMY_SHOT_CATEGORY = 6
 	
 	-- load map
-	map = sti("Maps/test1.lua")
+	map = sti("Maps/test1.lua", { "box2d" })
 
     -- the height of a meter our worlds will be 64px
     love.physics.setMeter(64)
@@ -27,6 +27,9 @@ love.load:subscribe(function (arg)
     -- create a world for the bodies to exist in with horizontal gravity
     -- of 0 and vertical gravity of 9.81
     world = love.physics.newWorld(0, 9.81*64, true)
+    
+	-- Prepare collision objects
+	map:box2d_init(world)
 
     -- --Collision callbacks:
     -- world:setCallbacks(bC, eC, preS, postS)
@@ -543,12 +546,19 @@ love.update:subscribe(function (dt)
 end)
 
 love.draw:subscribe(function ()
-	
-	-- Draw world
-	map:draw()
 
-    -- heroPosX, heroPosY = hero.body:getPosition();
-    -- love.graphics.translate(-heroPosX + love.graphics.getWidth()/2, -heroPosY + love.graphics.getHeight() * 3/4)
+    heroPosX, heroPosY = hero.body:getPosition();
+    local tx,ty = -heroPosX + love.graphics.getWidth()/2, -heroPosY + love.graphics.getHeight() * 3/4;
+    -- love.graphics.translate(tx,ty)
+	
+    -- Draw world
+	love.graphics.setColor(1, 1, 1)
+	map:draw(tx,ty)
+
+	-- Draw Collision Map (useful for debugging)
+	love.graphics.setColor(1, 0, 0)
+	map:box2d_draw(tx,ty)
+
 
     -- -- draw a "filled in" polygon using the mapObjs coordinates
     -- rx.Observable.fromTable(mapObjs, pairs, false)
