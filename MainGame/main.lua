@@ -8,6 +8,9 @@ local Enemies = require 'Enemies'
 -- MapManager module
 local MapManager = require 'MapManager'
 
+-- Player module
+local Player = require 'Player'
+
 -- Maps keys to players and directions
 local keyMap = {
   a = -1,
@@ -40,53 +43,8 @@ love.load:subscribe(function (arg)
     world:setCallbacks(bC, eC, preS, postS)
 
     -- objects = {} -- table to hold all our physical objects
-    -- mapObjs = {} -- table to hold all our map objects
-
+    
     -- --map----map----map----map----map----map----map----map----map----map----map----map----map----map----map----map----map----map----map----map----map----map----map----map--
-
-    -- ground1 = {}
-    -- ground1.tag = "Ground"
-    -- ground1.color = {112/255, 72/255, 7/255}
-    -- ground1.body = love.physics.newBody(world, -100, 650)
-    -- ground1.shape = love.physics.newRectangleShape(650, 150)
-    -- -- attach shape to body
-    -- ground1.fixture = love.physics.newFixture(ground1.body, ground1.shape)
-    -- ground1.fixture:setUserData(ground1)
-
-    -- table.insert(mapObjs, ground1)
-
-    -- ground2 = {}
-    -- ground2.tag = "Ground"
-    -- ground2.color = {112/255, 72/255, 7/255}
-    -- ground2.body = love.physics.newBody(world, 550, 650)
-    -- ground2.shape = love.physics.newRectangleShape(650, 300)
-    -- -- attach shape to body
-    -- ground2.fixture = love.physics.newFixture(ground2.body, ground2.shape)
-    -- ground2.fixture:setUserData(ground2)
-
-    -- table.insert(mapObjs, ground2)
-
-    -- wall1 = {}
-    -- wall1.tag = "Wall"
-    -- wall1.color = {9/255, 84/255, 9/255}
-    -- wall1.body = love.physics.newBody(world, -550, 225)
-    -- wall1.shape = love.physics.newRectangleShape(650, 1000)
-    -- -- attach shape to body
-    -- wall1.fixture = love.physics.newFixture(wall1.body, wall1.shape)
-    -- wall1.fixture:setUserData(wall1)
-
-    -- table.insert(mapObjs, wall1)
-
-    -- wall2 = {}
-    -- wall2.tag = "Wall"
-    -- wall2.color = {9/255, 84/255, 9/255}
-    -- wall2.body = love.physics.newBody(world, 1200, 225)
-    -- wall2.shape = love.physics.newRectangleShape(650, 1000)
-    -- -- attach shape to body
-    -- wall2.fixture = love.physics.newFixture(wall2.body, wall2.shape)
-    -- wall2.fixture:setUserData(wall2)
-
-    -- table.insert(mapObjs, wall2)
 
     -- platforms = {{50, 400}, {150, 450}, {500, 450}, {600, 400}}
     
@@ -113,82 +71,7 @@ love.load:subscribe(function (arg)
 
     -- --hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero--
 
-	-- Create new dynamic data layer called "Sprites" as the 8th layer
-	local playerLayer = map:addCustomLayer("Player", 3)
-
-	-- Get player spawn object
-	local spawn
-	for k, object in pairs(map.objects) do
-		if object.name == "spawn" then
-			spawn = object
-			break
-		end
-	end
-	
-	hero = {}
-	playerLayer.hero = hero
-
-    hero.tag = "Hero"
-    hero.health = rx.BehaviorSubject.create(100)
-    hero.health:debounce(1, scheduler)
-               :subscribe(function (val)
-                    hero.backHealth = val
-                end)
-    hero.backHealth = 100
-    hero.dir = {1,0}
-    hero.initX = spawn.x
-    hero.initY = spawn.y
-    hero.width = 20
-    hero.height = 30
-    hero.speed = 150
-    hero.shots = {} -- holds our shots
-    hero.body = love.physics.newBody(world, hero.initX, hero.initY, "dynamic")
-    hero.body:setFixedRotation(true)
-    hero.shape = love.physics.newRectangleShape(hero.width, hero.height)
-    hero.fixture = love.physics.newFixture(hero.body, hero.shape, 2)
-    hero.fixture:setUserData(hero)
-    hero.fixture:setCategory(2)
-	hero.grounded = true
-
-	-- Draw player
-    playerLayer.draw = function(self)
-        
-        love.graphics.setColor(117/255, 186/255, 60/255)
-        love.graphics.polygon("fill", hero.body:getWorldPoints(hero.shape:getPoints()))
-
-		-- Temporarily draw a point at our location so we know
-		-- that our sprite is offset properly
-		love.graphics.setPointSize(5)
-		love.graphics.points(math.floor(self.hero.body:getX()), math.floor(self.hero.body:getY()))
-	end
-	
-	-- Remove unneeded object layer
-	map:removeLayer("spawn")
-    
-    -- table.insert(objects, hero)
-
-    -- -- shots
-    -- rx.Observable.fromRange(1, 5)
-    --     :subscribe(function ()
-    --         local shot = {}
-    --         shot.tag = "Shot"
-    --         shot.width = 3
-    --         shot.height = 3
-    --         shot.fired = false
-    --         shot.speed = 180--math.random(10,80)
-    --         shot.body = love.physics.newBody(world, 0, 0, "dynamic")
-    --         shot.body:setFixedRotation(true)
-    --         shot.body:setLinearVelocity(0, 0)
-    --         shot.body:setGravityScale(0)
-    --         shot.body:setBullet(true)
-    --         shot.shape = love.physics.newRectangleShape(0, 0, shot.width, shot.height)
-    --         shot.fixture = love.physics.newFixture(shot.body, shot.shape, 2)
-    --         shot.fixture:setUserData(shot)
-    --         shot.fixture:setCategory(2)
-    --         shot.fixture:setMask(2)
-    --         shot.fixture:setSensor(true)
-    --         table.insert(hero.shots, shot)
-    --     end)
+    hero = Player.Init(map, "Player", 3, scheduler)
 
     -- --hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero--
 
