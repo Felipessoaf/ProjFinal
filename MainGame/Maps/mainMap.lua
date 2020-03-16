@@ -39,36 +39,42 @@ return {
         {
           id = 54,
           properties = {
+            ["Ground"] = true,
             ["collidable"] = true
           }
         },
         {
           id = 55,
           properties = {
+            ["Ground"] = true,
             ["collidable"] = true
           }
         },
         {
           id = 56,
           properties = {
+            ["Ground"] = true,
             ["collidable"] = true
           }
         },
         {
           id = 57,
           properties = {
+            ["Ground"] = true,
             ["collidable"] = true
           }
         },
         {
           id = 58,
           properties = {
+            ["Ground"] = true,
             ["collidable"] = true
           }
         },
         {
           id = 59,
           properties = {
+            ["Ground"] = true,
             ["collidable"] = true
           }
         },
@@ -183,36 +189,42 @@ return {
         {
           id = 182,
           properties = {
+            ["Ground"] = true,
             ["collidable"] = true
           }
         },
         {
           id = 183,
           properties = {
+            ["Ground"] = true,
             ["collidable"] = true
           }
         },
         {
           id = 184,
           properties = {
+            ["Ground"] = true,
             ["collidable"] = true
           }
         },
         {
           id = 185,
           properties = {
+            ["Ground"] = true,
             ["collidable"] = true
           }
         },
         {
           id = 186,
           properties = {
+            ["Ground"] = true,
             ["collidable"] = true
           }
         },
         {
           id = 187,
           properties = {
+            ["Ground"] = true,
             ["collidable"] = true
           }
         },

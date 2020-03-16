@@ -7,31 +7,37 @@
   <image source="generic_platformer_tiles.png" width="1024" height="768"/>
   <tile id="54">
    <properties>
+    <property name="Ground" type="bool" value="true"/>
     <property name="collidable" type="bool" value="true"/>
    </properties>
   </tile>
   <tile id="55">
    <properties>
+    <property name="Ground" type="bool" value="true"/>
     <property name="collidable" type="bool" value="true"/>
    </properties>
   </tile>
   <tile id="56">
    <properties>
+    <property name="Ground" type="bool" value="true"/>
     <property name="collidable" type="bool" value="true"/>
    </properties>
   </tile>
   <tile id="57">
    <properties>
+    <property name="Ground" type="bool" value="true"/>
     <property name="collidable" type="bool" value="true"/>
    </properties>
   </tile>
   <tile id="58">
    <properties>
+    <property name="Ground" type="bool" value="true"/>
     <property name="collidable" type="bool" value="true"/>
    </properties>
   </tile>
   <tile id="59">
    <properties>
+    <property name="Ground" type="bool" value="true"/>
     <property name="collidable" type="bool" value="true"/>
    </properties>
   </tile>
@@ -127,31 +133,37 @@
   </tile>
   <tile id="182">
    <properties>
+    <property name="Ground" type="bool" value="true"/>
     <property name="collidable" type="bool" value="true"/>
    </properties>
   </tile>
   <tile id="183">
    <properties>
+    <property name="Ground" type="bool" value="true"/>
     <property name="collidable" type="bool" value="true"/>
    </properties>
   </tile>
   <tile id="184">
    <properties>
+    <property name="Ground" type="bool" value="true"/>
     <property name="collidable" type="bool" value="true"/>
    </properties>
   </tile>
   <tile id="185">
    <properties>
+    <property name="Ground" type="bool" value="true"/>
     <property name="collidable" type="bool" value="true"/>
    </properties>
   </tile>
   <tile id="186">
    <properties>
+    <property name="Ground" type="bool" value="true"/>
     <property name="collidable" type="bool" value="true"/>
    </properties>
   </tile>
   <tile id="187">
    <properties>
+    <property name="Ground" type="bool" value="true"/>
     <property name="collidable" type="bool" value="true"/>
    </properties>
   </tile>

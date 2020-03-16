@@ -32,7 +32,7 @@ love.load:subscribe(function (arg)
 	map:box2d_init(world)
 
     -- --Collision callbacks:
-    -- world:setCallbacks(bC, eC, preS, postS)
+    world:setCallbacks(bC, eC, preS, postS)
 
     -- objects = {} -- table to hold all our physical objects
     -- mapObjs = {} -- table to hold all our map objects
@@ -146,7 +146,10 @@ love.load:subscribe(function (arg)
 	hero.grounded = true
 
 	-- Draw player
-	playerLayer.draw = function(self)
+    playerLayer.draw = function(self)
+        
+        love.graphics.setColor(117/255, 186/255, 60/255)
+        love.graphics.polygon("fill", hero.body:getWorldPoints(hero.shape:getPoints()))
 
 		-- Temporarily draw a point at our location so we know
 		-- that our sprite is offset properly
@@ -300,7 +303,7 @@ love.load:subscribe(function (arg)
     postSolve = rx.Subject.create()
 
     -- Trata reset do grounded para pulo
-    beginContact:filter(function(a, b, coll) return (a:getUserData().tag == "Ground" or a:getUserData().tag == "Platform") and b:getUserData().tag == "Hero" end)
+    beginContact:filter(function(a, b, coll) return (a:getUserData().properties.Ground == true or a:getUserData().tag == "Platform") and b:getUserData().tag == "Hero" end)
                 :subscribe(function() hero.grounded = true end)
 
     -- Trata colisao player com enemyRange
@@ -432,7 +435,7 @@ love.load:subscribe(function (arg)
 end)
 
 --Collision callbacks 
-function bC(a, b, coll)   
+function bC(a, b, coll)  
     beginContact:onNext(a, b, coll)
 end
 function eC(a, b, coll)
