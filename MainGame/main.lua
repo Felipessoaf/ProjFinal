@@ -1,7 +1,12 @@
+-- Rx libs
 local rx = require 'rx'
 require 'rx-love'
 
-local sti = require "sti"
+-- Enemies module
+local Enemies = require 'Enemies'
+
+-- MapManager module
+local MapManager = require 'MapManager'
 
 -- Maps keys to players and directions
 local keyMap = {
@@ -19,7 +24,7 @@ love.load:subscribe(function (arg)
 	local ENEMY_SHOT_CATEGORY = 6
 	
 	-- load map
-	map = sti("Maps/mainMap.lua", { "box2d" })
+	map = MapManager.InitMap()
 
     -- the height of a meter our worlds will be 64px
     love.physics.setMeter(64)
