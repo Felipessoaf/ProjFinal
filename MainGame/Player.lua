@@ -45,8 +45,8 @@ function Player.Init(map, layerName, layerNumber, scheduler)
 	-- Draw player
     playerLayer.draw = function(self)
         
-        love.graphics.setColor(117/255, 186/255, 60/255)
-        love.graphics.polygon("fill", hero.body:getWorldPoints(hero.shape:getPoints()))
+        -- love.graphics.setColor(117/255, 186/255, 60/255)
+        -- love.graphics.polygon("fill", hero.body:getWorldPoints(hero.shape:getPoints()))
 
 		-- Temporarily draw a point at our location so we know
 		-- that our sprite is offset properly
@@ -84,5 +84,9 @@ function Player.Init(map, layerName, layerNumber, scheduler)
 
     return hero
 end
+
+love.update:subscribe(function (dt)
+    
+end)
 
 return Player

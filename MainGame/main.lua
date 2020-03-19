@@ -440,7 +440,6 @@ love.draw:subscribe(function ()
 
     heroPosX, heroPosY = hero.body:getPosition();
     local tx,ty = -heroPosX + love.graphics.getWidth()/2, -heroPosY + love.graphics.getHeight() * 3/4;
-    -- love.graphics.translate(tx,ty)
 	
     -- Draw world
 	love.graphics.setColor(1, 1, 1)
@@ -467,10 +466,6 @@ love.draw:subscribe(function ()
     --     :subscribe(function(shot)
     --         love.graphics.polygon("fill", shot.body:getWorldPoints(shot.shape:getPoints()))
     --     end)
-
-    -- -- let's draw our hero
-    -- love.graphics.setColor(117/255, 186/255, 60/255)
-    -- love.graphics.polygon("fill", hero.body:getWorldPoints(hero.shape:getPoints()))
 
     -- -- let's draw our enemies
     -- love.graphics.setColor(135/255, 0, 168/255)
