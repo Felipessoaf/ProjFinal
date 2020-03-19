@@ -1,0 +1,4 @@
+criar um observavel a partir de corotina
+
+comparar o q da pra fazer em vez de usar rx usar diretamente corotina, pra comparar com o que o "normal" tem de fato pra oferecer.
+no normal quem faz o "resume" é o prog, no rx é o scheduler
