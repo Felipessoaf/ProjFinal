@@ -66,57 +66,7 @@ love.load:subscribe(function (arg)
 
     -- --enemies----enemies----enemies----enemies----enemies----enemies----enemies----enemies----enemies----enemies----enemies----enemies----enemies----enemies----enemies--
 
-    -- enemies = {}
-    
-    -- local enemy = {}
-    -- enemy.tag = "Enemy"
-    -- enemy.initX = 700
-    -- enemy.initY = 480
-    -- enemy.width = 40
-    -- enemy.height = 20
-    -- enemy.alive = true
-    -- enemy.shots = {}
-    -- enemy.body = love.physics.newBody(world, enemy.initX, enemy.initY, "dynamic")
-    -- enemy.body:setFixedRotation(true)
-    -- enemy.shape = love.physics.newRectangleShape(enemy.width, enemy.height)
-    -- enemy.fixture = love.physics.newFixture(enemy.body, enemy.shape, 2)
-    -- enemy.fixture:setUserData(enemy)
-    -- enemy.fixture:setCategory(3)
-    -- table.insert(enemies, enemy)  
-        
-    -- table.insert(objects, enemies)
-
-    -- rx.Observable.fromRange(1, 10)
-    --     :subscribe(function ()
-    --         local shot = {}
-    --         shot.tag = "EnemyShot"
-    --         shot.width = 3
-    --         shot.height = 3
-    --         shot.fired = false
-    --         shot.speed = 100
-    --         shot.body = love.physics.newBody(world, -8000, -8000, "dynamic")
-    --         shot.body:setActive(false)
-    --         shot.body:setFixedRotation(true)
-    --         shot.body:setGravityScale(0)
-    --         shot.body:setSleepingAllowed(true)
-    --         shot.body:setBullet(true)
-    --         shot.shape = love.physics.newRectangleShape(shot.width, shot.height)
-    --         shot.fixture = love.physics.newFixture(shot.body, shot.shape, 2)
-    --         shot.fixture:setUserData(shot)
-    --         shot.fixture:setCategory(3)
-    --         shot.fixture:setMask(3)
-    --         shot.fixture:setSensor(true)
-    --         table.insert(enemy.shots, shot)
-    --     end)
-
-    -- -- Atira
-    -- scheduler:schedule(function()
-    --         coroutine.yield(1)
-    --         while true and enemy.alive do
-    --             enemyShoot(enemy.shots, {enemy.body:getX(), enemy.body:getY()})
-    --             coroutine.yield(math.random(.5,2))
-    --         end
-    --     end)
+    enemies = Enemies.Init(scheduler)
 
     -- -- Checa alerta perigo
     -- alertaPerigo = {}
@@ -373,57 +323,18 @@ love.draw:subscribe(function ()
 	love.graphics.setColor(1, 0, 0)
 	map:box2d_draw(tx,ty)
 
-
-    -- -- draw a "filled in" polygon using the mapObjs coordinates
-    -- rx.Observable.fromTable(mapObjs, pairs, false)
-    --     :subscribe(function(obj)
-    --         love.graphics.setColor(unpack(obj.color))
-    --         love.graphics.polygon("fill", obj.body:getWorldPoints(obj.shape:getPoints()))
-    --     end)
-
-    -- -- let's draw our heros shots
-    -- love.graphics.setColor(255,255,255,255)
-    -- rx.Observable.fromTable(hero.shots, pairs, false)
-    --     :filter(function(shot)
-    --         return shot.fired
-    --     end)
-    --     :subscribe(function(shot)
-    --         love.graphics.polygon("fill", shot.body:getWorldPoints(shot.shape:getPoints()))
-    --     end)
-
-    -- -- let's draw our enemies
-    -- love.graphics.setColor(135/255, 0, 168/255)
-    -- local enemiesAlive = rx.Observable.fromTable(enemies, pairs, false)
-    --                         :filter(function(enemy)
-    --                             return enemy.alive
-    --                         end)
-    
-    -- enemiesAlive:subscribe(function(enemy)
-    --         love.graphics.polygon("fill", enemy.body:getWorldPoints(enemy.shape:getPoints()))
-
-    --         -- let's draw our enemy shots
-    --         love.graphics.setColor(0, 0, 0)
-    --         rx.Observable.fromTable(enemy.shots, pairs, false)
-    --             :filter(function(shot)
-    --                 return shot.fired
-    --             end)
-    --             :subscribe(function(shot)
-    --                 love.graphics.polygon("fill", shot.body:getWorldPoints(shot.shape:getPoints()))
-    --             end)
-    --     end)
-
     -- love.graphics.setColor(unpack(enemyRange.color))
     -- love.graphics.polygon("fill", enemyRange.body:getWorldPoints(enemyRange.shape:getPoints()))
 
-    -- -- Move camera back to original pos
-    -- love.graphics.translate(-(-heroPosX + love.graphics.getWidth()/2), -(-heroPosY + love.graphics.getHeight() * 3/4))
-    -- -- Health bar
-    -- love.graphics.setColor(242/255, 178/255, 0)
-    -- love.graphics.rectangle("fill", 20, 20, hero.backHealth, 20)
-    -- love.graphics.setColor(255,0,0,255)
-    -- love.graphics.rectangle("fill", 20, 20, hero.health:getValue(), 20)
-    -- love.graphics.setColor(0,0,0,255)
-    -- love.graphics.rectangle("line", 20, 20, 100, 20)
+    -- Move camera back to original pos
+    love.graphics.translate(-(-heroPosX + love.graphics.getWidth()/2), -(-heroPosY + love.graphics.getHeight() * 3/4))
+    -- Health bar
+    love.graphics.setColor(242/255, 178/255, 0)
+    love.graphics.rectangle("fill", 20, 20, hero.backHealth, 20)
+    love.graphics.setColor(255,0,0,255)
+    love.graphics.rectangle("fill", 20, 20, hero.health:getValue(), 20)
+    love.graphics.setColor(0,0,0,255)
+    love.graphics.rectangle("line", 20, 20, 100, 20)
 
     -- -- Alerta perigo
     -- love.graphics.setColor(unpack(alertaPerigo.cor))

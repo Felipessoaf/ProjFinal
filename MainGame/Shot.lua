@@ -13,9 +13,8 @@ function Shot.Init()
 
     Shot.shots = {}
     
-	-- Draw player
+	-- Draw shots
     shotLayer.draw = function(self)
-        -- let's draw our heros shots
         love.graphics.setColor(255,255,255,255)
         rx.Observable.fromTable(Shot.shots, pairs, false)
             :filter(function(shot)
@@ -31,11 +30,14 @@ end
 
 function Shot.Create()
     local shot = {}
+    -- Properties
     shot.tag = "Shot"
     shot.width = 3
     shot.height = 3
     shot.fired = false
     shot.speed = 180--math.random(10,80)
+    
+   -- Physics
     shot.body = love.physics.newBody(world, 0, 0, "dynamic")
     shot.body:setFixedRotation(true)
     shot.body:setLinearVelocity(0, 0)
@@ -47,6 +49,7 @@ function Shot.Create()
     shot.fixture:setCategory(2)
     shot.fixture:setMask(2)
     shot.fixture:setSensor(true)
+    
     table.insert(Shot.shots, shot)
 end
 
