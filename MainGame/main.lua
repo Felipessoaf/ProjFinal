@@ -11,26 +11,17 @@ local MapManager = require 'MapManager'
 -- Player module
 local Player = require 'Player'
 
--- Maps keys to players and directions
-local keyMap = {
-  a = -1,
-  d = 1
-}
-
 local scheduler = rx.CooperativeScheduler.create()
 
 -- Declare initial state of game
 love.load:subscribe(function (arg)
-    local HERO_CATEGORY = 3
-    local HERO_SHOT_CATEGORY = 4
-    local ENEMY_CATEGORY = 5
-	local ENEMY_SHOT_CATEGORY = 6
+    -- local HERO_CATEGORY = 3
+    -- local HERO_SHOT_CATEGORY = 4
+    -- local ENEMY_CATEGORY = 5
+	-- local ENEMY_SHOT_CATEGORY = 6
 	
 	-- load map
 	map = MapManager.InitMap()
-
-    -- the height of a meter our worlds will be 64px
-    love.physics.setMeter(64)
 
     -- create a world for the bodies to exist in with horizontal gravity
     -- of 0 and vertical gravity of 9.81
@@ -41,8 +32,6 @@ love.load:subscribe(function (arg)
 
     -- --Collision callbacks:
     world:setCallbacks(bC, eC, preS, postS)
-
-    -- objects = {} -- table to hold all our physical objects
     
     -- --map----map----map----map----map----map----map----map----map----map----map----map----map----map----map----map----map----map----map----map----map----map----map----map--
 
@@ -71,7 +60,7 @@ love.load:subscribe(function (arg)
 
     -- --hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero--
 
-    hero = Player.Init(map, "Player", 3, scheduler)
+    hero = Player.Init(scheduler)
 
     -- --hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero--
 
@@ -336,39 +325,6 @@ function postS(a, b, coll, normalimpulse, tangentimpulse)
     postSolve:onNext(a, b, coll, normalimpulse, tangentimpulse)
 end
 
--- Helper functions
-local function move(direction)
-    currentVelX, currentVelY = hero.body:getLinearVelocity()
-    hero.body:setLinearVelocity(hero.speed*direction, currentVelY)
-    hero.dir = {direction, 0}
-end
-
-local function stopHorMove()
-    currentVelX, currentVelY = hero.body:getLinearVelocity()
-    hero.body:setLinearVelocity(0, currentVelY)
-end
-
-local function jump()
-    hero.body:applyLinearImpulse(0, -100)
-    hero.grounded = false
-end
-
-function shoot()
-    rx.Observable.fromTable(hero.shots, pairs, false)
-        :filter(function(shot)
-            return not shot.fired
-        end)
-        :first()
-        :subscribe(function(shot)
-            dirX, dirY = unpack(hero.dir)
-            shot.body:setLinearVelocity(dirX * shot.speed, dirY * shot.speed)
-            shot.body:setPosition(hero.body:getX(), hero.body:getY())
-            shot.fired = true
-            shot.fixture:setMask(2)
-            shot.body:setActive(true)
-        end)
-end
-
 function enemyShoot(shotsTable, pos)
     rx.Observable.fromTable(shotsTable, pairs, false)
         :filter(function(shot)
@@ -395,38 +351,6 @@ function killEnemy(enemy)
     enemy.shots = {}
     enemy.body:setActive(false)
 end
-
--- keyboard actions for our hero
-for _, key in pairs({'a', 'd'}) do
-    love.update
-        :filter(function()
-            return love.keyboard.isDown(key)
-        end)
-        :map(function(dt)
-            return keyMap[key]
-        end)
-        :subscribe(move)
-end
-
-love.keyreleased
-    :filter(function(key) return key == 'a' or  key == 'd' end)
-    :subscribe(function()
-        stopHorMove()
-    end)
-
-love.keypressed
-    :filter(function(key) return key == 'space' end)
-    :subscribe(function()
-        shoot()
-        currentVelX, currentVelY = hero.body:getLinearVelocity()
-        hero.body:setLinearVelocity(0, currentVelY)
-    end)
-
-love.keypressed
-    :filter(function(key) return key == 'w' and hero.grounded end)
-    :subscribe(function()
-        jump()
-    end)
 
 love.update:subscribe(function (dt)
     world:update(dt) -- this puts the world into motion

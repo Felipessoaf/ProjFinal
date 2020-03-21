@@ -2,11 +2,23 @@
 local rx = require 'rx'
 require 'rx-love'
 
+-- Layers module
+local Layers = require 'Layers'
+
+-- Shot module
+local Shot = require 'Shot'
+
 local Player = {}
 
-function Player.Init(map, layerName, layerNumber, scheduler)
-   -- Create new dynamic data layer called "Sprites" as the 8th layer
-	local playerLayer = map:addCustomLayer(layerName, layerNumber)
+-- Maps keys to players and directions
+local keyMap = {
+  a = -1,
+  d = 1
+}
+
+function Player.Init(scheduler)
+   -- Create new dynamic data layer
+    local playerLayer = map:addCustomLayer(Layers.player.name, Layers.player.number)
 
 	-- Get player spawn object
 	local spawn
@@ -16,9 +28,9 @@ function Player.Init(map, layerName, layerNumber, scheduler)
 			break
 		end
 	end
-	
+    
+    -- Create hero table
 	local hero = {}
-	playerLayer.hero = hero
 
     hero.tag = "Hero"
     hero.health = rx.BehaviorSubject.create(100)
@@ -40,53 +52,98 @@ function Player.Init(map, layerName, layerNumber, scheduler)
     hero.fixture = love.physics.newFixture(hero.body, hero.shape, 2)
     hero.fixture:setUserData(hero)
     hero.fixture:setCategory(2)
-	hero.grounded = true
+    hero.grounded = true
+    
+    -- Functions
+    hero.move = function (direction)
+        local currentVelX, currentVelY = hero.body:getLinearVelocity()
+        hero.body:setLinearVelocity(hero.speed*direction, currentVelY)
+        hero.dir = {direction, 0}
+    end
+
+    hero.stopHorMove = function ()
+        currentVelX, currentVelY = hero.body:getLinearVelocity()
+        hero.body:setLinearVelocity(0, currentVelY)
+    end
+    
+    hero.jump = function ()
+        hero.body:applyLinearImpulse(0, -100)
+        hero.grounded = false
+    end
+    
+    hero.shoot = function ()
+        rx.Observable.fromTable(hero.shots, pairs, false)
+            :filter(function(shot)
+                return not shot.fired
+            end)
+            :first()
+            :subscribe(function(shot)
+                dirX, dirY = unpack(hero.dir)
+                shot.body:setLinearVelocity(dirX * shot.speed, dirY * shot.speed)
+                shot.body:setPosition(hero.body:getX(), hero.body:getY())
+                shot.fired = true
+                shot.fixture:setMask(2)
+                shot.body:setActive(true)
+            end)
+    end
 
 	-- Draw player
     playerLayer.draw = function(self)
         
-        -- love.graphics.setColor(117/255, 186/255, 60/255)
-        -- love.graphics.polygon("fill", hero.body:getWorldPoints(hero.shape:getPoints()))
+        love.graphics.setColor(117/255, 186/255, 60/255)
+        love.graphics.polygon("fill", hero.body:getWorldPoints(hero.shape:getPoints()))
 
 		-- Temporarily draw a point at our location so we know
 		-- that our sprite is offset properly
-		love.graphics.setPointSize(5)
-		love.graphics.points(math.floor(self.hero.body:getX()), math.floor(self.hero.body:getY()))
+		-- love.graphics.setPointSize(5)
+		-- love.graphics.points(math.floor(self.hero.body:getX()), math.floor(self.hero.body:getY()))
 	end
+
+    -- keyboard actions for our hero
+    for _, key in pairs({'a', 'd'}) do
+        love.update
+            :filter(function()
+                return love.keyboard.isDown(key)
+            end)
+            :map(function(dt)
+                return keyMap[key]
+            end)
+            :subscribe(function(dir)
+                hero.move(dir)
+            end)
+    end
+
+    love.keyreleased
+        :filter(function(key) return key == 'a' or  key == 'd' end)
+        :subscribe(function()
+            hero.stopHorMove()
+        end)
+
+    love.keypressed
+        :filter(function(key) return key == 'space' end)
+        :subscribe(function()
+            hero.shoot()
+            currentVelX, currentVelY = hero.body:getLinearVelocity()
+            hero.body:setLinearVelocity(0, currentVelY)
+        end)
+
+    love.keypressed
+        :filter(function(key) return key == 'w' and hero.grounded end)
+        :subscribe(function()
+            hero.jump()
+        end)
 	
 	-- Remove unneeded object layer
 	map:removeLayer("spawn")
-    
-    -- table.insert(objects, hero)
 
-    -- -- shots
-    -- rx.Observable.fromRange(1, 5)
-    --     :subscribe(function ()
-    --         local shot = {}
-    --         shot.tag = "Shot"
-    --         shot.width = 3
-    --         shot.height = 3
-    --         shot.fired = false
-    --         shot.speed = 180--math.random(10,80)
-    --         shot.body = love.physics.newBody(world, 0, 0, "dynamic")
-    --         shot.body:setFixedRotation(true)
-    --         shot.body:setLinearVelocity(0, 0)
-    --         shot.body:setGravityScale(0)
-    --         shot.body:setBullet(true)
-    --         shot.shape = love.physics.newRectangleShape(0, 0, shot.width, shot.height)
-    --         shot.fixture = love.physics.newFixture(shot.body, shot.shape, 2)
-    --         shot.fixture:setUserData(shot)
-    --         shot.fixture:setCategory(2)
-    --         shot.fixture:setMask(2)
-    --         shot.fixture:setSensor(true)
-    --         table.insert(hero.shots, shot)
-    --     end)
+    -- shots
+    hero.shots = Shot.Init()
+    rx.Observable.fromRange(1, 5)
+        :subscribe(function ()
+            Shot.Create()
+        end)
 
     return hero
 end
-
-love.update:subscribe(function (dt)
-    
-end)
 
 return Player
