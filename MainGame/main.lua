@@ -327,7 +327,7 @@ love.draw:subscribe(function ()
     -- love.graphics.polygon("fill", enemyRange.body:getWorldPoints(enemyRange.shape:getPoints()))
 
     -- Move camera back to original pos
-    love.graphics.translate(-(-heroPosX + love.graphics.getWidth()/2), -(-heroPosY + love.graphics.getHeight() * 3/4))
+    -- love.graphics.translate(-(-heroPosX + love.graphics.getWidth()/2), -(-heroPosY + love.graphics.getHeight() * 3/4))
     -- Health bar
     love.graphics.setColor(242/255, 178/255, 0)
     love.graphics.rectangle("fill", 20, 20, hero.backHealth, 20)

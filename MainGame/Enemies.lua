@@ -15,9 +15,8 @@ function Enemies.Init(scheduler)
 
 	-- Get enemies spawn objects
 	for k, object in pairs(map.objects) do
-		if object.name == "shooterSpawn" then
+      if object.name == "shooterSpawn" then
 			Enemies.CreateShooter(object.x, object.y, scheduler)
-			break
 		end
 	end
     
@@ -75,8 +74,8 @@ function Enemies.CreateShooter(posX, posY, scheduler)
 
 		-- Temporarily draw a point at our location so we know
 		-- that our sprite is offset properly
-		love.graphics.setPointSize(5)
-		love.graphics.points(math.floor(enemy.body:getX()), math.floor(enemy.body:getY()))
+		-- love.graphics.setPointSize(5)
+		-- love.graphics.points(math.floor(enemy.body:getX()), math.floor(enemy.body:getY()))
    end
 
    -- rx.Observable.fromRange(1, 10)
