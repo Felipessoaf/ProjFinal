@@ -21,51 +21,13 @@ love.load:subscribe(function (arg)
 	-- local ENEMY_SHOT_CATEGORY = 6
 	
 	-- load map
-	map = MapManager.InitMap()
-
-    -- create a world for the bodies to exist in with horizontal gravity
-    -- of 0 and vertical gravity of 9.81
-    world = love.physics.newWorld(0, 9.81*64, true)
-    
-	-- Prepare collision objects
-	map:box2d_init(world)
+	map, world = MapManager.InitMap()
 
     -- --Collision callbacks:
     world:setCallbacks(bC, eC, preS, postS)
-    
-    -- --map----map----map----map----map----map----map----map----map----map----map----map----map----map----map----map----map----map----map----map----map----map----map----map--
-
-    -- platforms = {{50, 400}, {150, 450}, {500, 450}, {600, 400}}
-    
-    -- rx.Observable.fromTable(platforms, pairs, false)
-    --     :subscribe(function(platPos)
-    --         plat = {}
-    --         plat.tag = "Platform"
-    --         plat.color = {0.20, 0.20, 0.20}
-    --         x,y = unpack(platPos)
-    --         plat.body = love.physics.newBody(world, x, y, "kinematic")
-    --         plat.shape = love.physics.newRectangleShape(100, 25)
-    --         -- A higher density gives it more mass.
-    --         plat.fixture = love.physics.newFixture(plat.body, plat.shape, 5)
-    --         plat.fixture:setUserData(plat)
-
-    --         table.insert(mapObjs, plat)
-    --     end)
-
-    -- table.insert(objects, mapObjs)
-
-    -- love.graphics.setBackgroundColor(0.41, 0.53, 0.97)
-
-    -- --map----map----map----map----map----map----map----map----map----map----map----map----map----map----map----map----map----map----map----map----map----map----map----map--
-
-    -- --hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero--
 
     hero = Player.Init(scheduler)
-
-    -- --hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero----hero--
-
-    -- --enemies----enemies----enemies----enemies----enemies----enemies----enemies----enemies----enemies----enemies----enemies----enemies----enemies----enemies----enemies--
-
+    
     enemies = Enemies.Init(scheduler)
 
     -- -- Checa alerta perigo
