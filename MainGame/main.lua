@@ -130,13 +130,13 @@ love.load:subscribe(function (arg)
     postSolve = rx.Subject.create()
 
     -- Trata reset do grounded para pulo
-    beginContact:filter(function(a, b, coll) return (a:getUserData().properties.Ground == true or a:getUserData().tag == "Platform") and b:getUserData().tag == "Hero" end)
+    beginContact:filter(function(a, b, coll) return (a:getUserData().properties.Ground == true or a:getUserData().properties.tag == "Platform") and b:getUserData().properties.tag == "Hero" end)
                 :subscribe(function() hero.grounded = true end)
 
     -- Trata colisao player com enemyRange
     enterRange = beginContact
         :filter(function(a, b, coll) 
-            return a:getUserData().tag == "Hero" and b:getUserData().tag == "EnemyRange" 
+            return a:getUserData().properties.tag == "Hero" and b:getUserData().properties.tag == "EnemyRange" 
         end)
         :map(function ()
             return "enter"
@@ -144,7 +144,7 @@ love.load:subscribe(function (arg)
 
     exitRange = endContact
         :filter(function(a, b, coll) 
-            return a:getUserData().tag == "Hero" and b:getUserData().tag == "EnemyRange" 
+            return a:getUserData().properties.tag == "Hero" and b:getUserData().properties.tag == "EnemyRange" 
         end)
         :map(function ()
             return "exit"
@@ -211,14 +211,14 @@ love.load:subscribe(function (arg)
     --     end)
 
     -- Trata colisao de tiro do player
-    shotHit = beginContact:filter(function(a, b, coll) return a:getUserData().tag == "Shot" or b:getUserData().tag == "Shot" end)
-    shotHitEnemy, shotHitOther = shotHit:partition(function(a, b, coll) return a:getUserData().tag == "Shot" and b:getUserData().tag == "Enemy" end)
+    shotHit = beginContact:filter(function(a, b, coll) return a:getUserData().properties.tag == "Shot" or b:getUserData().properties.tag == "Shot" end)
+    shotHitEnemy, shotHitOther = shotHit:partition(function(a, b, coll) return a:getUserData().properties.tag == "Shot" and b:getUserData().properties.tag == "Enemy" end)
     shotHit:subscribe(function(a, b, coll) 
         local shot = {}
-        if a:getUserData().tag == "Shot" then
-            shot = a:getUserData()
+        if a:getUserData().properties.tag == "Shot" then
+            shot = a:getUserData().properties
         else
-            shot = b:getUserData()
+            shot = b:getUserData().properties
         end
 
         shot.fired = false 
@@ -229,33 +229,33 @@ love.load:subscribe(function (arg)
         end)
     end)
     shotHitEnemy:subscribe(function(a, b, coll)
-        a:getUserData().fired = false
+        a:getUserData().properties.fired = false
         scheduler:schedule(function()
             coroutine.yield(.01)
-            a:getUserData().body:setActive(false)
-            a:getUserData().body:setPosition(-8000,-8000)
+            a:getUserData().properties.body:setActive(false)
+            a:getUserData().properties.body:setPosition(-8000,-8000)
         end)
-        killEnemy(b:getUserData()) 
+        killEnemy(b:getUserData().properties) 
     end)
 
     -- Trata colisao de tiro do inimigo
-    enemyShotHit = beginContact:filter(function(a, b, coll) return a:getUserData().tag == "EnemyShot" or b:getUserData().tag == "EnemyShot" end)
-    enemyShotHitHero, enemyShotHitOther = enemyShotHit:partition(function(a, b, coll) return a:getUserData().tag == "Hero" end)
+    enemyShotHit = beginContact:filter(function(a, b, coll) return a:getUserData().properties.tag == "EnemyShot" or b:getUserData().properties.tag == "EnemyShot" end)
+    enemyShotHitHero, enemyShotHitOther = enemyShotHit:partition(function(a, b, coll) return a:getUserData().properties.tag == "Hero" end)
     enemyShotHitOther:subscribe(function(a, b, coll) 
-        b:getUserData().fired = false 
+        b:getUserData().properties.fired = false 
         scheduler:schedule(function()
             coroutine.yield(.01)
-            b:getUserData().body:setActive(false)
+            b:getUserData().properties.body:setActive(false)
         end)
     end)
     enemyShotHitHero:subscribe(function(a, b, coll)
-        b:getUserData().fired = false 
+        b:getUserData().properties.fired = false 
         scheduler:schedule(function()
             coroutine.yield(.01)
-            b:getUserData().body:setActive(false)
+            b:getUserData().properties.body:setActive(false)
         end)
             
-        a:getUserData().health:onNext(hero.health:getValue() - 10)
+        a:getUserData().properties.health:onNext(hero.health:getValue() - 10)
     end)
 
     --colisoes----colisoes----colisoes----colisoes----colisoes----colisoes----colisoes----colisoes----colisoes----colisoes----colisoes----colisoes----colisoes----colisoes--

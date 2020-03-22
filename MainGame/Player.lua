@@ -50,7 +50,7 @@ function Player.Init(scheduler)
     hero.body:setFixedRotation(true)
     hero.shape = love.physics.newRectangleShape(hero.width, hero.height)
     hero.fixture = love.physics.newFixture(hero.body, hero.shape, 2)
-    hero.fixture:setUserData(hero)
+    hero.fixture:setUserData({properties = hero})
     hero.fixture:setCategory(2)
     hero.grounded = true
     

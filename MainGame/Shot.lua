@@ -45,11 +45,11 @@ function Shot.Create()
     shot.body:setBullet(true)
     shot.shape = love.physics.newRectangleShape(0, 0, shot.width, shot.height)
     shot.fixture = love.physics.newFixture(shot.body, shot.shape, 2)
-    shot.fixture:setUserData(shot)
+    shot.fixture:setUserData({properties = shot})
     shot.fixture:setCategory(2)
     shot.fixture:setMask(2)
     shot.fixture:setSensor(true)
-    
+
     table.insert(Shot.shots, shot)
 end
 
