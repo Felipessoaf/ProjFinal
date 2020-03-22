@@ -30,41 +30,6 @@ love.load:subscribe(function (arg)
     
     enemies = Enemies.Init(scheduler)
 
-    -- -- Checa alerta perigo
-    -- alertaPerigo = {}
-    -- alertaPerigo.cor = {0,0,0,0}
-    -- alertaPerigo.y = 0
-    -- enemiesShotsPos = rx.Subject.create()
-    -- enemyShotsAlertRange = enemiesShotsPos:filter(function(pos)
-    --         local rightSide = hero.body:getX() + love.graphics.getWidth()/2
-    --         return pos[1] > rightSide and pos[1] < rightSide + 150
-    --     end)
-
-    -- enemyShotsAlertRange:subscribe(function (pos)
-    --     alertaPerigo.cor = {1,0,0,1}
-    --     alertaPerigo.y = pos[2]
-    -- end)
-
-    -- enemyShotsAlertRange:debounce(.2, scheduler)
-    --     :subscribe(function (pos)
-    --         alertaPerigo.cor = {0,0,0,0}
-    --     end)
-
-    -- -- Atualiza pos dos tiros
-    -- scheduler:schedule(function()
-    --         coroutine.yield(1)
-    --         while true and enemy.alive do
-    --             rx.Observable.fromTable(enemy.shots, pairs, false)
-    --                 :filter(function(shot)
-    --                     return shot.fired
-    --                 end)
-    --                 :subscribe(function(shot)
-    --                     enemiesShotsPos:onNext({shot.body:getPosition()})
-    --                 end)
-    --             coroutine.yield(.3)
-    --         end
-    --     end)
-
     -- -- Area alcance visao
     -- enemyRange = {}
     -- enemyRange.tag = "EnemyRange"
@@ -297,8 +262,4 @@ love.draw:subscribe(function ()
     love.graphics.rectangle("fill", 20, 20, hero.health:getValue(), 20)
     love.graphics.setColor(0,0,0,255)
     love.graphics.rectangle("line", 20, 20, 100, 20)
-
-    -- -- Alerta perigo
-    -- love.graphics.setColor(unpack(alertaPerigo.cor))
-    -- love.graphics.rectangle("line", love.graphics.getWidth()-20, alertaPerigo.y -heroPosY + love.graphics.getHeight() * 3/4, 20, 20)
 end)
