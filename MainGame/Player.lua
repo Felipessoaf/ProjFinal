@@ -140,6 +140,15 @@ function Player.Init(scheduler)
         :subscribe(function()
             love.load()
         end)
+
+    
+    love.update
+        :filter(function()
+            return hero.body:getY() > 1500
+        end)
+        :subscribe(function()
+            love.load()
+        end)
 	
 	-- Remove unneeded object layer
 	map:removeLayer("spawn")

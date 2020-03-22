@@ -145,8 +145,9 @@ function Enemies.CreateShooter(posX, posY, scheduler)
         -- love.graphics.points(math.floor(enemy.body:getX()), math.floor(enemy.body:getY()))
             
         -- Alerta perigo
+        local offsetX, offsetY = -(-heroPosX + love.graphics.getWidth()/2), -(-heroPosY + love.graphics.getHeight() * 3/4)
         love.graphics.setColor(unpack(alertaPerigo.cor))
-        love.graphics.rectangle("line", love.graphics.getWidth()-20, alertaPerigo.y -heroPosY + love.graphics.getHeight() * 3/4, 20, 20)
+        love.graphics.rectangle("line", love.graphics.getWidth()-20 + offsetX, alertaPerigo.y -heroPosY + love.graphics.getHeight() * 3/4 + offsetY, 20, 20)
 	end
 
    table.insert(Enemies.enemies, enemy)  
