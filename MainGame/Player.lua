@@ -134,6 +134,12 @@ function Player.Init(scheduler)
         :subscribe(function()
             hero.jump()
         end)
+
+    hero.health
+        :filter(function(val) return val <= 0 end)
+        :subscribe(function()
+            love.load()
+        end)
 	
 	-- Remove unneeded object layer
 	map:removeLayer("spawn")
