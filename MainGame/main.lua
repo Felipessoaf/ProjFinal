@@ -304,7 +304,7 @@ end
 
 love.update:subscribe(function (dt)
     world:update(dt) -- this puts the world into motion
-	-- scheduler:update(dt)
+	scheduler:update(dt)
 	
 	-- Update world map
 	map:update(dt)

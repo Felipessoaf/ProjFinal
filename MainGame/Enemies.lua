@@ -63,14 +63,14 @@ function Enemies.CreateShooter(posX, posY, scheduler)
       love.graphics.polygon("line", enemy.body:getWorldPoints(enemy.shape:getPoints()))
 
       -- let's draw our enemy shots
-      -- love.graphics.setColor(0, 0, 0)
-      -- rx.Observable.fromTable(enemy.shots, pairs, false)
-      --    :filter(function(shot)
-      --          return shot.fired
-      --    end)
-      --    :subscribe(function(shot)
-      --          love.graphics.polygon("fill", shot.body:getWorldPoints(shot.shape:getPoints()))
-      --    end)
+      love.graphics.setColor(0, 0, 0)
+      rx.Observable.fromTable(enemy.shots, pairs, false)
+         :filter(function(shot)
+               return shot.fired
+         end)
+         :subscribe(function(shot)
+               love.graphics.polygon("fill", shot.body:getWorldPoints(shot.shape:getPoints()))
+         end)
 
 		-- Temporarily draw a point at our location so we know
 		-- that our sprite is offset properly
@@ -78,37 +78,37 @@ function Enemies.CreateShooter(posX, posY, scheduler)
 		-- love.graphics.points(math.floor(enemy.body:getX()), math.floor(enemy.body:getY()))
    end
 
-   -- rx.Observable.fromRange(1, 10)
-   --     :subscribe(function ()
-   --         local shot = {}
-   --         shot.tag = "EnemyShot"
-   --         shot.width = 3
-   --         shot.height = 3
-   --         shot.fired = false
-   --         shot.speed = 100
-   --         shot.body = love.physics.newBody(world, -8000, -8000, "dynamic")
-   --         shot.body:setActive(false)
-   --         shot.body:setFixedRotation(true)
-   --         shot.body:setGravityScale(0)
-   --         shot.body:setSleepingAllowed(true)
-   --         shot.body:setBullet(true)
-   --         shot.shape = love.physics.newRectangleShape(shot.width, shot.height)
-   --         shot.fixture = love.physics.newFixture(shot.body, shot.shape, 2)
-   --         shot.fixture:setUserData(shot)
-   --         shot.fixture:setCategory(3)
-   --         shot.fixture:setMask(3)
-   --         shot.fixture:setSensor(true)
-   --         table.insert(enemy.shots, shot)
-   --     end)
+   rx.Observable.fromRange(1, 10)
+       :subscribe(function ()
+           local shot = {}
+           shot.tag = "EnemyShot"
+           shot.width = 3
+           shot.height = 3
+           shot.fired = false
+           shot.speed = 100
+           shot.body = love.physics.newBody(world, -8000, -8000, "dynamic")
+           shot.body:setActive(false)
+           shot.body:setFixedRotation(true)
+           shot.body:setGravityScale(0)
+           shot.body:setSleepingAllowed(true)
+           shot.body:setBullet(true)
+           shot.shape = love.physics.newRectangleShape(shot.width, shot.height)
+           shot.fixture = love.physics.newFixture(shot.body, shot.shape, 2)
+           shot.fixture:setUserData(shot)
+           shot.fixture:setCategory(3)
+           shot.fixture:setMask(3)
+           shot.fixture:setSensor(true)
+           table.insert(enemy.shots, shot)
+       end)
 
    -- Atira
-   -- scheduler:schedule(function()
-   --         coroutine.yield(1)
-   --         while true and enemy.alive do
-   --             enemyShoot(enemy.shots, {enemy.body:getX(), enemy.body:getY()})
-   --             coroutine.yield(math.random(.5,2))
-   --         end
-   --     end)
+   scheduler:schedule(function()
+           coroutine.yield(1)
+           while true and enemy.alive do
+               enemyShoot(enemy.shots, {enemy.body:getX(), enemy.body:getY()})
+               coroutine.yield(math.random(.5,2))
+           end
+       end)
 
    table.insert(Enemies.enemies, enemy)  
 end
