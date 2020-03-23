@@ -30,25 +30,6 @@ love.load:subscribe(function (arg)
     
     enemies = Enemies.Init(scheduler)
 
-    -- -- Area alcance visao
-    -- enemyRange = {}
-    -- enemyRange.tag = "EnemyRange"
-    -- enemyRange.color = {1, 132/255, 0, 0.5}
-    -- enemyRange.outRangeColor = {1, 132/255, 0, 0.5}
-    -- enemyRange.safeColor = {0, 1, 0, 0.5}
-    -- enemyRange.dangerColor = {1, 0, 0, 0.5}
-    -- enemyRange.body = love.physics.newBody(world, enemy.initX, enemy.initY)
-    -- enemyRange.shape = love.physics.newRectangleShape(300, 100)
-    -- -- attach shape to body
-    -- enemyRange.fixture = love.physics.newFixture(enemyRange.body, enemyRange.shape)
-    -- enemyRange.fixture:setUserData(enemyRange)
-    -- enemyRange.fixture:setSensor(true)
-
-    -- table.insert(objects, enemyRange)
-
-
-    --enemies----enemies----enemies----enemies----enemies----enemies----enemies----enemies----enemies----enemies----enemies----enemies----enemies----enemies----enemies--
-
     --colisoes----colisoes----colisoes----colisoes----colisoes----colisoes----colisoes----colisoes----colisoes----colisoes----colisoes----colisoes----colisoes----colisoes--
 
     beginContact = rx.Subject.create()
@@ -249,9 +230,6 @@ love.draw:subscribe(function ()
 	-- Draw Collision Map (useful for debugging)
 	love.graphics.setColor(1, 0, 0)
 	map:box2d_draw(tx,ty)
-
-    -- love.graphics.setColor(unpack(enemyRange.color))
-    -- love.graphics.polygon("fill", enemyRange.body:getWorldPoints(enemyRange.shape:getPoints()))
 
     -- Move camera back to original pos
     -- love.graphics.translate(-(-heroPosX + love.graphics.getWidth()/2), -(-heroPosY + love.graphics.getHeight() * 3/4))

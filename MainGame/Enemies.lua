@@ -15,9 +15,11 @@ function Enemies.Init(scheduler)
 
 	-- Get enemies spawn objects
 	for k, object in pairs(map.objects) do
-      if object.name == "shooterSpawn" then
+        if object.name == "shooterSpawn" then
 			Enemies.CreateShooter(object.x, object.y, scheduler)
-		end
+        elseif object.name == "patrolSpawn" then
+			Enemies.CreatePatrol(object.x, object.y)
+        end
 	end
     
 	-- Draw enemies
@@ -153,7 +155,7 @@ function Enemies.CreateShooter(posX, posY, scheduler)
    table.insert(Enemies.enemies, enemy)  
 end
 
-function Enemies.CreatePatrol(posX, posY, scheduler)
+function Enemies.CreatePatrol(posX, posY)
 	local enemy = {}
 	-- Properties
 	enemy.tag = "Enemy"
@@ -173,12 +175,29 @@ function Enemies.CreatePatrol(posX, posY, scheduler)
 	enemy.fixture:setUserData({properties = enemy})
 	enemy.fixture:setCategory(3)
 
+    -- -- Area alcance visao
+    local enemyRange = {}
+    enemyRange.tag = "EnemyRange"
+    enemyRange.color = {1, 132/255, 0, 0.5}
+    enemyRange.outRangeColor = {1, 132/255, 0, 0.5}
+    enemyRange.safeColor = {0, 1, 0, 0.5}
+    enemyRange.dangerColor = {1, 0, 0, 0.5}
+    enemyRange.body = love.physics.newBody(world, enemy.initX, enemy.initY)
+    enemyRange.shape = love.physics.newRectangleShape(300, 100)
+    -- attach shape to body
+    enemyRange.fixture = love.physics.newFixture(enemyRange.body, enemyRange.shape)
+    enemyRange.fixture:setUserData({properties = enemyRange})
+    enemyRange.fixture:setSensor(true)
+
 	-- Functions
 	enemy.draw = function()
 		love.graphics.setColor(247/255, 154/255, 22/255)
 		love.graphics.polygon("fill", enemy.body:getWorldPoints(enemy.shape:getPoints()))
 		love.graphics.setColor(0, 0, 0)
 		love.graphics.polygon("line", enemy.body:getWorldPoints(enemy.shape:getPoints()))
+
+        love.graphics.setColor(unpack(enemyRange.color))
+        love.graphics.polygon("fill", enemyRange.body:getWorldPoints(enemyRange.shape:getPoints()))
 	end
 
    table.insert(Enemies.enemies, enemy)  
