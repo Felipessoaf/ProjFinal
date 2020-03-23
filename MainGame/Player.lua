@@ -142,6 +142,7 @@ function Player.Init(scheduler)
         end)
 
     
+    -- TODO: consertar isso, o reset tem q destruir td antes de loadar de novo?
     love.update
         :filter(function()
             return hero.body:getY() > 1500

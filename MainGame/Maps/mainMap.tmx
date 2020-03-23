@@ -373,12 +373,12 @@
 </data>
  </layer>
  <objectgroup id="8" name="enemies">
-  <object id="9" name="shooterSpawn" x="1332" y="1071">
+  <object id="9" name="shooterSpawn" x="1332.33" y="1077.67">
    <properties>
     <property name="enemyType" value="shooter"/>
    </properties>
   </object>
-  <object id="11" name="shooterSpawn" x="1558.17" y="1004.17">
+  <object id="11" name="shooterSpawn" x="1554.84" y="1014.17">
    <properties>
     <property name="enemyType" value="shooter"/>
    </properties>

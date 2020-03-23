@@ -48,7 +48,7 @@ function Enemies.CreateShooter(posX, posY, scheduler)
 	enemy.shots = {}
 
 	-- Physics
-	enemy.body = love.physics.newBody(world, enemy.initX, enemy.initY, "dynamic")
+	enemy.body = love.physics.newBody(world, enemy.initX, enemy.initY, "static")
 	enemy.body:setFixedRotation(true)
 	enemy.shape = love.physics.newRectangleShape(enemy.width, enemy.height)
 	enemy.fixture = love.physics.newFixture(enemy.body, enemy.shape, 2)
@@ -148,6 +148,37 @@ function Enemies.CreateShooter(posX, posY, scheduler)
         local offsetX, offsetY = -(-heroPosX + love.graphics.getWidth()/2), -(-heroPosY + love.graphics.getHeight() * 3/4)
         love.graphics.setColor(unpack(alertaPerigo.cor))
         love.graphics.rectangle("line", love.graphics.getWidth()-20 + offsetX, alertaPerigo.y -heroPosY + love.graphics.getHeight() * 3/4 + offsetY, 20, 20)
+	end
+
+   table.insert(Enemies.enemies, enemy)  
+end
+
+function Enemies.CreatePatrol(posX, posY, scheduler)
+	local enemy = {}
+	-- Properties
+	enemy.tag = "Enemy"
+	enemy.initX = posX
+	enemy.initY = posY
+	enemy.width = 40
+	enemy.height = 20
+	enemy.alive = true
+
+	enemy.shots = {}
+
+	-- Physics
+	enemy.body = love.physics.newBody(world, enemy.initX, enemy.initY, "dynamic")
+	enemy.body:setFixedRotation(true)
+	enemy.shape = love.physics.newRectangleShape(enemy.width, enemy.height)
+	enemy.fixture = love.physics.newFixture(enemy.body, enemy.shape, 2)
+	enemy.fixture:setUserData({properties = enemy})
+	enemy.fixture:setCategory(3)
+
+	-- Functions
+	enemy.draw = function()
+		love.graphics.setColor(247/255, 154/255, 22/255)
+		love.graphics.polygon("fill", enemy.body:getWorldPoints(enemy.shape:getPoints()))
+		love.graphics.setColor(0, 0, 0)
+		love.graphics.polygon("line", enemy.body:getWorldPoints(enemy.shape:getPoints()))
 	end
 
    table.insert(Enemies.enemies, enemy)  
