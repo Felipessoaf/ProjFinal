@@ -149,6 +149,15 @@ function Player.Init(scheduler)
             love.load()
         end)
 
+    hero.collisions
+        :filter(function(other) 
+            print(other)
+            return other.tag == "Tile" and other.Ground == true 
+        end)
+        :subscribe(function()
+            hero.grounded = true
+        end)
+
     
     -- TODO: consertar isso, o reset tem q destruir td antes de loadar de novo?
     love.update
