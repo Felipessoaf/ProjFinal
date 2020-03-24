@@ -53,6 +53,14 @@ function Player.Init(scheduler)
     hero.fixture:setUserData({properties = hero})
     hero.fixture:setCategory(2)
     hero.grounded = true
+    hero.collisions = rx.BehaviorSubject.create()
+
+    -- shots
+    hero.shots = Shot.Init()
+    rx.Observable.fromRange(1, 5)
+        :subscribe(function ()
+            Shot.Create()
+        end)
     
     -- Functions
     hero.move = function (direction)
@@ -153,13 +161,6 @@ function Player.Init(scheduler)
 	
 	-- Remove unneeded object layer
 	map:removeLayer("spawn")
-
-    -- shots
-    hero.shots = Shot.Init()
-    rx.Observable.fromRange(1, 5)
-        :subscribe(function ()
-            Shot.Create()
-        end)
 
     return hero
 end
