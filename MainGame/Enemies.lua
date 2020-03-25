@@ -50,7 +50,7 @@ function Enemies.CreateShooter(posX, posY, scheduler)
 	enemy.shots = {}
 
 	-- Physics
-	enemy.body = love.physics.newBody(world, enemy.initX, enemy.initY, "static")
+	enemy.body = love.physics.newBody(world, enemy.initX, enemy.initY, "dynamic")
 	enemy.body:setFixedRotation(true)
 	enemy.shape = love.physics.newRectangleShape(enemy.width, enemy.height)
 	enemy.fixture = love.physics.newFixture(enemy.body, enemy.shape, 2)

@@ -40,72 +40,83 @@ return {
           id = 54,
           properties = {
             ["Ground"] = true,
-            ["collidable"] = true
+            ["collidable"] = true,
+            ["tag"] = "Tile"
           }
         },
         {
           id = 55,
           properties = {
             ["Ground"] = true,
-            ["collidable"] = true
+            ["collidable"] = true,
+            ["tag"] = "Tile"
           }
         },
         {
           id = 56,
           properties = {
             ["Ground"] = true,
-            ["collidable"] = true
+            ["collidable"] = true,
+            ["tag"] = "Tile"
           }
         },
         {
           id = 57,
           properties = {
             ["Ground"] = true,
-            ["collidable"] = true
+            ["collidable"] = true,
+            ["tag"] = "Tile"
           }
         },
         {
           id = 58,
           properties = {
             ["Ground"] = true,
-            ["collidable"] = true
+            ["collidable"] = true,
+            ["tag"] = "Tile"
           }
         },
         {
           id = 59,
           properties = {
             ["Ground"] = true,
-            ["collidable"] = true
+            ["collidable"] = true,
+            ["tag"] = "Tile"
           }
         },
         {
           id = 86,
           properties = {
-            ["collidable"] = true
+            ["collidable"] = true,
+            ["tag"] = "Tile"
           }
         },
         {
           id = 87,
           properties = {
-            ["collidable"] = true
+            ["collidable"] = true,
+            ["tag"] = "Tile"
           }
         },
         {
           id = 88,
           properties = {
-            ["collidable"] = true
+            ["collidable"] = true,
+            ["tag"] = "Tile"
           }
         },
         {
           id = 89,
           properties = {
-            ["collidable"] = true
+            ["collidable"] = true,
+            ["tag"] = "Tile"
           }
         },
         {
           id = 90,
           properties = {
-            ["collidable"] = true
+            ["collidable"] = true,
+            ["tag"] = "Tile"
           }
         },
         {
@@ -117,31 +128,36 @@ return {
         {
           id = 118,
           properties = {
-            ["collidable"] = true
+            ["collidable"] = true,
+            ["tag"] = "Tile"
           }
         },
         {
           id = 119,
           properties = {
-            ["collidable"] = true
+            ["collidable"] = true,
+            ["tag"] = "Tile"
           }
         },
         {
           id = 120,
           properties = {
-            ["collidable"] = true
+            ["collidable"] = true,
+            ["tag"] = "Tile"
           }
         },
         {
           id = 121,
           properties = {
-            ["collidable"] = true
+            ["collidable"] = true,
+            ["tag"] = "Tile"
           }
         },
         {
           id = 122,
           properties = {
-            ["collidable"] = true
+            ["collidable"] = true,
+            ["tag"] = "Tile"
           }
         },
         {
@@ -153,25 +169,29 @@ return {
         {
           id = 150,
           properties = {
-            ["collidable"] = true
+            ["collidable"] = true,
+            ["tag"] = "Tile"
           }
         },
         {
           id = 151,
           properties = {
-            ["collidable"] = true
+            ["collidable"] = true,
+            ["tag"] = "Tile"
           }
         },
         {
           id = 152,
           properties = {
-            ["collidable"] = true
+            ["collidable"] = true,
+            ["tag"] = "Tile"
           }
         },
         {
           id = 153,
           properties = {
-            ["collidable"] = true
+            ["collidable"] = true,
+            ["tag"] = "Tile"
           }
         },
         {
@@ -190,72 +210,83 @@ return {
           id = 182,
           properties = {
             ["Ground"] = true,
-            ["collidable"] = true
+            ["collidable"] = true,
+            ["tag"] = "Tile"
           }
         },
         {
           id = 183,
           properties = {
             ["Ground"] = true,
-            ["collidable"] = true
+            ["collidable"] = true,
+            ["tag"] = "Tile"
           }
         },
         {
           id = 184,
           properties = {
             ["Ground"] = true,
-            ["collidable"] = true
+            ["collidable"] = true,
+            ["tag"] = "Tile"
           }
         },
         {
           id = 185,
           properties = {
             ["Ground"] = true,
-            ["collidable"] = true
+            ["collidable"] = true,
+            ["tag"] = "Tile"
           }
         },
         {
           id = 186,
           properties = {
             ["Ground"] = true,
-            ["collidable"] = true
+            ["collidable"] = true,
+            ["tag"] = "Tile"
           }
         },
         {
           id = 187,
           properties = {
             ["Ground"] = true,
-            ["collidable"] = true
+            ["collidable"] = true,
+            ["tag"] = "Tile"
           }
         },
         {
           id = 214,
           properties = {
-            ["collidable"] = true
+            ["collidable"] = true,
+            ["tag"] = "Tile"
           }
         },
         {
           id = 215,
           properties = {
-            ["collidable"] = true
+            ["collidable"] = true,
+            ["tag"] = "Tile"
           }
         },
         {
           id = 216,
           properties = {
-            ["collidable"] = true
+            ["collidable"] = true,
+            ["tag"] = "Tile"
           }
         },
         {
           id = 217,
           properties = {
-            ["collidable"] = true
+            ["collidable"] = true,
+            ["tag"] = "Tile"
           }
         },
         {
           id = 218,
           properties = {
-            ["collidable"] = true
+            ["collidable"] = true,
+            ["tag"] = "Tile"
           }
         },
         {
@@ -267,31 +298,36 @@ return {
         {
           id = 246,
           properties = {
-            ["collidable"] = true
+            ["collidable"] = true,
+            ["tag"] = "Tile"
           }
         },
         {
           id = 247,
           properties = {
-            ["collidable"] = true
+            ["collidable"] = true,
+            ["tag"] = "Tile"
           }
         },
         {
           id = 248,
           properties = {
-            ["collidable"] = true
+            ["collidable"] = true,
+            ["tag"] = "Tile"
           }
         },
         {
           id = 249,
           properties = {
-            ["collidable"] = true
+            ["collidable"] = true,
+            ["tag"] = "Tile"
           }
         },
         {
           id = 250,
           properties = {
-            ["collidable"] = true
+            ["collidable"] = true,
+            ["tag"] = "Tile"
           }
         },
         {
@@ -303,25 +339,29 @@ return {
         {
           id = 278,
           properties = {
-            ["collidable"] = true
+            ["collidable"] = true,
+            ["tag"] = "Tile"
           }
         },
         {
           id = 279,
           properties = {
-            ["collidable"] = true
+            ["collidable"] = true,
+            ["tag"] = "Tile"
           }
         },
         {
           id = 280,
           properties = {
-            ["collidable"] = true
+            ["collidable"] = true,
+            ["tag"] = "Tile"
           }
         },
         {
           id = 281,
           properties = {
-            ["collidable"] = true
+            ["collidable"] = true,
+            ["tag"] = "Tile"
           }
         },
         {
@@ -334,54 +374,6 @@ return {
           id = 283,
           properties = {
             ["collidable"] = true
-          }
-        },
-        {
-          id = 342,
-          properties = {
-            ["collidable"] = "true"
-          }
-        },
-        {
-          id = 347,
-          properties = {
-            ["collidable"] = "true"
-          }
-        },
-        {
-          id = 374,
-          properties = {
-            ["collidable"] = "true"
-          }
-        },
-        {
-          id = 375,
-          properties = {
-            ["collidable"] = "true"
-          }
-        },
-        {
-          id = 376,
-          properties = {
-            ["collidable"] = "true"
-          }
-        },
-        {
-          id = 377,
-          properties = {
-            ["collidable"] = "true"
-          }
-        },
-        {
-          id = 378,
-          properties = {
-            ["collidable"] = "true"
-          }
-        },
-        {
-          id = 379,
-          properties = {
-            ["collidable"] = "true"
           }
         }
       }

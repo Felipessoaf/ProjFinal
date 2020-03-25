@@ -8,7 +8,9 @@ function CollisionManager.Init(scheduler)
     -- local HERO_CATEGORY = 3
     -- local HERO_SHOT_CATEGORY = 4
     -- local ENEMY_CATEGORY = 5
-	-- local ENEMY_SHOT_CATEGORY = 6
+    -- local ENEMY_SHOT_CATEGORY = 6
+    
+    CollisionManager.scheduler = scheduler
 
     -- --Collision callbacks:
     world:setCallbacks(bC, eC, preS, postS)
@@ -88,13 +90,21 @@ function CollisionManager.Init(scheduler)
 
     -- Trata colisao de tiro do player
     shotHit = beginContact:filter(function(a, b, coll) return a:getUserData().properties.tag == "Shot" or b:getUserData().properties.tag == "Shot" end)
-    shotHitEnemy, shotHitOther = shotHit:partition(function(a, b, coll) return a:getUserData().properties.tag == "Shot" and b:getUserData().properties.tag == "Enemy" end)
+    shotHitEnemy = rx.BehaviorSubject.create()
+
     shotHit:subscribe(function(a, b, coll) 
         local shot = {}
+        local other = {}
         if a:getUserData().properties.tag == "Shot" then
             shot = a:getUserData().properties
+            other = b:getUserData().properties
         else
             shot = b:getUserData().properties
+            other = a:getUserData().properties
+        end
+
+        if other.tag == "Enemy" then
+            killEnemy(other) 
         end
 
         shot.fired = false 
@@ -103,15 +113,6 @@ function CollisionManager.Init(scheduler)
             shot.body:setActive(false)
             shot.body:setPosition(-8000,-8000)
         end)
-    end)
-    shotHitEnemy:subscribe(function(a, b, coll)
-        a:getUserData().properties.fired = false
-        scheduler:schedule(function()
-            coroutine.yield(.01)
-            a:getUserData().properties.body:setActive(false)
-            a:getUserData().properties.body:setPosition(-8000,-8000)
-        end)
-        killEnemy(b:getUserData().properties) 
     end)
 
     -- Trata colisao de tiro do inimigo
@@ -164,16 +165,17 @@ function enemyShoot(shotsTable, pos)
 end
 
 function killEnemy(enemy)
-    print("killEnemy: "..enemy)
+    CollisionManager.scheduler:schedule(function()
+        coroutine.yield(.01)
+        rx.Observable.fromTable(enemy.shots, pairs, false)
+            :subscribe(function(shot)
+                shot.body:setActive(false)
+                shot.fixture:setMask(2,3)
+            end)
+        enemy.shots = {}
+        enemy.body:setActive(false)
+    end)
     enemy.alive = false
-    rx.Observable.fromTable(enemy.shots, pairs, false)
-        :subscribe(function(shot)
-            shot.body:setActive(false)
-            shot.fixture:setMask(2,3)
-            print("shot: "..shot)
-        end)
-    enemy.shots = {}
-    enemy.body:setActive(false)
 end
 
 return CollisionManager

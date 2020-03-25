@@ -297,46 +297,6 @@
     <property name="collidable" type="bool" value="true"/>
    </properties>
   </tile>
-  <tile id="342">
-   <properties>
-    <property name="collidable" value="true"/>
-   </properties>
-  </tile>
-  <tile id="347">
-   <properties>
-    <property name="collidable" value="true"/>
-   </properties>
-  </tile>
-  <tile id="374">
-   <properties>
-    <property name="collidable" value="true"/>
-   </properties>
-  </tile>
-  <tile id="375">
-   <properties>
-    <property name="collidable" value="true"/>
-   </properties>
-  </tile>
-  <tile id="376">
-   <properties>
-    <property name="collidable" value="true"/>
-   </properties>
-  </tile>
-  <tile id="377">
-   <properties>
-    <property name="collidable" value="true"/>
-   </properties>
-  </tile>
-  <tile id="378">
-   <properties>
-    <property name="collidable" value="true"/>
-   </properties>
-  </tile>
-  <tile id="379">
-   <properties>
-    <property name="collidable" value="true"/>
-   </properties>
-  </tile>
  </tileset>
  <layer id="3" name="Sky" width="150" height="70">
   <data encoding="csv">
