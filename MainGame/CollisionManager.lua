@@ -5,6 +5,10 @@ require 'rx-love'
 local CollisionManager = {}
 
 function CollisionManager.Init(scheduler)
+    -- local HERO_CATEGORY = 3
+    -- local HERO_SHOT_CATEGORY = 4
+    -- local ENEMY_CATEGORY = 5
+	-- local ENEMY_SHOT_CATEGORY = 6
 
     -- --Collision callbacks:
     world:setCallbacks(bC, eC, preS, postS)
@@ -17,7 +21,6 @@ function CollisionManager.Init(scheduler)
     -- Trata reset do grounded para pulo
     beginContact
         :filter(function(a, b, coll) 
-            print(a:getUserData().properties.Ground)
             return (a:getUserData().properties.Ground == true or a:getUserData().properties.tag == "Platform") and b:getUserData().properties.tag == "Hero" 
         end)
         :subscribe(function() hero.grounded = true end)
@@ -27,26 +30,26 @@ function CollisionManager.Init(scheduler)
         :filter(function(a, b, coll) 
             return a:getUserData().properties.tag == "Hero" and b:getUserData().properties.tag == "EnemyRange" 
         end)
-        :map(function ()
-            return "enter"
+        :map(function (a, b, coll)
+            return {state = "enter", enemyRange = b:getUserData().properties}
         end)
 
     exitRange = endContact
         :filter(function(a, b, coll) 
             return a:getUserData().properties.tag == "Hero" and b:getUserData().properties.tag == "EnemyRange" 
         end)
-        :map(function ()
-            return "exit"
+        :map(function (a, b, coll)
+            return {state = "exit", enemyRange = b:getUserData().properties}
         end)
 
     rangeState = enterRange:merge(exitRange)
 
-    enterRange:subscribe(function ()
-        enemyRange.color = enemyRange.dangerColor
+    enterRange:subscribe(function (info)
+        info.enemyRange.color = info.enemyRange.dangerColor
     end)
 
-    exitRange:subscribe(function ()
-        enemyRange.color = enemyRange.outRangeColor
+    exitRange:subscribe(function (info)
+        info.enemyRange.color = info.enemyRange.outRangeColor
     end)
 
     --combineLatest
@@ -69,18 +72,18 @@ function CollisionManager.Init(scheduler)
         end)
 
     heroSafe = heroRangeState:filter(function(a,b)
-        return a == "enter" and b == "pressed"
+        return a.state == "enter" and b == "pressed"
     end)
     heroNotSafe = heroRangeState:filter(function(a,b)
-        return a == "enter" and b == "not pressed"
+        return a.state == "enter" and b == "not pressed"
     end)
     
-    heroSafe:subscribe(function() 
-        enemyRange.color = enemyRange.safeColor
+    heroSafe:subscribe(function(a,b) 
+        a.enemyRange.color = a.enemyRange.safeColor
     end)
     
-    heroNotSafe:subscribe(function() 
-        enemyRange.color = enemyRange.dangerColor
+    heroNotSafe:subscribe(function(a,b) 
+        a.enemyRange.color = a.enemyRange.dangerColor
     end)
 
     -- Trata colisao de tiro do player
@@ -132,7 +135,6 @@ function CollisionManager.Init(scheduler)
     end)
 end
 
-
 --Collision callbacks 
 function bC(a, b, coll)  
     beginContact:onNext(a, b, coll)
@@ -145,6 +147,33 @@ function preS(a, b, coll)
 end
 function postS(a, b, coll, normalimpulse, tangentimpulse)
     postSolve:onNext(a, b, coll, normalimpulse, tangentimpulse)
+end
+
+function enemyShoot(shotsTable, pos)
+    rx.Observable.fromTable(shotsTable, pairs, false)
+        :filter(function(shot)
+            return not shot.fired
+        end)
+        :first()
+        :subscribe(function(shot)
+            shot.body:setLinearVelocity(-shot.speed, 0)
+            shot.body:setPosition(unpack(pos))
+            shot.fired = true
+            shot.body:setActive(true)
+        end)
+end
+
+function killEnemy(enemy)
+    print("killEnemy: "..enemy)
+    enemy.alive = false
+    rx.Observable.fromTable(enemy.shots, pairs, false)
+        :subscribe(function(shot)
+            shot.body:setActive(false)
+            shot.fixture:setMask(2,3)
+            print("shot: "..shot)
+        end)
+    enemy.shots = {}
+    enemy.body:setActive(false)
 end
 
 return CollisionManager
