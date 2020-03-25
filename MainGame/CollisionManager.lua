@@ -107,12 +107,14 @@ function CollisionManager.Init(scheduler)
             killEnemy(other) 
         end
 
-        shot.fired = false 
-        scheduler:schedule(function()
-            coroutine.yield(.01)
-            shot.body:setActive(false)
-            shot.body:setPosition(-8000,-8000)
-        end)
+        if other.tag ~= "EnemyRange" then
+            shot.fired = false 
+            scheduler:schedule(function()
+                coroutine.yield(.01)
+                shot.body:setActive(false)
+                shot.body:setPosition(-8000,-8000)
+            end)
+        end
     end)
 
     -- Trata colisao de tiro do inimigo
