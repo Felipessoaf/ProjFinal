@@ -1,7 +1,3 @@
--- Rx libs
-local rx = require 'rx'
-require 'rx-love'
-
 -- Enemies module
 local Enemies = require 'Enemies'
 

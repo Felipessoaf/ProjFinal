@@ -1,10 +1,6 @@
--- Rx libs
-local rx = require 'rx'
-require 'rx-love'
-
 local CollisionManager = {}
 
-function CollisionManager.Init(scheduler)
+function CollisionManager.Init()
     -- local HERO_CATEGORY = 3
     -- local HERO_SHOT_CATEGORY = 4
     -- local ENEMY_CATEGORY = 5
