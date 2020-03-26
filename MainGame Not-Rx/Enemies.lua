@@ -1,3 +1,7 @@
+-- Rx libs
+local rx = require 'rx'
+require 'rx-love'
+
 -- Layers module
 local Layers = require 'Layers'
 

@@ -1,6 +1,10 @@
+-- Rx libs
+local rx = require 'rx'
+require 'rx-love'
+
 local CollisionManager = {}
 
-function CollisionManager.Init()
+function CollisionManager.Init(scheduler)
     -- local HERO_CATEGORY = 3
     -- local HERO_SHOT_CATEGORY = 4
     -- local ENEMY_CATEGORY = 5
@@ -9,81 +13,8 @@ function CollisionManager.Init()
     CollisionManager.scheduler = scheduler
 
     -- --Collision callbacks:
-    world:setCallbacks(bC, eC, preS, postS)
-
-    beginContact = rx.Subject.create()
-    endContact = rx.Subject.create()
-    preSolve = rx.Subject.create()
-    postSolve = rx.Subject.create()
-
-    -- Trata reset do grounded para pulo
-    beginContact
-        :filter(function(a, b, coll) 
-            return (a:getUserData().properties.Ground == true or a:getUserData().properties.tag == "Platform") and b:getUserData().properties.tag == "Hero" 
-        end)
-        :subscribe(function() hero.grounded = true end)
-
-    -- Trata colisao player com enemyRange
-    enterRange = beginContact
-        :filter(function(a, b, coll) 
-            return a:getUserData().properties.tag == "Hero" and b:getUserData().properties.tag == "EnemyRange" 
-        end)
-        :map(function (a, b, coll)
-            return {state = "enter", enemyRange = b:getUserData().properties}
-        end)
-
-    exitRange = endContact
-        :filter(function(a, b, coll) 
-            return a:getUserData().properties.tag == "Hero" and b:getUserData().properties.tag == "EnemyRange" 
-        end)
-        :map(function (a, b, coll)
-            return {state = "exit", enemyRange = b:getUserData().properties}
-        end)
-
-    rangeState = enterRange:merge(exitRange)
-
-    enterRange:subscribe(function (info)
-        info.enemyRange.color = info.enemyRange.dangerColor
-    end)
-
-    exitRange:subscribe(function (info)
-        info.enemyRange.color = info.enemyRange.outRangeColor
-    end)
-
-    --combineLatest
-    cPressed = love.keypressed
-        :filter(function(key) return key == 'c' end)
-        :map(function ()
-            return "pressed"
-        end)
-    cReleased = love.keyreleased
-        :filter(function(key) return key == 'c' end)
-        :map(function ()
-            return "not pressed"
-        end)
-
-    cPressState = cPressed:merge(cReleased)
-
-    heroRangeState = rangeState
-        :combineLatest(cPressState, function (a, b)
-            return a,b
-        end)
-
-    heroSafe = heroRangeState:filter(function(a,b)
-        return a.state == "enter" and b == "pressed"
-    end)
-    heroNotSafe = heroRangeState:filter(function(a,b)
-        return a.state == "enter" and b == "not pressed"
-    end)
+    world:setCallbacks(beginContact, endContact, preSolve, postSolve)
     
-    heroSafe:subscribe(function(a,b) 
-        a.enemyRange.color = a.enemyRange.safeColor
-    end)
-    
-    heroNotSafe:subscribe(function(a,b) 
-        a.enemyRange.color = a.enemyRange.dangerColor
-    end)
-
     -- Trata colisao de tiro do player
     shotHit = beginContact:filter(function(a, b, coll) return a:getUserData().properties.tag == "Shot" or b:getUserData().properties.tag == "Shot" end)
     shotHitEnemy = rx.BehaviorSubject.create()
@@ -134,19 +65,44 @@ function CollisionManager.Init()
     end)
 end
 
---Collision callbacks 
-function bC(a, b, coll)  
-    beginContact:onNext(a, b, coll)
+-- Trata reset do grounded para pulo
+function beginContact(a, b, coll)  
+    if (a:getUserData().properties.Ground == true or a:getUserData().properties.tag == "Platform") and b:getUserData().properties.tag == "Hero" then
+        hero.grounded = true
+    elseif a:getUserData().properties.tag == "Hero" and b:getUserData().properties.tag == "EnemyRange" then
+        local enemy, hero = b:getUserData().properties, a:getUserData().properties
+        enemy.enemyRange.color = enemy.enemyRange.dangerColor
+        hero.inEnemyRange = enemy
+    end
 end
-function eC(a, b, coll)
-    endContact:onNext(a, b, coll)
+
+function endContact(a, b, coll)
+    if a:getUserData().properties.tag == "Hero" and b:getUserData().properties.tag == "EnemyRange" then
+        local enemy = b:getUserData().properties
+        enemy.enemyRange.color = enemy.enemyRange.outRangeColor
+        hero.inEnemyRange = nil
+    end
 end
-function preS(a, b, coll)
-    preSolve:onNext(a, b, coll)
+
+function preSolve(a, b, coll)
+    
 end
-function postS(a, b, coll, normalimpulse, tangentimpulse)
-    postSolve:onNext(a, b, coll, normalimpulse, tangentimpulse)
+
+function postSolve(a, b, coll, normalimpulse, tangentimpulse)
+    
 end
+
+function love.keypressed( key )
+    if key == "c" and hero.inEnemyRange ~= nil then
+        hero.inEnemyRange.enemyRange.color = hero.inEnemyRange.enemyRange.safeColor
+    end
+ end
+  
+ function love.keyreleased( key )
+    if key == "c" and hero.inEnemyRange ~= nil then
+        hero.inEnemyRange.enemyRange.color = hero.inEnemyRange.enemyRange.dangerColor
+    end
+ end
 
 function enemyShoot(shotsTable, pos)
     rx.Observable.fromTable(shotsTable, pairs, false)
