@@ -54,28 +54,27 @@ function Enemies.CreateShooter(posX, posY, scheduler)
 	enemy.fixture:setUserData({properties = enemy})
 	enemy.fixture:setCategory(3)
 
-	rx.Observable.fromRange(1, 10)
-		:subscribe(function ()
-			local shot = {}
-			shot.tag = "EnemyShot"
-			shot.width = 3
-			shot.height = 3
-			shot.fired = false
-			shot.speed = 100
-			shot.body = love.physics.newBody(world, -8000, -8000, "dynamic")
-			shot.body:setActive(false)
-			shot.body:setFixedRotation(true)
-			shot.body:setGravityScale(0)
-			shot.body:setSleepingAllowed(true)
-			shot.body:setBullet(true)
-			shot.shape = love.physics.newRectangleShape(shot.width, shot.height)
-			shot.fixture = love.physics.newFixture(shot.body, shot.shape, 2)
-			shot.fixture:setUserData({properties = shot})
-			shot.fixture:setCategory(3)
-			shot.fixture:setMask(3)
-			shot.fixture:setSensor(true)
-			table.insert(enemy.shots, shot)
-		end)
+    for i=1,10 do
+        local shot = {}
+        shot.tag = "EnemyShot"
+        shot.width = 3
+        shot.height = 3
+        shot.fired = false
+        shot.speed = 100
+        shot.body = love.physics.newBody(world, -8000, -8000, "dynamic")
+        shot.body:setActive(false)
+        shot.body:setFixedRotation(true)
+        shot.body:setGravityScale(0)
+        shot.body:setSleepingAllowed(true)
+        shot.body:setBullet(true)
+        shot.shape = love.physics.newRectangleShape(shot.width, shot.height)
+        shot.fixture = love.physics.newFixture(shot.body, shot.shape, 2)
+        shot.fixture:setUserData({properties = shot})
+        shot.fixture:setCategory(3)
+        shot.fixture:setMask(3)
+        shot.fixture:setSensor(true)
+        table.insert(enemy.shots, shot)
+    end
 
 	-- Atira
 	scheduler:schedule(function()
