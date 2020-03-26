@@ -23,15 +23,12 @@ function Enemies.Init(scheduler)
 	end
     
 	-- Draw enemies
-   enemyLayer.draw = function(self)
-      local enemiesAlive = rx.Observable.fromTable(Enemies.enemies, pairs, false)
-                              :filter(function(enemy)
-                                    return enemy.alive
-                              end)
-      
-      enemiesAlive:subscribe(function(enemy)
-               enemy.draw()
-            end)
+    enemyLayer.draw = function(self)
+        for k, enemy in pairs(Enemies.enemies) do
+            if enemy.alive then
+                enemy.draw()
+            end
+        end
    end
    
    return Enemies.enemies
