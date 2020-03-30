@@ -1,7 +1,3 @@
--- Rx libs
-local rx = require 'rx'
-require 'rx-love'
-
 -- Layers module
 local Layers = require 'Layers'
 
@@ -16,13 +12,11 @@ function Shot.Init()
 	-- Draw shots
     shotLayer.draw = function(self)
         love.graphics.setColor(255,255,255,255)
-        rx.Observable.fromTable(Shot.shots, pairs, false)
-            :filter(function(shot)
-                return shot.fired
-            end)
-            :subscribe(function(shot)
+        for _, shot in pairs(Shot.shots) do
+            if shot.fired then
                 love.graphics.polygon("fill", shot.body:getWorldPoints(shot.shape:getPoints()))
-            end)
+            end
+        end
     end
     
     return Shot.shots
