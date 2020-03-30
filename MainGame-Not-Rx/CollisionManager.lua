@@ -66,13 +66,13 @@ function CollisionManager.Init(scheduler)
             b:getUserData().properties.body:setActive(false)
         end)
             
-        a:getUserData().properties.health:onNext(hero.health:getValue() - 10)
+        a:getUserData().properties.damage(10)
     end)
 end
 
--- Trata reset do grounded para pulo
 function bC(a, b, coll)  
     beginContact:onNext(a, b, coll)  
+    -- Trata reset do grounded para pulo
     if (a:getUserData().properties.Ground == true or a:getUserData().properties.tag == "Platform") and b:getUserData().properties.tag == "Hero" then
         hero.grounded = true
     elseif a:getUserData().properties.tag == "Hero" and b:getUserData().properties.tag == "EnemyRange" then

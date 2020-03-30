@@ -17,7 +17,7 @@ local CollisionManager = require 'CollisionManager'
 local scheduler = rx.CooperativeScheduler.create()
 
 -- Declare initial state of game
-love.load:subscribe(function (arg)	
+function love.load()
 	-- load map
 	map, world = MapManager.InitMap()
 
@@ -26,17 +26,30 @@ love.load:subscribe(function (arg)
     enemies = Enemies.Init(scheduler)
 
     CollisionManager.Init(scheduler)
-end)
+end
 
-love.update:subscribe(function (dt)
+function love.update(dt)
     world:update(dt) -- this puts the world into motion
 	scheduler:update(dt)
 	
 	-- Update world map
-	map:update(dt)
-end)
+    map:update(dt)
+    
+    -- Updates Player
+    hero.update(dt)
+end
 
-love.draw:subscribe(function ()
+function love.keyreleased(key)
+    -- Sends to Player
+    hero.keyreleased(key)
+end
+
+function love.keypressed(key)
+    -- Sends to Player
+    hero.keypressed(key)
+end
+
+function love.draw()
 
     heroPosX, heroPosY = hero.body:getPosition();
     local tx,ty = -heroPosX + love.graphics.getWidth()/2, -heroPosY + love.graphics.getHeight() * 3/4;
@@ -55,7 +68,7 @@ love.draw:subscribe(function ()
     love.graphics.setColor(242/255, 178/255, 0)
     love.graphics.rectangle("fill", 20, 20, hero.backHealth, 20)
     love.graphics.setColor(255,0,0,255)
-    love.graphics.rectangle("fill", 20, 20, hero.health:getValue(), 20)
+    love.graphics.rectangle("fill", 20, 20, hero.health, 20)
     love.graphics.setColor(0,0,0,255)
     love.graphics.rectangle("line", 20, 20, 100, 20)
-end)
+end

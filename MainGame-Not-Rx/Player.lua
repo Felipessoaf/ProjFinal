@@ -1,7 +1,3 @@
--- Rx libs
-local rx = require 'rx'
-require 'rx-love'
-
 -- Layers module
 local Layers = require 'Layers'
 
@@ -33,12 +29,13 @@ function Player.Init(scheduler)
 	local hero = {}
 
     hero.tag = "Hero"
-    hero.health = rx.BehaviorSubject.create(100)
-    hero.health:debounce(1, scheduler)
-               :subscribe(function (val)
-                    hero.backHealth = val
-                end)
+    hero.health = 100
+    -- hero.health:debounce(1, scheduler)
+    --            :subscribe(function (val)
+    --                 hero.backHealth = val
+    --             end)
     hero.backHealth = 100
+    hero.lastDamageTime = -1
     hero.dir = {1,0}
     hero.initX = spawn.x
     hero.initY = spawn.y
@@ -53,14 +50,13 @@ function Player.Init(scheduler)
     hero.fixture:setUserData({properties = hero})
     hero.fixture:setCategory(2)
     hero.grounded = true
-    hero.collisions = rx.BehaviorSubject.create()
 
     -- shots
     hero.shots = Shot.Init()
-    rx.Observable.fromRange(1, 5)
-        :subscribe(function ()
-            Shot.Create()
-        end)
+    
+    for i=1,5 do
+        Shot.Create()
+    end
     
     -- Functions
     hero.move = function (direction)
@@ -79,20 +75,60 @@ function Player.Init(scheduler)
         hero.grounded = false
     end
     
-    hero.shoot = function ()
-        rx.Observable.fromTable(hero.shots, pairs, false)
-            :filter(function(shot)
-                return not shot.fired
-            end)
-            :first()
-            :subscribe(function(shot)
+    hero.shoot = function ()        
+        for k, shot in pairs(hero.shots) do
+            if not shot.fired then
                 dirX, dirY = unpack(hero.dir)
                 shot.body:setLinearVelocity(dirX * shot.speed, dirY * shot.speed)
                 shot.body:setPosition(hero.body:getX(), hero.body:getY())
                 shot.fired = true
                 shot.fixture:setMask(2)
                 shot.body:setActive(true)
-            end)
+
+                break
+            end
+        end
+    end
+    
+    hero.damage = function (value)
+        hero.health = hero.health - 10
+        hero.lastDamageTime = love.timer.getTime()
+    end
+
+    hero.update = function (dt)
+        -- keyboard actions for our hero
+        for _, key in pairs({'a', 'd'}) do
+            if love.keyboard.isDown(key) then
+                hero.move(keyMap[key])
+            end
+        end
+
+        if hero.body:getY() > 1500 or hero.health <= 0 then
+            love.load()
+        end
+
+        if hero.lastDamageTime > 0 then
+            if love.timer.getTime() > hero.lastDamageTime + 1 then
+                hero.lastDamageTime = -1
+                hero.backHealth = hero.health
+            end
+        end
+    end
+
+    hero.keypressed = function (key)
+        if key == 'space' then
+            hero.shoot()
+            currentVelX, currentVelY = hero.body:getLinearVelocity()
+            hero.body:setLinearVelocity(0, currentVelY)
+        elseif key == 'w' and hero.grounded then
+            hero.jump()
+        end
+    end
+
+    hero.keyreleased = function (key)
+        if key == 'a' or  key == 'd' then
+            hero.stopHorMove()
+        end
     end
 
 	-- Draw player
@@ -107,58 +143,8 @@ function Player.Init(scheduler)
 		-- that our sprite is offset properly
 		-- love.graphics.setPointSize(5)
 		-- love.graphics.points(math.floor(self.hero.body:getX()), math.floor(self.hero.body:getY()))
-	end
-
-    -- keyboard actions for our hero
-    for _, key in pairs({'a', 'd'}) do
-        love.update
-            :filter(function()
-                return love.keyboard.isDown(key)
-            end)
-            :map(function(dt)
-                return keyMap[key]
-            end)
-            :subscribe(function(dir)
-                hero.move(dir)
-            end)
     end
-
-    love.keyreleased
-        :filter(function(key) return key == 'a' or  key == 'd' end)
-        :subscribe(function()
-            hero.stopHorMove()
-        end)
-
-    love.keypressed
-        :filter(function(key) return key == 'space' end)
-        :subscribe(function()
-            hero.shoot()
-            currentVelX, currentVelY = hero.body:getLinearVelocity()
-            hero.body:setLinearVelocity(0, currentVelY)
-        end)
-
-    love.keypressed
-        :filter(function(key) return key == 'w' and hero.grounded end)
-        :subscribe(function()
-            hero.jump()
-        end)
-
-    hero.health
-        :filter(function(val) return val <= 0 end)
-        :subscribe(function()
-            love.load()
-        end)
-
     
-    -- TODO: consertar isso, o reset tem q destruir td antes de loadar de novo?
-    love.update
-        :filter(function()
-            return hero.body:getY() > 1500
-        end)
-        :subscribe(function()
-            love.load()
-        end)
-	
 	-- Remove unneeded object layer
 	map:removeLayer("spawn")
 
