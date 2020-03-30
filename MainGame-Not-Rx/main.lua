@@ -37,6 +37,11 @@ function love.update(dt)
     
     -- Updates Player
     hero.update(dt)
+    
+    -- Updates Enemies
+    for _, enemie in pairs(enemies) do
+        enemie.update(dt)
+    end
 end
 
 function love.keyreleased(key)

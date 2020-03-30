@@ -28,12 +28,9 @@ function Player.Init(scheduler)
     -- Create hero table
 	local hero = {}
 
+	-- Properties
     hero.tag = "Hero"
     hero.health = 100
-    -- hero.health:debounce(1, scheduler)
-    --            :subscribe(function (val)
-    --                 hero.backHealth = val
-    --             end)
     hero.backHealth = 100
     hero.lastDamageTime = -1
     hero.dir = {1,0}
@@ -42,14 +39,15 @@ function Player.Init(scheduler)
     hero.width = 20
     hero.height = 30
     hero.speed = 150
-    hero.shots = {} -- holds our shots
+    hero.grounded = true
+    
+	-- Physics
     hero.body = love.physics.newBody(world, hero.initX, hero.initY, "dynamic")
     hero.body:setFixedRotation(true)
     hero.shape = love.physics.newRectangleShape(hero.width, hero.height)
     hero.fixture = love.physics.newFixture(hero.body, hero.shape, 2)
     hero.fixture:setUserData({properties = hero})
     hero.fixture:setCategory(2)
-    hero.grounded = true
 
     -- shots
     hero.shots = Shot.Init()

@@ -30,6 +30,10 @@ function Enemies.Init(scheduler)
             end
         end
    end
+
+   -- Remove unneeded object layer
+--    map:removeLayer("shooterSpawn")
+--    map:removeLayer("patrolSpawn")
    
    return Enemies.enemies
 end
@@ -43,8 +47,8 @@ function Enemies.CreateShooter(posX, posY, scheduler)
 	enemy.width = 40
 	enemy.height = 20
 	enemy.alive = true
-
-	enemy.shots = {}
+	enemy.lastShotTime = love.timer.getTime()
+	enemy.nextShotTimeInterval = 1
 
 	-- Physics
 	enemy.body = love.physics.newBody(world, enemy.initX, enemy.initY, "dynamic")
@@ -53,6 +57,8 @@ function Enemies.CreateShooter(posX, posY, scheduler)
 	enemy.fixture = love.physics.newFixture(enemy.body, enemy.shape, 2)
 	enemy.fixture:setUserData({properties = enemy})
 	enemy.fixture:setCategory(3)
+
+	enemy.shots = {}
 
     for i=1,10 do
         local shot = {}
@@ -76,15 +82,18 @@ function Enemies.CreateShooter(posX, posY, scheduler)
         table.insert(enemy.shots, shot)
     end
 
-	-- Atira
-	scheduler:schedule(function()
-			coroutine.yield(1)
-			while true and enemy.alive do
-				enemyShoot(enemy.shots, {enemy.body:getX(), enemy.body:getY()})
-				coroutine.yield(math.random(.5,2))
-			end
-		end)
-
+    -- Functions
+    enemy.update = function (dt)
+        if enemy.alive then
+            local curTime = love.timer.getTime()
+            if curTime > enemy.lastShotTime + enemy.nextShotTimeInterval then
+                enemy.lastShotTime = curTime
+                enemyShoot(enemy.shots, {enemy.body:getX(), enemy.body:getY()})
+                enemy.nextShotTimeInterval = math.random(.5,2)
+            end
+        end
+    end
+    
    	-- Checa alerta perigo
     local alertaPerigo = {}
     alertaPerigo.cor = {0,0,0,0}
@@ -120,7 +129,6 @@ function Enemies.CreateShooter(posX, posY, scheduler)
             end
         end)
 
-	-- Functions
 	enemy.draw = function()
 		love.graphics.setColor(135/255, 0, 168/255)
 		love.graphics.polygon("fill", enemy.body:getWorldPoints(enemy.shape:getPoints()))
@@ -129,13 +137,11 @@ function Enemies.CreateShooter(posX, posY, scheduler)
 
 		-- let's draw our enemy shots
 		love.graphics.setColor(0, 0, 0)
-		rx.Observable.fromTable(enemy.shots, pairs, false)
-			:filter(function(shot)
-				return shot.fired
-			end)
-			:subscribe(function(shot)
-				love.graphics.polygon("fill", shot.body:getWorldPoints(shot.shape:getPoints()))
-			end)
+        for _, shot in pairs(enemy.shots) do
+            if shot.fired then
+                love.graphics.polygon("fill", shot.body:getWorldPoints(shot.shape:getPoints()))
+            end
+        end
 
         -- Temporarily draw a point at our location so we know
         -- that our sprite is offset properly
@@ -146,9 +152,9 @@ function Enemies.CreateShooter(posX, posY, scheduler)
         local offsetX, offsetY = -(-heroPosX + love.graphics.getWidth()/2), -(-heroPosY + love.graphics.getHeight() * 3/4)
         love.graphics.setColor(unpack(alertaPerigo.cor))
         love.graphics.rectangle("line", love.graphics.getWidth()-20 + offsetX, alertaPerigo.y -heroPosY + love.graphics.getHeight() * 3/4 + offsetY, 20, 20)
-	end
+    end
 
-   table.insert(Enemies.enemies, enemy)  
+    table.insert(Enemies.enemies, enemy)  
 end
 
 function Enemies.CreatePatrol(posX, posY)
@@ -160,8 +166,6 @@ function Enemies.CreatePatrol(posX, posY)
 	enemy.width = 40
 	enemy.height = 20
 	enemy.alive = true
-
-	enemy.shots = {}
 
 	-- Physics
 	enemy.body = love.physics.newBody(world, enemy.initX, enemy.initY, "dynamic")
@@ -186,6 +190,10 @@ function Enemies.CreatePatrol(posX, posY)
     enemyRange.fixture:setSensor(true)
 
 	-- Functions
+    enemy.update = function (dt)
+        
+    end
+
 	enemy.draw = function()
 		love.graphics.setColor(247/255, 154/255, 22/255)
 		love.graphics.polygon("fill", enemy.body:getWorldPoints(enemy.shape:getPoints()))
@@ -196,7 +204,7 @@ function Enemies.CreatePatrol(posX, posY)
         love.graphics.polygon("fill", enemyRange.body:getWorldPoints(enemyRange.shape:getPoints()))
 	end
 
-   table.insert(Enemies.enemies, enemy)  
+    table.insert(Enemies.enemies, enemy)  
 end
 
 return Enemies
