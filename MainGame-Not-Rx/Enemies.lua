@@ -49,6 +49,8 @@ function Enemies.CreateShooter(posX, posY, scheduler)
 	enemy.alive = true
 	enemy.lastShotTime = love.timer.getTime()
 	enemy.nextShotTimeInterval = 1
+	enemy.lastDangerResetTime = love.timer.getTime()
+	enemy.dangerTimeMax = 1
 
 	-- Physics
 	enemy.body = love.physics.newBody(world, enemy.initX, enemy.initY, "dynamic")
@@ -82,52 +84,38 @@ function Enemies.CreateShooter(posX, posY, scheduler)
         table.insert(enemy.shots, shot)
     end
 
+    enemy.alertaPerigo = {}
+    enemy.alertaPerigo.cor = {0,0,0,0}
+    enemy.alertaPerigo.y = 0
+
     -- Functions
     enemy.update = function (dt)
         if enemy.alive then
+            -- Shoots
             local curTime = love.timer.getTime()
             if curTime > enemy.lastShotTime + enemy.nextShotTimeInterval then
                 enemy.lastShotTime = curTime
                 enemyShoot(enemy.shots, {enemy.body:getX(), enemy.body:getY()})
                 enemy.nextShotTimeInterval = math.random(.5,2)
             end
+
+            -- Calculate dangerAlert
+            for _, shot in pairs(enemy.shots) do
+                local rightSide = hero.body:getX() + love.graphics.getWidth()/2
+                local posX, posY = shot.body:getPosition()
+                if posX > rightSide and posX < rightSide + 150 then
+                    enemy.alertaPerigo.cor = {1,0,0,1}
+                    enemy.alertaPerigo.y = posY
+                end
+            end
+
+            -- Reset alert
+            if curTime > enemy.lastDangerResetTime + enemy.dangerTimeMax then
+                enemy.lastDangerResetTime = curTime
+                enemy.alertaPerigo.cor = {0,0,0,0}
+            end
         end
     end
-    
-   	-- Checa alerta perigo
-    local alertaPerigo = {}
-    alertaPerigo.cor = {0,0,0,0}
-    alertaPerigo.y = 0
-    local enemiesShotsPos = rx.Subject.create()
-    local enemyShotsAlertRange = enemiesShotsPos:filter(function(pos)
-            local rightSide = hero.body:getX() + love.graphics.getWidth()/2
-            return pos[1] > rightSide and pos[1] < rightSide + 150
-        end)
-
-    enemyShotsAlertRange:subscribe(function (pos)
-        alertaPerigo.cor = {1,0,0,1}
-        alertaPerigo.y = pos[2]
-    end)
-
-    enemyShotsAlertRange:debounce(.2, scheduler)
-        :subscribe(function (pos)
-            alertaPerigo.cor = {0,0,0,0}
-        end)
-
-    -- Atualiza pos dos tiros
-    scheduler:schedule(function()
-            coroutine.yield(1)
-            while true and enemy.alive do
-                rx.Observable.fromTable(enemy.shots, pairs, false)
-                    :filter(function(shot)
-                        return shot.fired
-                    end)
-                    :subscribe(function(shot)
-                        enemiesShotsPos:onNext({shot.body:getPosition()})
-                    end)
-                coroutine.yield(.3)
-            end
-        end)
 
 	enemy.draw = function()
 		love.graphics.setColor(135/255, 0, 168/255)
@@ -150,8 +138,8 @@ function Enemies.CreateShooter(posX, posY, scheduler)
             
         -- Alerta perigo
         local offsetX, offsetY = -(-heroPosX + love.graphics.getWidth()/2), -(-heroPosY + love.graphics.getHeight() * 3/4)
-        love.graphics.setColor(unpack(alertaPerigo.cor))
-        love.graphics.rectangle("line", love.graphics.getWidth()-20 + offsetX, alertaPerigo.y -heroPosY + love.graphics.getHeight() * 3/4 + offsetY, 20, 20)
+        love.graphics.setColor(unpack(enemy.alertaPerigo.cor))
+        love.graphics.rectangle("line", love.graphics.getWidth()-20 + offsetX, enemy.alertaPerigo.y -heroPosY + love.graphics.getHeight() * 3/4 + offsetY, 20, 20)
     end
 
     table.insert(Enemies.enemies, enemy)  
