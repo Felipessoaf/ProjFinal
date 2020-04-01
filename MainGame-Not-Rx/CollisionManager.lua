@@ -20,25 +20,6 @@ function CollisionManager.Init(scheduler)
     preSolve = rx.Subject.create()
     postSolve = rx.Subject.create()
 
-    -- Trata colisao de tiro do inimigo
-    enemyShotHit = beginContact:filter(function(a, b, coll) return a:getUserData().properties.tag == "EnemyShot" or b:getUserData().properties.tag == "EnemyShot" end)
-    enemyShotHitHero, enemyShotHitOther = enemyShotHit:partition(function(a, b, coll) return a:getUserData().properties.tag == "Hero" end)
-    enemyShotHitOther:subscribe(function(a, b, coll) 
-        b:getUserData().properties.fired = false 
-        scheduler:schedule(function()
-            coroutine.yield(.01)
-            b:getUserData().properties.body:setActive(false)
-        end)
-    end)
-    enemyShotHitHero:subscribe(function(a, b, coll)
-        b:getUserData().properties.fired = false 
-        scheduler:schedule(function()
-            coroutine.yield(.01)
-            b:getUserData().properties.body:setActive(false)
-        end)
-            
-        a:getUserData().properties.damage(10)
-    end)
 end
 
 function bC(a, b, coll)  
@@ -52,6 +33,8 @@ function bC(a, b, coll)
         hero.inEnemyRange = enemyRange
     elseif a:getUserData().properties.tag == "Shot" or b:getUserData().properties.tag == "Shot" then
         checkShotHit(a, b)
+    elseif a:getUserData().properties.tag == "EnemyShot" or b:getUserData().properties.tag == "EnemyShot" then
+        checkEnemyShotHit(a, b)
     end
 end
 
@@ -95,6 +78,18 @@ function checkShotHit(a, b)
             shot.body:setPosition(-8000,-8000)
         end)
     end
+end
+
+function checkEnemyShotHit(a, b)
+    if a:getUserData().properties.tag == "Hero" then
+        a:getUserData().properties.damage(10)
+    end
+
+    b:getUserData().properties.fired = false 
+    CollisionManager.scheduler:schedule(function()
+        coroutine.yield(.01)
+        b:getUserData().properties.body:setActive(false)
+    end)
 end
 
 function enemyShoot(shotsTable, pos)
