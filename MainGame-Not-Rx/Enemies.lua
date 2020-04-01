@@ -51,6 +51,8 @@ function Enemies.CreateShooter(posX, posY, scheduler)
 	enemy.nextShotTimeInterval = 1
 	enemy.lastDangerResetTime = love.timer.getTime()
 	enemy.dangerTimeMax = 1
+	enemy.lastDangerAlertTime = love.timer.getTime()
+	enemy.dangerAlertTimeInterval = 0.3
 
 	-- Physics
 	enemy.body = love.physics.newBody(world, enemy.initX, enemy.initY, "dynamic")
@@ -100,12 +102,15 @@ function Enemies.CreateShooter(posX, posY, scheduler)
             end
 
             -- Calculate dangerAlert
-            for _, shot in pairs(enemy.shots) do
-                local rightSide = hero.body:getX() + love.graphics.getWidth()/2
-                local posX, posY = shot.body:getPosition()
-                if posX > rightSide and posX < rightSide + 150 then
-                    enemy.alertaPerigo.cor = {1,0,0,1}
-                    enemy.alertaPerigo.y = posY
+            if curTime > enemy.lastDangerAlertTime + enemy.dangerAlertTimeInterval then
+                enemy.lastDangerAlertTime = curTime
+                for _, shot in pairs(enemy.shots) do
+                    local rightSide = hero.body:getX() + love.graphics.getWidth()/2
+                    local posX, posY = shot.body:getPosition()
+                    if posX > rightSide and posX < rightSide + 150 then
+                        enemy.alertaPerigo.cor = {1,0,0,1}
+                        enemy.alertaPerigo.y = posY
+                    end
                 end
             end
 
