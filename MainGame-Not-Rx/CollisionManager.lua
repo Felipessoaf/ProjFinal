@@ -1,7 +1,3 @@
--- Rx libs
-local rx = require 'rx'
-require 'rx-love'
-
 local CollisionManager = {}
 
 function CollisionManager.Init(scheduler)
@@ -13,17 +9,11 @@ function CollisionManager.Init(scheduler)
     CollisionManager.scheduler = scheduler
 
     -- --Collision callbacks:
-    world:setCallbacks(bC, eC, preS, postS)
-
-    beginContact = rx.Subject.create()
-    endContact = rx.Subject.create()
-    preSolve = rx.Subject.create()
-    postSolve = rx.Subject.create()
+    world:setCallbacks(beginContact, endContact, preSolve, postSolve)
 
 end
 
-function bC(a, b, coll)  
-    beginContact:onNext(a, b, coll)  
+function beginContact(a, b, coll)  
     -- Trata reset do grounded para pulo
     if (a:getUserData().properties.Ground == true or a:getUserData().properties.tag == "Platform") and b:getUserData().properties.tag == "Hero" then
         hero.grounded = true
@@ -38,8 +28,7 @@ function bC(a, b, coll)
     end
 end
 
-function eC(a, b, coll)
-    endContact:onNext(a, b, coll)
+function endContact(a, b, coll)
     if a:getUserData().properties.tag == "Hero" and b:getUserData().properties.tag == "EnemyRange" then
         local enemyRange = b:getUserData().properties
         enemyRange.color = enemyRange.outRangeColor
@@ -47,12 +36,12 @@ function eC(a, b, coll)
     end
 end
 
-function preS(a, b, coll)
-    preSolve:onNext(a, b, coll)
+function preSolve(a, b, coll)
+    
 end
 
-function postS(a, b, coll, normalimpulse, tangentimpulse)
-    postSolve:onNext(a, b, coll, normalimpulse, tangentimpulse)
+function postSolve(a, b, coll, normalimpulse, tangentimpulse)
+    
 end
 
 function checkShotHit(a, b)
@@ -92,28 +81,13 @@ function checkEnemyShotHit(a, b)
     end)
 end
 
-function enemyShoot(shotsTable, pos)
-    rx.Observable.fromTable(shotsTable, pairs, false)
-        :filter(function(shot)
-            return not shot.fired
-        end)
-        :first()
-        :subscribe(function(shot)
-            shot.body:setLinearVelocity(-shot.speed, 0)
-            shot.body:setPosition(unpack(pos))
-            shot.fired = true
-            shot.body:setActive(true)
-        end)
-end
-
 function killEnemy(enemy)
     CollisionManager.scheduler:schedule(function()
         coroutine.yield(.01)
-        rx.Observable.fromTable(enemy.shots, pairs, false)
-            :subscribe(function(shot)
-                shot.body:setActive(false)
-                shot.fixture:setMask(2,3)
-            end)
+        for k, shot in pairs(enemy.shots) do
+            shot.body:setActive(false)
+            shot.fixture:setMask(2,3)
+        end
         enemy.shots = {}
         enemy.body:setActive(false)
     end)

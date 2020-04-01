@@ -87,13 +87,26 @@ function Enemies.CreateShooter(posX, posY, scheduler)
     enemy.alertaPerigo.y = 0
 
     -- Functions
+    enemy.enemyShoot = function (shotsTable, pos)   
+        for k, shot in pairs(shotsTable) do
+            if not shot.fired then
+                shot.body:setLinearVelocity(-shot.speed, 0)
+                shot.body:setPosition(unpack(pos))
+                shot.fired = true
+                shot.body:setActive(true)
+
+                break
+            end
+        end
+    end
+
     enemy.update = function (dt)
         if enemy.alive then
             -- Shoots
             local curTime = love.timer.getTime()
             if curTime > enemy.lastShotTime + enemy.nextShotTimeInterval then
                 enemy.lastShotTime = curTime
-                enemyShoot(enemy.shots, {enemy.body:getX(), enemy.body:getY()})
+                enemy.enemyShoot(enemy.shots, {enemy.body:getX(), enemy.body:getY()})
                 enemy.nextShotTimeInterval = math.random(.5,2)
             end
 
