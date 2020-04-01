@@ -19,35 +19,6 @@ function CollisionManager.Init(scheduler)
     endContact = rx.Subject.create()
     preSolve = rx.Subject.create()
     postSolve = rx.Subject.create()
-    
-    -- Trata colisao de tiro do player
-    shotHit = beginContact:filter(function(a, b, coll) return a:getUserData().properties.tag == "Shot" or b:getUserData().properties.tag == "Shot" end)
-    shotHitEnemy = rx.BehaviorSubject.create()
-
-    shotHit:subscribe(function(a, b, coll) 
-        local shot = {}
-        local other = {}
-        if a:getUserData().properties.tag == "Shot" then
-            shot = a:getUserData().properties
-            other = b:getUserData().properties
-        else
-            shot = b:getUserData().properties
-            other = a:getUserData().properties
-        end
-
-        if other.tag == "Enemy" then
-            killEnemy(other) 
-        end
-
-        if other.tag ~= "EnemyRange" then
-            shot.fired = false 
-            scheduler:schedule(function()
-                coroutine.yield(.01)
-                shot.body:setActive(false)
-                shot.body:setPosition(-8000,-8000)
-            end)
-        end
-    end)
 
     -- Trata colisao de tiro do inimigo
     enemyShotHit = beginContact:filter(function(a, b, coll) return a:getUserData().properties.tag == "EnemyShot" or b:getUserData().properties.tag == "EnemyShot" end)
@@ -79,6 +50,8 @@ function bC(a, b, coll)
         local enemyRange, hero = b:getUserData().properties, a:getUserData().properties
         enemyRange.color = enemyRange.dangerColor
         hero.inEnemyRange = enemyRange
+    elseif a:getUserData().properties.tag == "Shot" or b:getUserData().properties.tag == "Shot" then
+        checkShotHit(a, b)
     end
 end
 
@@ -97,6 +70,31 @@ end
 
 function postS(a, b, coll, normalimpulse, tangentimpulse)
     postSolve:onNext(a, b, coll, normalimpulse, tangentimpulse)
+end
+
+function checkShotHit(a, b)
+    local shot = {}
+    local other = {}
+    if a:getUserData().properties.tag == "Shot" then
+        shot = a:getUserData().properties
+        other = b:getUserData().properties
+    else
+        shot = b:getUserData().properties
+        other = a:getUserData().properties
+    end
+
+    if other.tag == "Enemy" then
+        killEnemy(other) 
+    end
+
+    if other.tag ~= "EnemyRange" then
+        shot.fired = false 
+        CollisionManager.scheduler:schedule(function()
+            coroutine.yield(.01)
+            shot.body:setActive(false)
+            shot.body:setPosition(-8000,-8000)
+        end)
+    end
 end
 
 function enemyShoot(shotsTable, pos)
