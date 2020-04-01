@@ -120,12 +120,16 @@ function Player.Init(scheduler)
             hero.body:setLinearVelocity(0, currentVelY)
         elseif key == 'w' and hero.grounded then
             hero.jump()
+        elseif key == "c" and hero.inEnemyRange ~= nil then
+            hero.inEnemyRange.color = hero.inEnemyRange.safeColor
         end
     end
 
     hero.keyreleased = function (key)
         if key == 'a' or  key == 'd' then
             hero.stopHorMove()
+        elseif key == "c" and hero.inEnemyRange ~= nil then
+            hero.inEnemyRange.color = hero.inEnemyRange.dangerColor
         end
     end
 

@@ -99,18 +99,6 @@ function postS(a, b, coll, normalimpulse, tangentimpulse)
     postSolve:onNext(a, b, coll, normalimpulse, tangentimpulse)
 end
 
--- function love.keypressed( key )
---     if key == "c" and hero.inEnemyRange ~= nil then
---         hero.inEnemyRange.color = hero.inEnemyRange.safeColor
---     end
---  end
-  
---  function love.keyreleased( key )
---     if key == "c" and hero.inEnemyRange ~= nil then
---         hero.inEnemyRange.color = hero.inEnemyRange.dangerColor
---     end
---  end
-
 function enemyShoot(shotsTable, pos)
     rx.Observable.fromTable(shotsTable, pairs, false)
         :filter(function(shot)
