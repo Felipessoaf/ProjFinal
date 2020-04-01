@@ -43,7 +43,7 @@ end
 function beginContact(a, b, coll)  
     -- Trata reset do grounded para pulo
     if (a:getUserData().properties.Ground == true or a:getUserData().properties.tag == "Platform") and b:getUserData().properties.tag == "Hero" then
-        hero.grounded = true
+        hero.jumpCount = 2
     elseif a:getUserData().properties.tag == "Hero" and b:getUserData().properties.tag == "EnemyRange" then
         local enemyRange, hero = b:getUserData().properties, a:getUserData().properties
         enemyRange.color = enemyRange.dangerColor

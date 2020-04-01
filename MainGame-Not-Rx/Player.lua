@@ -39,7 +39,7 @@ function Player.Init(scheduler)
     hero.width = 20
     hero.height = 30
     hero.speed = 150
-    hero.grounded = true
+    hero.jumpCount = 2
     
 	-- Physics
     hero.body = love.physics.newBody(world, hero.initX, hero.initY, "dynamic")
@@ -50,8 +50,7 @@ function Player.Init(scheduler)
     hero.fixture:setCategory(2)
 
     -- shots
-    hero.shots = Shot.Init()
-    
+    hero.shots = Shot.Init()    
     for i=1,5 do
         Shot.Create()
     end
@@ -69,8 +68,18 @@ function Player.Init(scheduler)
     end
     
     hero.jump = function ()
+        -- Sets y velocity to 0
+        currentVelX, currentVelY = hero.body:getLinearVelocity()
+        hero.body:setLinearVelocity(currentVelX, 0)
+
+        -- Applies impulse
         hero.body:applyLinearImpulse(0, -100)
-        hero.grounded = false
+
+        -- Decrement jumpCount
+        hero.jumpCount = hero.jumpCount - 1
+
+        -- Clamp 0..hero.jumpCount
+        hero.jumpCount = (hero.jumpCount < 0 and 0 or hero.jumpCount)
     end
     
     hero.shoot = function ()        
@@ -118,7 +127,7 @@ function Player.Init(scheduler)
             hero.shoot()
             currentVelX, currentVelY = hero.body:getLinearVelocity()
             hero.body:setLinearVelocity(0, currentVelY)
-        elseif key == 'w' and hero.grounded then
+        elseif key == 'w' and hero.jumpCount > 0 then
             hero.jump()
         elseif key == "c" and hero.inEnemyRange ~= nil then
             hero.inEnemyRange.color = hero.inEnemyRange.safeColor
