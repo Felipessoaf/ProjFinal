@@ -42,6 +42,9 @@ function love.update(dt)
     for _, enemie in pairs(enemies) do
         enemie.update(dt)
     end
+
+    -- Update collisions
+    CollisionManager.update(dt)
 end
 
 function love.keyreleased(key)

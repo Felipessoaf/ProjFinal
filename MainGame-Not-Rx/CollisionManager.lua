@@ -1,14 +1,39 @@
 local CollisionManager = {}
 
-function CollisionManager.Init(scheduler)
+function CollisionManager.Init()
     -- local HERO_CATEGORY = 3
     -- local HERO_SHOT_CATEGORY = 4
     -- local ENEMY_CATEGORY = 5
     -- local ENEMY_SHOT_CATEGORY = 6
     
-    CollisionManager.scheduler = scheduler
+    -- CollisionManager.scheduler = scheduler
 
     CollisionManager.shotsToDisable = {}
+    CollisionManager.enemyShotsToDisable = {}
+    CollisionManager.enemiesToDisable = {}
+
+    CollisionManager.update = function(dt) 
+        for k, shot in pairs(CollisionManager.shotsToDisable) do
+            shot.body:setActive(false)
+            shot.body:setPosition(-8000,-8000)
+            CollisionManager.shotsToDisable[k] = nil
+        end
+
+        for k, shot in pairs(CollisionManager.enemyShotsToDisable) do
+            shot.body:setActive(false)
+        end
+        
+        for k, enemy in pairs(CollisionManager.enemiesToDisable) do
+            if enemy.shots ~= nil then
+                for i, shot in pairs(enemy.shots) do
+                    shot.body:setActive(false)
+                    shot.fixture:setMask(2,3)
+                end
+                enemy.shots = {}
+            end
+            enemy.body:setActive(false)
+        end
+    end
 
     -- --Collision callbacks:
     world:setCallbacks(beginContact, endContact, preSolve, postSolve)
@@ -43,10 +68,7 @@ function preSolve(a, b, coll)
 end
 
 function postSolve(a, b, coll, normalimpulse, tangentimpulse)
-    for k, shot in pairs(CollisionManager.shotsToDisable) do
-        -- shot.body:setActive(false)
-        -- shot.body:setPosition(-8000,-8000)
-    end
+
 end
 
 function checkShotHit(a, b)
@@ -67,11 +89,6 @@ function checkShotHit(a, b)
     if other.tag ~= "EnemyRange" then
         shot.fired = false 
         table.insert(CollisionManager.shotsToDisable, shot)
-        -- CollisionManager.scheduler:schedule(function()
-        --     coroutine.yield(.01)
-        --     shot.body:setActive(false)
-        --     shot.body:setPosition(-8000,-8000)
-        -- end)
     end
 end
 
@@ -81,22 +98,11 @@ function checkEnemyShotHit(a, b)
     end
 
     b:getUserData().properties.fired = false 
-    CollisionManager.scheduler:schedule(function()
-        coroutine.yield(.01)
-        b:getUserData().properties.body:setActive(false)
-    end)
+    table.insert(CollisionManager.enemyShotsToDisable, b:getUserData().properties)
 end
 
 function killEnemy(enemy)
-    CollisionManager.scheduler:schedule(function()
-        coroutine.yield(.01)
-        for k, shot in pairs(enemy.shots) do
-            shot.body:setActive(false)
-            shot.fixture:setMask(2,3)
-        end
-        enemy.shots = {}
-        enemy.body:setActive(false)
-    end)
+    table.insert(CollisionManager.enemiesToDisable, enemy)
     enemy.alive = false
 end
 
