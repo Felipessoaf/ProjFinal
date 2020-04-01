@@ -52,7 +52,7 @@ function Player.Init(scheduler)
     hero.fixture = love.physics.newFixture(hero.body, hero.shape, 2)
     hero.fixture:setUserData({properties = hero})
     hero.fixture:setCategory(2)
-    hero.grounded = true
+    hero.jumpCount = 2
     hero.collisions = rx.BehaviorSubject.create()
 
     -- shots
@@ -75,8 +75,18 @@ function Player.Init(scheduler)
     end
     
     hero.jump = function ()
+        -- Sets y velocity to 0
+        currentVelX, currentVelY = hero.body:getLinearVelocity()
+        hero.body:setLinearVelocity(currentVelX, 0)
+
+        -- Applies impulse
         hero.body:applyLinearImpulse(0, -100)
-        hero.grounded = false
+
+        -- Decrement jumpCount
+        hero.jumpCount = hero.jumpCount - 1
+        
+        -- Clamp 0..hero.jumpCount
+        hero.jumpCount = (hero.jumpCount < 0 and 0 or hero.jumpCount)
     end
     
     hero.shoot = function ()
@@ -138,7 +148,7 @@ function Player.Init(scheduler)
         end)
 
     love.keypressed
-        :filter(function(key) return key == 'w' and hero.grounded end)
+        :filter(function(key) return key == 'w' and hero.jumpCount > 0 end)
         :subscribe(function()
             hero.jump()
         end)

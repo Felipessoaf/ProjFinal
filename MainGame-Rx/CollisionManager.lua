@@ -20,12 +20,12 @@ function CollisionManager.Init(scheduler)
     preSolve = rx.Subject.create()
     postSolve = rx.Subject.create()
 
-    -- Trata reset do grounded para pulo
+    -- Trata reset do jumpCount
     beginContact
         :filter(function(a, b, coll) 
             return (a:getUserData().properties.Ground == true or a:getUserData().properties.tag == "Platform") and b:getUserData().properties.tag == "Hero" 
         end)
-        :subscribe(function() hero.grounded = true end)
+        :subscribe(function() hero.jumpCount = 2 end)
 
     -- Trata colisao player com enemyRange
     enterRange = beginContact
