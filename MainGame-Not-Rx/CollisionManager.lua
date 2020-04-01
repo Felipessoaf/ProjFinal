@@ -8,6 +8,8 @@ function CollisionManager.Init(scheduler)
     
     CollisionManager.scheduler = scheduler
 
+    CollisionManager.shotsToDisable = {}
+
     -- --Collision callbacks:
     world:setCallbacks(beginContact, endContact, preSolve, postSolve)
 
@@ -41,7 +43,10 @@ function preSolve(a, b, coll)
 end
 
 function postSolve(a, b, coll, normalimpulse, tangentimpulse)
-    
+    for k, shot in pairs(CollisionManager.shotsToDisable) do
+        -- shot.body:setActive(false)
+        -- shot.body:setPosition(-8000,-8000)
+    end
 end
 
 function checkShotHit(a, b)
@@ -61,11 +66,12 @@ function checkShotHit(a, b)
 
     if other.tag ~= "EnemyRange" then
         shot.fired = false 
-        CollisionManager.scheduler:schedule(function()
-            coroutine.yield(.01)
-            shot.body:setActive(false)
-            shot.body:setPosition(-8000,-8000)
-        end)
+        table.insert(CollisionManager.shotsToDisable, shot)
+        -- CollisionManager.scheduler:schedule(function()
+        --     coroutine.yield(.01)
+        --     shot.body:setActive(false)
+        --     shot.body:setPosition(-8000,-8000)
+        -- end)
     end
 end
 
