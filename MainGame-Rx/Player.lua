@@ -32,6 +32,7 @@ function Player.Init(scheduler)
     -- Create hero table
 	local hero = {}
 
+	-- Properties
     hero.tag = "Hero"
     hero.health = rx.BehaviorSubject.create(100)
     hero.health:debounce(1, scheduler)
@@ -45,15 +46,16 @@ function Player.Init(scheduler)
     hero.width = 20
     hero.height = 30
     hero.speed = 150
-    hero.shots = {} -- holds our shots
+    hero.jumpCount = 2
+
+	-- Physics
     hero.body = love.physics.newBody(world, hero.initX, hero.initY, "dynamic")
     hero.body:setFixedRotation(true)
     hero.shape = love.physics.newRectangleShape(hero.width, hero.height)
     hero.fixture = love.physics.newFixture(hero.body, hero.shape, 2)
     hero.fixture:setUserData({properties = hero})
     hero.fixture:setCategory(2)
-    hero.jumpCount = 2
-    hero.collisions = rx.BehaviorSubject.create()
+    -- hero.collisions = rx.BehaviorSubject.create()
 
     -- shots
     hero.shots = Shot.Init()
@@ -84,7 +86,7 @@ function Player.Init(scheduler)
 
         -- Decrement jumpCount
         hero.jumpCount = hero.jumpCount - 1
-        
+
         -- Clamp 0..hero.jumpCount
         hero.jumpCount = (hero.jumpCount < 0 and 0 or hero.jumpCount)
     end
