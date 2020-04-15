@@ -1,15 +1,19 @@
 local Layers = {
+    movingPlats = {
+        name = "MovingPlats",
+        number = 3
+    },
     shots = {
         name = "Shots",
-        number = 3
+        number = 4
     },
     player = {
         name = "Player",
-        number = 4
+        number = 5
     },
     enemy = {
         name = "Enemy",
-        number = 5
+        number = 6
     },
 }
 

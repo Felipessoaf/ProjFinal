@@ -11,6 +11,9 @@ local MapManager = require 'MapManager'
 -- Player module
 local Player = require 'Player'
 
+-- MovingPlats module
+local MovingPlats = require 'MovingPlats'
+
 -- CollisionManager module
 local CollisionManager = require 'CollisionManager'
 
@@ -24,6 +27,8 @@ love.load:subscribe(function (arg)
     hero = Player.Init(scheduler)
     
     enemies = Enemies.Init(scheduler)
+    
+    movingPlats = MovingPlats.Init(scheduler)
 
     CollisionManager.Init(scheduler)
 end)
