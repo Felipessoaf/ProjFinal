@@ -385,12 +385,12 @@
   </object>
  </objectgroup>
  <objectgroup id="10" name="movingPlats">
-  <object id="14" name="horizontal" x="1644" y="1016">
+  <object id="14" name="horizontalPlat" x="1323.5" y="1036.5">
    <properties>
     <property name="platType" value="horizontal"/>
    </properties>
   </object>
-  <object id="16" name="vertical" x="1749.5" y="1013.5">
+  <object id="16" name="verticalPlat" x="1538.5" y="997">
    <properties>
     <property name="platType" value="vertical"/>
    </properties>

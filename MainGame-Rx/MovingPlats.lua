@@ -13,7 +13,7 @@ function MovingPlats.Init(scheduler)
 
    MovingPlats.movingPlats = {}
 
-	-- Get enemies spawn objects
+	-- Get plats spawn objects
 	for k, object in pairs(map.objects) do
         if object.name == "verticalPlat" then
 			MovingPlats.Create(object.x, object.y, scheduler, true)
@@ -30,10 +30,10 @@ function MovingPlats.Init(scheduler)
             end)
    end
    
-   return Enemies.enemies
+   return MovingPlats.movingPlats
 end
 
-function MovingPlats.CreateShooter(posX, posY, scheduler, isVertical)
+function MovingPlats.Create(posX, posY, scheduler, isVertical)
 	local plat = {}
 	-- Properties
 	plat.tag = "movingPlat"
@@ -44,20 +44,13 @@ function MovingPlats.CreateShooter(posX, posY, scheduler, isVertical)
 	plat.vertical = isVertical
 
 	-- Physics
-	plat.body = love.physics.newBody(world, plat.initX, plat.initY, "dynamic")
-	plat.body:setFixedRotation(true)
+	plat.body = love.physics.newBody(world, plat.initX, plat.initY, "kinematic")
+    plat.body:setFixedRotation(true)
+    plat.body:setGravityScale(0)
+    plat.body:setLinearVelocity(isVertical and 0 or 50, isVertical and -50 or 0)
 	plat.shape = love.physics.newRectangleShape(plat.width, plat.height)
 	plat.fixture = love.physics.newFixture(plat.body, plat.shape, 2)
 	plat.fixture:setUserData({properties = plat})
-
-	-- Move
-	scheduler:schedule(function()
-			coroutine.yield(1)
-			while true and enemy.alive do
-				enemyShoot(enemy.shots, {enemy.body:getX(), enemy.body:getY()})
-				coroutine.yield(math.random(.5,2))
-			end
-		end)
 
 	-- Functions
 	plat.draw = function()
@@ -68,11 +61,16 @@ function MovingPlats.CreateShooter(posX, posY, scheduler, isVertical)
 
         -- Temporarily draw a point at our location so we know
         -- that our sprite is offset properly
-        -- love.graphics.setPointSize(5)
-        -- love.graphics.points(math.floor(enemy.body:getX()), math.floor(enemy.body:getY()))
-	end
+        love.graphics.setColor(1, 1, 1)
+        love.graphics.setPointSize(5)
+        love.graphics.points(math.floor(plat.body:getX()), math.floor(plat.body:getY()))
+    end
+    
+    plat.insidePath = function()
+        return true
+    end
 
-   table.insert(MovingPlats.movingPlatsLayer, plat)  
+   table.insert(MovingPlats.movingPlats, plat)  
 end
 
 
