@@ -39,8 +39,8 @@ function love.update(dt)
     hero.update(dt)
     
     -- Updates Enemies
-    for _, enemie in pairs(enemies) do
-        enemie.update(dt)
+    for _, enemy in pairs(enemies) do
+        enemy.update(dt)
     end
 
     -- Update collisions
