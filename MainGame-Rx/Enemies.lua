@@ -22,16 +22,17 @@ function Enemies.Init(scheduler)
         end
 	end
     
-	-- Draw enemies
-   enemyLayer.draw = function(self)
-      local enemiesAlive = rx.Observable.fromTable(Enemies.enemies, pairs, false)
-                              :filter(function(enemy)
-                                    return enemy.alive
-                              end)
-      
-      enemiesAlive:subscribe(function(enemy)
-               enemy.draw()
-            end)
+    -- Draw enemies
+    -- TODO: Separar em tabelas diferentes enemies alive vs not alive
+    enemyLayer.draw = function(self)
+        local enemiesAlive = rx.Observable.fromTable(Enemies.enemies, pairs, false)
+                                :filter(function(enemy)
+                                        return enemy.alive
+                                end)
+        
+        enemiesAlive:subscribe(function(enemy)
+                enemy.draw()
+                end)
    end
    
    return Enemies.enemies
