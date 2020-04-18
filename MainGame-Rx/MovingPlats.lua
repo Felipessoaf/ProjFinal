@@ -41,13 +41,15 @@ function MovingPlats.Create(posX, posY, scheduler, isVertical)
 	plat.initY = posY
 	plat.width = 40
 	plat.height = 20
-	plat.vertical = isVertical
+    plat.vertical = isVertical
+    plat.velocity = plat.vertical and -50 or 50
+    plat.canInvert = false
 
 	-- Physics
 	plat.body = love.physics.newBody(world, plat.initX, plat.initY, "kinematic")
     plat.body:setFixedRotation(true)
     plat.body:setGravityScale(0)
-    plat.body:setLinearVelocity(isVertical and 0 or 50, isVertical and -50 or 0)
+    plat.body:setLinearVelocity(plat.vertical and 0 or plat.velocity, plat.vertical and plat.velocity or 0)
 	plat.shape = love.physics.newRectangleShape(plat.width, plat.height)
 	plat.fixture = love.physics.newFixture(plat.body, plat.shape, 2)
 	plat.fixture:setUserData({properties = plat})
@@ -61,14 +63,38 @@ function MovingPlats.Create(posX, posY, scheduler, isVertical)
 
         -- Temporarily draw a point at our location so we know
         -- that our sprite is offset properly
-        love.graphics.setColor(1, 1, 1)
-        love.graphics.setPointSize(5)
-        love.graphics.points(math.floor(plat.body:getX()), math.floor(plat.body:getY()))
+        -- love.graphics.setColor(1, 1, 1)
+        -- love.graphics.setPointSize(5)
+        -- love.graphics.points(math.floor(plat.body:getX()), math.floor(plat.body:getY()))
     end
     
     plat.insidePath = function()
-        return true
+        if plat.vertical then
+            return (plat.body:getY() > (plat.initY - 50)) and (plat.body:getY() < (plat.initY + 50))
+        else
+            return (plat.body:getX() > (plat.initX - 50)) and (plat.body:getX() < (plat.initX + 50))
+        end
     end
+    
+    love.update
+        :filter(function()
+            return plat.insidePath()
+        end)
+        :subscribe(function()
+            print("inside path")
+            plat.canInvert = true
+        end)
+    
+    love.update
+        :filter(function()
+            return not plat.insidePath() and plat.canInvert
+        end)
+        :subscribe(function()
+            print("outside path")
+            plat.velocity = plat.velocity * -1
+            plat.body:setLinearVelocity(plat.vertical and 0 or plat.velocity, plat.vertical and plat.velocity or 0)
+            plat.canInvert = false
+        end)
 
    table.insert(MovingPlats.movingPlats, plat)  
 end
