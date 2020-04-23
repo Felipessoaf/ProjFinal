@@ -3,7 +3,7 @@ local Layers = require 'Layers'
 
 local Enemies = {}
 
-function Enemies.Init(scheduler)
+function Enemies.Init()
    -- Create new dynamic data layer
    local enemyLayer = map:addCustomLayer(Layers.enemy.name, Layers.enemy.number)
 
@@ -12,7 +12,7 @@ function Enemies.Init(scheduler)
 	-- Get enemies spawn objects
 	for k, object in pairs(map.objects) do
         if object.name == "shooterSpawn" then
-			Enemies.CreateShooter(object.x, object.y, scheduler)
+			Enemies.CreateShooter(object.x, object.y)
         elseif object.name == "patrolSpawn" then
 			Enemies.CreatePatrol(object.x, object.y)
         end
@@ -34,7 +34,7 @@ function Enemies.Init(scheduler)
    return Enemies.enemies
 end
 
-function Enemies.CreateShooter(posX, posY, scheduler)
+function Enemies.CreateShooter(posX, posY)
 	local enemy = {}
 	-- Properties
 	enemy.tag = "Enemy"

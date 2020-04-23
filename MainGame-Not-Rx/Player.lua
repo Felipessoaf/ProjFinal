@@ -12,7 +12,7 @@ local keyMap = {
   d = 1
 }
 
-function Player.Init(scheduler)
+function Player.Init()
    -- Create new dynamic data layer
     local playerLayer = map:addCustomLayer(Layers.player.name, Layers.player.number)
 
@@ -48,6 +48,7 @@ function Player.Init(scheduler)
     hero.fixture = love.physics.newFixture(hero.body, hero.shape, 2)
     hero.fixture:setUserData({properties = hero})
     hero.fixture:setCategory(2)
+    hero.fixture:setFriction(1)
 
     -- shots
     hero.shots = Shot.Init()    

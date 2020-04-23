@@ -11,6 +11,9 @@ local MapManager = require 'MapManager'
 -- Player module
 local Player = require 'Player'
 
+-- MovingPlats module
+local MovingPlats = require 'MovingPlats'
+
 -- CollisionManager module
 local CollisionManager = require 'CollisionManager'
 
@@ -21,11 +24,13 @@ function love.load()
 	-- load map
 	map, world = MapManager.InitMap()
 
-    hero = Player.Init(scheduler)
+    hero = Player.Init()
     
-    enemies = Enemies.Init(scheduler)
+    enemies = Enemies.Init()
+    
+    movingPlats = MovingPlats.Init()
 
-    CollisionManager.Init(scheduler)
+    CollisionManager.Init()
 end
 
 function love.update(dt)
@@ -41,6 +46,11 @@ function love.update(dt)
     -- Updates Enemies
     for _, enemy in pairs(enemies) do
         enemy.update(dt)
+    end
+    
+    -- Updates movingPlats
+    for _, movingPlat in pairs(movingPlats) do
+        movingPlat.update(dt)
     end
 
     -- Update collisions
