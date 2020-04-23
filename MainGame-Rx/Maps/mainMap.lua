@@ -8,8 +8,8 @@ return {
   height = 70,
   tilewidth = 32,
   tileheight = 32,
-  nextlayerid = 11,
-  nextobjectid = 18,
+  nextlayerid = 12,
+  nextobjectid = 19,
   properties = {},
   tilesets = {
     {
@@ -568,6 +568,32 @@ return {
             ["Ground"] = true,
             ["platType"] = "vertical"
           }
+        }
+      }
+    },
+    {
+      type = "objectgroup",
+      id = 11,
+      name = "fallingPlats",
+      visible = true,
+      opacity = 1,
+      offsetx = 0,
+      offsety = 0,
+      draworder = "topdown",
+      properties = {},
+      objects = {
+        {
+          id = 18,
+          name = "fallingPlat",
+          type = "",
+          shape = "rectangle",
+          x = 1441,
+          y = 1046,
+          width = 0,
+          height = 0,
+          rotation = 0,
+          visible = true,
+          properties = {}
         }
       }
     },

@@ -28,6 +28,13 @@ function CollisionManager.Init(scheduler)
         end)
         :subscribe(function() hero.jumpCount = 2 end)
 
+    -- Trata colisao player com falling plat
+    beginContact
+        :filter(function(a, b, coll) 
+            return a:getUserData().properties.tag == "Hero" and b:getUserData().properties.tag == "fallingPlat"
+        end)
+        :subscribe(function(a, b, coll) b:getUserData().properties.touchedPlayer:onNext(true) end)
+
     -- Trata colisao player com enemyRange
     enterRange = beginContact
         :filter(function(a, b, coll) 

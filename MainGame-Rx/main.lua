@@ -14,6 +14,9 @@ local Player = require 'Player'
 -- MovingPlats module
 local MovingPlats = require 'MovingPlats'
 
+-- FallingPlats module
+local FallingPlats = require 'FallingPlats'
+
 -- CollisionManager module
 local CollisionManager = require 'CollisionManager'
 
@@ -29,6 +32,8 @@ love.load:subscribe(function (arg)
     enemies = Enemies.Init(scheduler)
     
     movingPlats = MovingPlats.Init(scheduler)
+    
+    fallingPlats = FallingPlats.Init(scheduler)
 
     CollisionManager.Init(scheduler)
 end)
