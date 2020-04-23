@@ -1,7 +1,3 @@
--- Rx libs
-local rx = require 'rx'
-require 'rx-love'
-
 -- Layers module
 local Layers = require 'Layers'
 
@@ -24,10 +20,9 @@ function MovingPlats.Init()
     
     -- Draw plats
     movingPlatsLayer.draw = function(self)
-        rx.Observable.fromTable(MovingPlats.movingPlats, pairs, false)
-            :subscribe(function(plat)
-                plat.draw()
-            end)
+        for k, plat in pairs(MovingPlats.movingPlats) do
+            plat.draw()
+        end
    end
    
    return MovingPlats.movingPlats
