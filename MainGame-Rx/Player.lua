@@ -55,6 +55,7 @@ function Player.Init(scheduler)
     hero.fixture = love.physics.newFixture(hero.body, hero.shape, 2)
     hero.fixture:setUserData({properties = hero})
     hero.fixture:setCategory(2)
+    hero.fixture:setFriction(1)
     -- hero.collisions = rx.BehaviorSubject.create()
 
     -- shots

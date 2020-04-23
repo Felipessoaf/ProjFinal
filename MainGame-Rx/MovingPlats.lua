@@ -16,9 +16,9 @@ function MovingPlats.Init(scheduler)
 	-- Get plats spawn objects
 	for k, object in pairs(map.objects) do
         if object.name == "verticalPlat" then
-			MovingPlats.Create(object.x, object.y, scheduler, true)
+			MovingPlats.Create(object.x, object.y, scheduler, true, object.properties)
         elseif object.name == "horizontalPlat" then
-			MovingPlats.Create(object.x, object.y, scheduler, false)
+			MovingPlats.Create(object.x, object.y, scheduler, false, object.properties)
         end
 	end
     
@@ -33,7 +33,7 @@ function MovingPlats.Init(scheduler)
    return MovingPlats.movingPlats
 end
 
-function MovingPlats.Create(posX, posY, scheduler, isVertical)
+function MovingPlats.Create(posX, posY, scheduler, isVertical, properties)
 	local plat = {}
 	-- Properties
 	plat.tag = "movingPlat"
@@ -44,6 +44,7 @@ function MovingPlats.Create(posX, posY, scheduler, isVertical)
     plat.vertical = isVertical
     plat.velocity = plat.vertical and -50 or 50
     plat.canInvert = false
+    plat.Ground = true
 
 	-- Physics
 	plat.body = love.physics.newBody(world, plat.initX, plat.initY, "kinematic")
@@ -51,7 +52,8 @@ function MovingPlats.Create(posX, posY, scheduler, isVertical)
     plat.body:setGravityScale(0)
     plat.body:setLinearVelocity(plat.vertical and 0 or plat.velocity, plat.vertical and plat.velocity or 0)
 	plat.shape = love.physics.newRectangleShape(plat.width, plat.height)
-	plat.fixture = love.physics.newFixture(plat.body, plat.shape, 2)
+    plat.fixture = love.physics.newFixture(plat.body, plat.shape, 2)
+    plat.fixture:setFriction(1)
 	plat.fixture:setUserData({properties = plat})
 
 	-- Functions
@@ -81,7 +83,6 @@ function MovingPlats.Create(posX, posY, scheduler, isVertical)
             return plat.insidePath()
         end)
         :subscribe(function()
-            print("inside path")
             plat.canInvert = true
         end)
     
@@ -90,7 +91,6 @@ function MovingPlats.Create(posX, posY, scheduler, isVertical)
             return not plat.insidePath() and plat.canInvert
         end)
         :subscribe(function()
-            print("outside path")
             plat.velocity = plat.velocity * -1
             plat.body:setLinearVelocity(plat.vertical and 0 or plat.velocity, plat.vertical and plat.velocity or 0)
             plat.canInvert = false

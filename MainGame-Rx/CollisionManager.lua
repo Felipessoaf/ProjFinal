@@ -23,7 +23,8 @@ function CollisionManager.Init(scheduler)
     -- Trata reset do jumpCount
     beginContact
         :filter(function(a, b, coll) 
-            return (a:getUserData().properties.Ground == true or a:getUserData().properties.tag == "Platform") and b:getUserData().properties.tag == "Hero" 
+            return ((a:getUserData().properties.Ground == true or a:getUserData().properties.tag == "Platform") and b:getUserData().properties.tag == "Hero" or
+                    (b:getUserData().properties.Ground == true or b:getUserData().properties.tag == "Platform") and a:getUserData().properties.tag == "Hero")
         end)
         :subscribe(function() hero.jumpCount = 2 end)
 

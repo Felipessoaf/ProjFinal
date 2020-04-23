@@ -9,7 +9,7 @@ return {
   tilewidth = 32,
   tileheight = 32,
   nextlayerid = 11,
-  nextobjectid = 17,
+  nextobjectid = 18,
   properties = {},
   tilesets = {
     {
@@ -526,13 +526,14 @@ return {
           name = "horizontalPlat",
           type = "",
           shape = "rectangle",
-          x = 1323.5,
-          y = 1036.5,
+          x = 1658.5,
+          y = 985.5,
           width = 0,
           height = 0,
           rotation = 0,
           visible = true,
           properties = {
+            ["Ground"] = true,
             ["platType"] = "horizontal"
           }
         },
@@ -541,13 +542,30 @@ return {
           name = "verticalPlat",
           type = "",
           shape = "rectangle",
-          x = 1538.5,
-          y = 997,
+          x = 1758,
+          y = 911.5,
           width = 0,
           height = 0,
           rotation = 0,
           visible = true,
           properties = {
+            ["Ground"] = true,
+            ["platType"] = "vertical"
+          }
+        },
+        {
+          id = 17,
+          name = "verticalPlat",
+          type = "",
+          shape = "rectangle",
+          x = 2462.5,
+          y = 1137,
+          width = 0,
+          height = 0,
+          rotation = 0,
+          visible = true,
+          properties = {
+            ["Ground"] = true,
             ["platType"] = "vertical"
           }
         }
