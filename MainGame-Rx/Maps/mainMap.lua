@@ -9,7 +9,7 @@ return {
   tilewidth = 32,
   tileheight = 32,
   nextlayerid = 12,
-  nextobjectid = 19,
+  nextobjectid = 20,
   properties = {},
   tilesets = {
     {
@@ -500,6 +500,21 @@ return {
           shape = "rectangle",
           x = 2602.67,
           y = 1008.67,
+          width = 0,
+          height = 0,
+          rotation = 0,
+          visible = true,
+          properties = {
+            ["enemyType"] = "patrol"
+          }
+        },
+        {
+          id = 19,
+          name = "patrolSpawn",
+          type = "",
+          shape = "rectangle",
+          x = 2702,
+          y = 1009,
           width = 0,
           height = 0,
           rotation = 0,

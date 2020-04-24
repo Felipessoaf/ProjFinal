@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.3.2" orientation="orthogonal" renderorder="left-up" compressionlevel="0" width="150" height="70" tilewidth="32" tileheight="32" infinite="0" nextlayerid="12" nextobjectid="19">
+<map version="1.2" tiledversion="1.3.2" orientation="orthogonal" renderorder="left-up" compressionlevel="0" width="150" height="70" tilewidth="32" tileheight="32" infinite="0" nextlayerid="12" nextobjectid="20">
  <editorsettings>
   <export target="mainMap.lua" format="lua"/>
  </editorsettings>
@@ -379,6 +379,11 @@
    </properties>
   </object>
   <object id="13" name="patrolSpawn" x="2602.67" y="1008.67">
+   <properties>
+    <property name="enemyType" value="patrol"/>
+   </properties>
+  </object>
+  <object id="19" name="patrolSpawn" x="2702" y="1009">
    <properties>
     <property name="enemyType" value="patrol"/>
    </properties>

@@ -46,9 +46,17 @@ function FallingPlats.Create(posX, posY, scheduler)
     plat.timeToFall = 3
     plat.touchedPlayer = rx.BehaviorSubject.create()
 
-    plat.touchedPlayer:subscribe(function(val)
-        print("touched player!")
-    end)
+    plat.touchedPlayer
+        :filter(function(val)
+            return plat.timePlayerTouched < 0
+        end)
+        :debounce(function(val)
+            return plat.timePlayerTouched < 0
+        end, 3)
+        :subscribe(function(val)
+            plat.timePlayerTouched = love.timer.getTime()
+            print("touched player!")
+        end)
 
 	-- Physics
 	plat.body = love.physics.newBody(world, plat.initX, plat.initY, "kinematic")
