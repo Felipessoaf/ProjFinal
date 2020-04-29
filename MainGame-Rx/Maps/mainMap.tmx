@@ -410,7 +410,7 @@
   </object>
  </objectgroup>
  <objectgroup id="11" name="fallingPlats">
-  <object id="18" name="fallingPlat" x="1686.33" y="748.667"/>
+  <object id="18" name="fallingPlat" x="1281" y="1086"/>
  </objectgroup>
  <layer id="7" name="Sea" width="150" height="70">
   <data encoding="csv">

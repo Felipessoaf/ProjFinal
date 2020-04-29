@@ -845,6 +845,30 @@ function Observable:filter(predicate)
   end)
 end
 
+--- Returns a new Observable that produces values of the first and executes a function.
+-- @arg {function} action - The function to be executed.
+-- @returns {Observable}
+function Observable:execute(action)
+  return Observable.create(function(observer)
+    local function onNext(...)
+      util.tryWithObserver(observer, function(...)
+        action(...)
+        return observer:onNext(...)
+      end, ...)
+    end
+
+    local function onError(e)
+      return observer:onError(e)
+    end
+
+    local function onCompleted()
+      return observer:onCompleted()
+    end
+
+    return self:subscribe(onNext, onError, onCompleted)
+  end)
+end
+
 --- Returns a new Observable that produces the first value of the original that satisfies a
 -- predicate.
 -- @arg {function} predicate - The predicate used to find a value.
