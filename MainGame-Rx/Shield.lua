@@ -33,6 +33,12 @@ function Shield.Create(posX, posY, scheduler)
 	shield.initX = posX
 	shield.initY = posY
 	shield.radius = 10
+    shield.touchedPlayer = rx.BehaviorSubject.create()
+
+    shield.touchedPlayer
+        :subscribe(function(val)
+            print("collected!")
+        end)
 
 	-- Physics
 	shield.body = love.physics.newBody(world, shield.initX, shield.initY, "kinematic")
@@ -43,6 +49,7 @@ function Shield.Create(posX, posY, scheduler)
     shield.fixture = love.physics.newFixture(shield.body, shield.shape, 2)
     shield.fixture:setFriction(1)
 	shield.fixture:setUserData({properties = shield})
+    shield.fixture:setSensor(true)
 
 	-- Functions
     shield.draw = function()
