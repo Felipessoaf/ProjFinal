@@ -87,12 +87,8 @@ function FallingPlats.Create(posX, posY, scheduler)
         -- love.graphics.setPointSize(5)
         -- love.graphics.points(math.floor(plat.body:getX()), math.floor(plat.body:getY()))
     end
-    
-    plat.shouldFall = function()
-        return false -- love. plat.timePlayerTouched > plat.timeToFall 
-    end
 
-   table.insert(FallingPlats.fallingPlats, plat)  
+    table.insert(FallingPlats.fallingPlats, plat)  
 end
 
 

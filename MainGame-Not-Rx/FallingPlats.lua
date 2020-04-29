@@ -37,12 +37,15 @@ function FallingPlats.Create(posX, posY)
     plat.velocity = 1000
     plat.canInvert = false
     plat.Ground = true
-    plat.timePlayerTouched = -1
+    plat.previousTime = -1
     plat.timeToFall = 1
+    plat.lastTime = -1
+    plat.state = 0
+
     plat.touchedPlayer = function()
-        if plat.timePlayerTouched < 0 then
-            plat.timePlayerTouched = love.timer.getTime()
-            plat.body:setLinearVelocity(0, plat.velocity)
+        if plat.state == 0 then
+            plat.previousTime = love.timer.getTime()
+            plat.state = 1
         end
     end
 
@@ -87,12 +90,26 @@ function FallingPlats.Create(posX, posY)
         -- love.graphics.setPointSize(5)
         -- love.graphics.points(math.floor(plat.body:getX()), math.floor(plat.body:getY()))
     end
-    
-    plat.shouldFall = function()
-        return false -- love. plat.timePlayerTouched > plat.timeToFall 
+
+    plat.update = function(dt)
+        if plat.state == 1 then
+            local curTime = love.timer.getTime()
+            if curTime > plat.previousTime + plat.timeToFall then
+                plat.body:setLinearVelocity(0, plat.velocity)
+                plat.previousTime = curTime
+                plat.state = 2
+            end
+        elseif plat.state == 2 then
+            local curTime = love.timer.getTime()
+            if curTime > plat.previousTime + plat.timeToFall*3 then
+                plat.body:setLinearVelocity(0, 0)
+                plat.body:setPosition(plat.initX, plat.initY)
+                plat.state = 0
+            end
+        end
     end
 
-   table.insert(FallingPlats.fallingPlats, plat)  
+    table.insert(FallingPlats.fallingPlats, plat)  
 end
 
 

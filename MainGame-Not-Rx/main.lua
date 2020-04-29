@@ -57,6 +57,11 @@ function love.update(dt)
     for _, movingPlat in pairs(movingPlats) do
         movingPlat.update(dt)
     end
+    
+    -- Updates fallingPlats
+    for _, fallingPlat in pairs(fallingPlats) do
+        fallingPlat.update(dt)
+    end
 
     -- Update collisions
     CollisionManager.update(dt)
@@ -82,8 +87,8 @@ function love.draw()
 	map:draw(tx,ty)
 
 	-- Draw Collision Map (useful for debugging)
-	love.graphics.setColor(1, 0, 0)
-	map:box2d_draw(tx,ty)
+	-- love.graphics.setColor(1, 0, 0)
+	-- map:box2d_draw(tx,ty)
 
     -- Move camera back to original pos
     -- love.graphics.translate(-(-heroPosX + love.graphics.getWidth()/2), -(-heroPosY + love.graphics.getHeight() * 3/4))
