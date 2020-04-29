@@ -15,6 +15,10 @@ local Layers = {
         name = "Enemy",
         number = 6
     },
+    fallingPlats = {
+        name = "fallingPlats",
+        number = 7
+    },
 }
 
 return Layers

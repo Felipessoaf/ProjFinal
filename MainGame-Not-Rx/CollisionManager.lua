@@ -53,6 +53,10 @@ function beginContact(a, b, coll)
         checkShotHit(a, b)
     elseif a:getUserData().properties.tag == "EnemyShot" or b:getUserData().properties.tag == "EnemyShot" then
         checkEnemyShotHit(a, b)
+    elseif a:getUserData().properties.tag == "Hero" and b:getUserData().properties.tag == "fallingPlat" then
+        
+        print("touchedPlayer")
+        b:getUserData().properties.touchedPlayer()
     end
 end
 

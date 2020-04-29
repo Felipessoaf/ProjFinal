@@ -17,6 +17,9 @@ local MovingPlats = require 'MovingPlats'
 -- CollisionManager module
 local CollisionManager = require 'CollisionManager'
 
+-- FallingPlats module
+local FallingPlats = require 'FallingPlats'
+
 local scheduler = rx.CooperativeScheduler.create()
 
 -- Declare initial state of game
@@ -29,6 +32,8 @@ function love.load()
     enemies = Enemies.Init()
     
     movingPlats = MovingPlats.Init()
+    
+    fallingPlats = FallingPlats.Init()
 
     CollisionManager.Init()
 end
