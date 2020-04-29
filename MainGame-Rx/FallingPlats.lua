@@ -39,23 +39,23 @@ function FallingPlats.Create(posX, posY, scheduler)
 	plat.initY = posY
 	plat.width = 40
 	plat.height = 20
-    plat.velocity = 100
+    plat.velocity = 1000
     plat.canInvert = false
     plat.Ground = true
     plat.timePlayerTouched = -1
-    plat.timeToFall = 3
+    plat.timeToFall = 1
     plat.touchedPlayer = rx.BehaviorSubject.create()
+    plat.touchedPlayerValid = plat.touchedPlayer:filter(function(val) return plat.timePlayerTouched < 0 end)
 
-    plat.touchedPlayer
-        :filter(function(val)
-            return plat.timePlayerTouched < 0
+    plat.touchedPlayerValid
+        :delay(plat.timeToFall, scheduler)
+        :subscribe(function(val)
+            plat.body:setLinearVelocity(0, plat.velocity)
         end)
-        :debounce(function(val)
-            return plat.timePlayerTouched < 0
-        end, 3)
+
+    plat.touchedPlayerValid
         :subscribe(function(val)
             plat.timePlayerTouched = love.timer.getTime()
-            print("touched player!")
         end)
 
 	-- Physics
