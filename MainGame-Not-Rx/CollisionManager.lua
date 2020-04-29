@@ -45,18 +45,26 @@ function beginContact(a, b, coll)
     if ((a:getUserData().properties.Ground == true or a:getUserData().properties.tag == "Platform") and b:getUserData().properties.tag == "Hero" or
         (b:getUserData().properties.Ground == true or b:getUserData().properties.tag == "Platform") and a:getUserData().properties.tag == "Hero") then
         hero.jumpCount = 2
-    elseif a:getUserData().properties.tag == "Hero" and b:getUserData().properties.tag == "EnemyRange" then
+    end
+
+    -- Trata colisao player com falling plat
+    if a:getUserData().properties.tag == "Hero" and b:getUserData().properties.tag == "fallingPlat" then
+        b:getUserData().properties.touchedPlayer()
+    end
+
+    -- Trata colisao player com enemyRange
+    if a:getUserData().properties.tag == "Hero" and b:getUserData().properties.tag == "EnemyRange" then
         local enemyRange, hero = b:getUserData().properties, a:getUserData().properties
         enemyRange.color = enemyRange.dangerColor
         hero.inEnemyRange = enemyRange
-    elseif a:getUserData().properties.tag == "Shot" or b:getUserData().properties.tag == "Shot" then
+    end
+    
+    if a:getUserData().properties.tag == "Shot" or b:getUserData().properties.tag == "Shot" then
         checkShotHit(a, b)
-    elseif a:getUserData().properties.tag == "EnemyShot" or b:getUserData().properties.tag == "EnemyShot" then
+    end
+    
+    if a:getUserData().properties.tag == "EnemyShot" or b:getUserData().properties.tag == "EnemyShot" then
         checkEnemyShotHit(a, b)
-    elseif a:getUserData().properties.tag == "Hero" and b:getUserData().properties.tag == "fallingPlat" then
-        
-        print("touchedPlayer")
-        b:getUserData().properties.touchedPlayer()
     end
 end
 

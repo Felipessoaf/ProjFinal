@@ -40,7 +40,6 @@ function FallingPlats.Create(posX, posY)
     plat.timePlayerTouched = -1
     plat.timeToFall = 1
     plat.touchedPlayer = function()
-        print("touchedPlayer")
         if plat.timePlayerTouched < 0 then
             plat.timePlayerTouched = love.timer.getTime()
             plat.body:setLinearVelocity(0, plat.velocity)
