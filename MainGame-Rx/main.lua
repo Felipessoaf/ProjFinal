@@ -17,6 +17,9 @@ local MovingPlats = require 'MovingPlats'
 -- FallingPlats module
 local FallingPlats = require 'FallingPlats'
 
+-- Shield module
+local Shield = require 'Shield'
+
 -- CollisionManager module
 local CollisionManager = require 'CollisionManager'
 
@@ -34,6 +37,8 @@ love.load:subscribe(function (arg)
     movingPlats = MovingPlats.Init(scheduler)
     
     fallingPlats = FallingPlats.Init(scheduler)
+    
+    shield = Shield.Init(scheduler)
 
     CollisionManager.Init(scheduler)
 end)

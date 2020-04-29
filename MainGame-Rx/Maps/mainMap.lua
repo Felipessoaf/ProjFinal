@@ -8,8 +8,8 @@ return {
   height = 70,
   tilewidth = 32,
   tileheight = 32,
-  nextlayerid = 12,
-  nextobjectid = 20,
+  nextlayerid = 13,
+  nextobjectid = 22,
   properties = {},
   tilesets = {
     {
@@ -604,6 +604,32 @@ return {
           shape = "rectangle",
           x = 1285,
           y = 1079.33,
+          width = 0,
+          height = 0,
+          rotation = 0,
+          visible = true,
+          properties = {}
+        }
+      }
+    },
+    {
+      type = "objectgroup",
+      id = 12,
+      name = "coletaveis",
+      visible = true,
+      opacity = 1,
+      offsetx = 0,
+      offsety = 0,
+      draworder = "topdown",
+      properties = {},
+      objects = {
+        {
+          id = 21,
+          name = "shield",
+          type = "",
+          shape = "rectangle",
+          x = 1217.5,
+          y = 1100.5,
           width = 0,
           height = 0,
           rotation = 0,

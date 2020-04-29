@@ -8,15 +8,15 @@ local Layers = require 'Layers'
 local FallingPlats = {}
 
 function FallingPlats.Init(scheduler)
-   -- Create new dynamic data layer
-   local fallingPlatsLayer = map:addCustomLayer(Layers.fallingPlats.name, Layers.fallingPlats.number)
+    -- Create new dynamic data layer
+    local fallingPlatsLayer = map:addCustomLayer(Layers.fallingPlats.name, Layers.fallingPlats.number)
 
-   FallingPlats.fallingPlats = {}
+    FallingPlats.fallingPlats = {}
 
 	-- Get plats spawn objects
 	for k, object in pairs(map.objects) do
         if object.name == "fallingPlat" then
-			FallingPlats.Create(object.x, object.y, scheduler, true)
+			FallingPlats.Create(object.x, object.y, scheduler)
         end
 	end
     
@@ -26,9 +26,9 @@ function FallingPlats.Init(scheduler)
             :subscribe(function(plat)
                 plat.draw()
             end)
-   end
+    end
    
-   return FallingPlats.fallingPlats
+    return FallingPlats.fallingPlats
 end
 
 function FallingPlats.Create(posX, posY, scheduler)
