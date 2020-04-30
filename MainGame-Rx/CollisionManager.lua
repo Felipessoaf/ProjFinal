@@ -40,7 +40,10 @@ function CollisionManager.Init(scheduler)
         :filter(function(a, b, coll) 
             return a:getUserData().properties.tag == "Hero" and b:getUserData().properties.tag == "shield"
         end)
-        :subscribe(function(a, b, coll) b:getUserData().properties.touchedPlayer:onNext(a:getUserData().properties.body) end)
+        :subscribe(function(a, b, coll) 
+            a:getUserData().properties.item:onNext(b:getUserData().properties)
+            b:getUserData().properties.touchedPlayer:onNext(a:getUserData().properties.body) 
+        end)
 
     -- Trata colisao player com enemyRange
     enterRange = beginContact

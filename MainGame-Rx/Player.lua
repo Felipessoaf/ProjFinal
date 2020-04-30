@@ -47,6 +47,7 @@ function Player.Init(scheduler)
     hero.height = 30
     hero.speed = 150
     hero.jumpCount = 2
+    hero.item = rx.BehaviorSubject.create()
 
 	-- Physics
     hero.body = love.physics.newBody(world, hero.initX, hero.initY, "dynamic")
@@ -172,6 +173,14 @@ function Player.Init(scheduler)
             love.load()
         end)
 	
+    love.update
+        :filter(function()
+            return hero.item:getValue() ~= nil
+        end)
+        :subscribe(function()
+            hero.item:getValue().body:setPosition(hero.body:getPosition())
+        end)
+
 	-- Remove unneeded object layer
 	map:removeLayer("spawn")
 
