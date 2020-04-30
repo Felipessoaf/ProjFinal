@@ -49,24 +49,6 @@ function FallingPlats.Create(posX, posY)
         end
     end
 
-    -- plat.touchedPlayer
-    --     :filter(function(val) 
-    --         return plat.timePlayerTouched < 0
-    --     end)
-    --     :execute(function(val)
-    --         plat.timePlayerTouched = love.timer.getTime()
-    --     end)   
-    --     :delay(plat.timeToFall, scheduler)
-    --     :execute(function(val)
-    --         plat.body:setLinearVelocity(0, plat.velocity)
-    --     end)   
-    --     :delay(plat.timeToFall*3, scheduler)
-    --     :subscribe(function(val)
-    --         plat.timePlayerTouched = -1
-    --         plat.body:setLinearVelocity(0, 0)
-    --         plat.body:setPosition(plat.initX, plat.initY)
-    --     end)
-
 	-- Physics
 	plat.body = love.physics.newBody(world, plat.initX, plat.initY, "kinematic")
     plat.body:setFixedRotation(true)
