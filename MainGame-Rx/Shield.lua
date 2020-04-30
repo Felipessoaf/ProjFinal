@@ -36,8 +36,14 @@ function Shield.Create(posX, posY, scheduler)
     shield.touchedPlayer = rx.BehaviorSubject.create()
 
     shield.touchedPlayer
+        :execute(function(val)
+            shield.shape:setRadius(20)
+        end)
+        :flatMap(function(val)
+            return rx.Observable.replicate(val, 100)
+        end)
         :subscribe(function(val)
-            print("collected!")
+            shield.body:setPosition(val:getPosition())
         end)
 
 	-- Physics
