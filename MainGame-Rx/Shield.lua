@@ -35,6 +35,7 @@ function Shield.Create(posX, posY, scheduler)
 	shield.radius = 10
     shield.touchedPlayer = rx.BehaviorSubject.create()
     shield.playerPressed = rx.BehaviorSubject.create()
+    shield.touchedShot = rx.BehaviorSubject.create()
 
     shield.touchedPlayer
         -- :execute(function(val)
@@ -49,10 +50,19 @@ function Shield.Create(posX, posY, scheduler)
             -- shield.body:setPosition(val:getPosition())
         end)
 
+    --ideia: juntar stream q colidiu com shield + keypress em intervalo < x
     shield.playerPressed
         :skip(1)
+        :filter(function(key)
+            return key == "f"
+        end)
         :subscribe(function(key)
             print(key)
+        end)
+
+    shield.touchedShot
+        :subscribe(function(shot)
+            print("shot")
         end)
 
 	-- Physics
