@@ -34,6 +34,7 @@ function Shield.Create(posX, posY, scheduler)
 	shield.initY = posY
 	shield.radius = 10
     shield.touchedPlayer = rx.BehaviorSubject.create()
+    shield.playerPressed = rx.BehaviorSubject.create()
 
     shield.touchedPlayer
         -- :execute(function(val)
@@ -46,6 +47,12 @@ function Shield.Create(posX, posY, scheduler)
             shield.shape:setRadius(20)
             -- print(val:getPosition())
             -- shield.body:setPosition(val:getPosition())
+        end)
+
+    shield.playerPressed
+        :skip(1)
+        :subscribe(function(key)
+            print(key)
         end)
 
 	-- Physics

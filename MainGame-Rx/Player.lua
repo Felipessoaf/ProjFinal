@@ -163,6 +163,14 @@ function Player.Init(scheduler)
             love.load()
         end)
 
+    love.keypressed
+        :combineLatest(hero.item, function (key, item)
+            return key,item
+        end)
+        :subscribe(function (key, item)
+            item.playerPressed:onNext(key)
+        end)
+
     
     -- TODO: consertar isso, o reset tem q destruir td antes de loadar de novo?
     love.update
