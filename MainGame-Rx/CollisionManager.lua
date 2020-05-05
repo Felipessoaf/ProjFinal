@@ -48,10 +48,11 @@ function CollisionManager.Init(scheduler)
     -- Trata colisao enemyShot com shield
     beginContact
         :filter(function(a, b, coll) 
-            return a:getUserData().properties.tag == "EnemyShot" and b:getUserData().properties.tag == "shield"
+            return b:getUserData().properties.tag == "shield"
         end)
         :subscribe(function(a, b, coll) 
-            b:getUserData().properties.touchedShot:onNext(a:getUserData().properties) 
+            print(a:getUserData().properties.tag)
+            -- b:getUserData().properties.touchedShot:onNext(a:getUserData().properties) 
         end)
 
     -- Trata colisao player com enemyRange

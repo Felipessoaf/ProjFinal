@@ -410,7 +410,7 @@
   </object>
  </objectgroup>
  <objectgroup id="11" name="fallingPlats">
-  <object id="18" name="fallingPlat" x="1285" y="1079.33"/>
+  <object id="18" name="fallingPlat" x="1693" y="715.33"/>
  </objectgroup>
  <objectgroup id="12" name="coletaveis">
   <object id="21" name="shield" x="1217.5" y="1100.5"/>
