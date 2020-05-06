@@ -135,7 +135,7 @@ function CollisionManager.Init(scheduler)
             killEnemy(other) 
         end
 
-        if other.tag ~= "EnemyRange" then
+        if other.tag ~= "EnemyRange" and other.tag ~= "shield"  then
             shot.fired = false 
             scheduler:schedule(function()
                 coroutine.yield(.01)
@@ -149,10 +149,20 @@ function CollisionManager.Init(scheduler)
     enemyShotHit = beginContact:filter(function(a, b, coll) return a:getUserData().properties.tag == "EnemyShot" or b:getUserData().properties.tag == "EnemyShot" end)
     enemyShotHitHero, enemyShotHitOther = enemyShotHit:partition(function(a, b, coll) return a:getUserData().properties.tag == "Hero" end)
     enemyShotHitOther:subscribe(function(a, b, coll) 
-        b:getUserData().properties.fired = false 
+        local shot = {}
+        local other = {}
+        if a:getUserData().properties.tag == "EnemyShot" then
+            shot = a:getUserData().properties
+            other = b:getUserData().properties
+        else
+            shot = b:getUserData().properties
+            other = a:getUserData().properties
+        end
+
+        shot.fired = false 
         scheduler:schedule(function()
             coroutine.yield(.01)
-            b:getUserData().properties.body:setActive(false)
+            shot.body:setActive(false)
         end)
     end)
     enemyShotHitHero:subscribe(function(a, b, coll)
