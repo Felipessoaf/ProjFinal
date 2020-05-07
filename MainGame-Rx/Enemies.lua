@@ -79,6 +79,7 @@ function Enemies.CreateShooter(posX, posY, scheduler)
 			shot.fixture:setMask(3)
             shot.fixture:setSensor(true)
             shot.reset = function()
+                -- print("shot reset")
                 shot.fired = false 
                 scheduler:schedule(function()
                     coroutine.yield(.01)
@@ -93,7 +94,7 @@ function Enemies.CreateShooter(posX, posY, scheduler)
 			coroutine.yield(1)
 			while true and enemy.alive do
 				enemyShoot(enemy.shots, {enemy.body:getX(), enemy.body:getY()})
-				coroutine.yield(math.random(.5,2))
+				coroutine.yield(2)--math.random(.5,2))
 			end
 		end)
 

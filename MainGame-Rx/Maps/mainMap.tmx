@@ -413,7 +413,7 @@
   <object id="18" name="fallingPlat" x="1693" y="715.33"/>
  </objectgroup>
  <objectgroup id="12" name="coletaveis">
-  <object id="21" name="shield" x="1900.17" y="937.833"/>
+  <object id="21" name="shield" x="1962.84" y="991.166"/>
  </objectgroup>
  <layer id="7" name="Sea" width="150" height="70">
   <data encoding="csv">

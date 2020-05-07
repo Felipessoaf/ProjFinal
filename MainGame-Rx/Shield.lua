@@ -33,13 +33,14 @@ function Shield.Create(posX, posY, scheduler)
 	shield.initX = posX
 	shield.initY = posY
 	shield.radius = 10
+	shield.initRadius = 25
     shield.touchedPlayer = rx.BehaviorSubject.create()
     shield.playerPressed = rx.BehaviorSubject.create()
     shield.touchedShot = rx.BehaviorSubject.create()
 
     shield.touchedPlayer
         :subscribe(function(val)
-            shield.shape:setRadius(25)
+            shield.shape:setRadius(shield.initRadius)
         end)
 
     --ideia: juntar stream q colidiu com shield + keypress em intervalo < x
@@ -74,18 +75,18 @@ function Shield.Create(posX, posY, scheduler)
             -- print(shotInfo.other)
             -- print(activatedInfo.time)
             -- print(activatedInfo.other)
-            return math.abs(shotInfo.time - activatedInfo.time) < 0.5
+            return shotInfo, activatedInfo
         end)
-        :filter(function(inTime)
-            return inTime
+        :filter(function(shotInfo, activatedInfo)
+            return math.abs(shotInfo.time - activatedInfo.time) < 0.5
         end)
         :subscribe(function(shotInfo, activatedInfo)
             print("DEFEND")
-            -- shotInfo.other.reset()
-            -- print(shotInfo.time)
-            -- print(shotInfo.other)
-            -- print(activatedInfo.time)
-            -- print(activatedInfo.other)
+            shotInfo.other.reset()
+            print(shotInfo.time)
+            print(shotInfo)
+            print(activatedInfo.time)
+            print(activatedInfo.other)
         end)
 
     
@@ -95,11 +96,12 @@ function Shield.Create(posX, posY, scheduler)
     shield.body:setFixedRotation(true)
     shield.body:setGravityScale(0)
     shield.body:setLinearVelocity(0, 0)
-	shield.shape = love.physics.newCircleShape(shield.radius)
+	shield.shape = love.physics.newCircleShape(shield.initRadius)
     shield.fixture = love.physics.newFixture(shield.body, shield.shape, 2)
     shield.fixture:setFriction(1)
 	shield.fixture:setUserData({properties = shield})
     shield.fixture:setSensor(true)
+    shield.shape:setRadius(shield.radius)
 
 	-- Functions
     shield.draw = function()

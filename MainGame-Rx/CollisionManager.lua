@@ -158,7 +158,10 @@ function CollisionManager.Init(scheduler)
             other = a:getUserData().properties
         end
 
-        shot.reset()
+
+        if other.tag ~= "EnemyRange" and other.tag ~= "shield"  then
+            shot.reset()
+        end
     end)
     enemyShotHitHero:subscribe(function(a, b, coll)
         b:getUserData().properties.fired = false 
