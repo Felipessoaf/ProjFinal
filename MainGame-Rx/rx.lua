@@ -733,10 +733,11 @@ function Observable:TimeInterval(scheduler)
   
   return Observable.create(function(observer)
     local function onNext(...)
+      local values = util.pack(...)
       util.tryWithObserver(observer, function(...)
         local dt = scheduler:getCurrentTime() - lastTime
         lastTime = scheduler:getCurrentTime()
-        return observer:onNext(dt,...)
+        return observer:onNext(dt,util.unpack(values))
       end, ...)
     end
 
