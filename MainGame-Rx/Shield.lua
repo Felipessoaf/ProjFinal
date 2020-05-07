@@ -51,19 +51,27 @@ function Shield.Create(posX, posY, scheduler)
         end)
 
     --ideia: juntar stream q colidiu com shield + keypress em intervalo < x
-    shield.playerPressed
+    local activated = shield.playerPressed
         :skip(1)
+        -- :execute(function(val)
+        --     print("tempo")
+        -- end)
         :filter(function(key)
             return key == "f"
         end)
-        :subscribe(function(key)
-            print(key)
-        end)
+        -- :subscribe(function(key)
+        --     print(key)
+        -- end)
 
     shield.touchedShot
-        :subscribe(function(shot)
-            print("shot")
+        :combineLatest(activated, function (shot, activated)
+
         end)
+        -- :subscribe(function(shot)
+        --     print("shot")
+        -- end)
+
+    
 
 	-- Physics
 	shield.body = love.physics.newBody(world, shield.initX, shield.initY, "kinematic")

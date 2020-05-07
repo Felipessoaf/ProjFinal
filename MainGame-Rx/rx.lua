@@ -725,6 +725,31 @@ function Observable:delay(time, scheduler)
   end)
 end
 
+--- Convert an Observable that emits items into one that emits indications of the amount of time elapsed between those emissions.
+-- @returns {Observable}
+function Observable:TimeInterval(scheduler)
+  local lastTime = scheduler:getCurrentTime()
+  
+  return Observable.create(function(observer)
+    local function onNext(...)
+      util.tryWithObserver(observer, function(...)
+        print(scheduler:getCurrentTime())
+        return observer:onNext(...)
+      end, ...)
+    end
+
+    local function onError(e)
+      return observer:onError(e)
+    end
+
+    local function onCompleted()
+      return observer:onCompleted()
+    end
+
+    return self:subscribe(onNext, onError, onCompleted)
+  end)
+end
+
 --- Returns a new Observable that produces the values from the original with duplicates removed.
 -- @returns {Observable}
 function Observable:distinct()
@@ -1915,6 +1940,11 @@ end
 --- Returns whether or not the CooperativeScheduler's queue is empty.
 function CooperativeScheduler:isEmpty()
   return not next(self.tasks)
+end
+
+--- Returns the CooperativeScheduler's currentTime.
+function CooperativeScheduler:getCurrentTime()
+  return self.currentTime
 end
 
 --- @class TimeoutScheduler
