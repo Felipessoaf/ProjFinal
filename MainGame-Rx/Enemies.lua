@@ -77,7 +77,14 @@ function Enemies.CreateShooter(posX, posY, scheduler)
 			shot.fixture:setUserData({properties = shot})
 			shot.fixture:setCategory(3)
 			shot.fixture:setMask(3)
-			shot.fixture:setSensor(true)
+            shot.fixture:setSensor(true)
+            shot.reset = function()
+                shot.fired = false 
+                scheduler:schedule(function()
+                    coroutine.yield(.01)
+                    shot.body:setActive(false)
+                end)
+            end
 			table.insert(enemy.shots, shot)
 		end)
 

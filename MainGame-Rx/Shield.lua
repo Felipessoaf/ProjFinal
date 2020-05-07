@@ -38,38 +38,31 @@ function Shield.Create(posX, posY, scheduler)
     shield.touchedShot = rx.BehaviorSubject.create()
 
     shield.touchedPlayer
-        -- :execute(function(val)
-        --     shield.shape:setRadius(20)
-        -- end)
-        -- :flatMap(function(val)
-        --     return rx.Observable.replicate(val, 10)
-        -- end)
         :subscribe(function(val)
-            shield.shape:setRadius(20)
-            -- print(val:getPosition())
-            -- shield.body:setPosition(val:getPosition())
+            shield.shape:setRadius(25)
         end)
 
     --ideia: juntar stream q colidiu com shield + keypress em intervalo < x
-    local activated = shield.playerPressed
+    local activatedTimeStamp = shield.playerPressed
         :skip(1)
-        -- :execute(function(val)
-        --     print("tempo")
-        -- end)
         :filter(function(key)
             return key == "f"
         end)
-        -- :subscribe(function(key)
-        --     print(key)
-        -- end)
+        :Timestamp(scheduler)
 
-    shield.touchedShot
-        :combineLatest(activated, function (shot, activated)
+    local touchedShotTimeStamp = shield.touchedShot:Timestamp(scheduler)
 
+    touchedShotTimeStamp
+        :combineLatest(activatedTimeStamp, function (shotInfo, activatedInfo)
+            return math.abs(shotInfo.timeStamp - activatedInfo.timeStamp) < 0.5
         end)
-        -- :subscribe(function(shot)
-        --     print("shot")
-        -- end)
+        :filter(function(inTime)
+            return inTime
+        end)
+        :subscribe(function(shotInfo, activatedInfo)
+            print("DEFEND")
+            -- print(unpack(shotInfo))
+        end)
 
     
 

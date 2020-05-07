@@ -413,7 +413,7 @@
   <object id="18" name="fallingPlat" x="1693" y="715.33"/>
  </objectgroup>
  <objectgroup id="12" name="coletaveis">
-  <object id="21" name="shield" x="1217.5" y="1100.5"/>
+  <object id="21" name="shield" x="1900.17" y="937.833"/>
  </objectgroup>
  <layer id="7" name="Sea" width="150" height="70">
   <data encoding="csv">
@@ -567,6 +567,6 @@
 </data>
  </layer>
  <objectgroup id="5" name="spawn">
-  <object id="1" name="spawn" x="1101.33" y="1128.67"/>
+  <object id="1" name="spawn" x="1904" y="878.003"/>
  </objectgroup>
 </map>

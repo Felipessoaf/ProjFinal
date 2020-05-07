@@ -725,7 +725,7 @@ function Observable:delay(time, scheduler)
   end)
 end
 
---- Convert an Observable that emits items into one that emits indications of the amount of time elapsed between those emissions.
+--- Convert an Observable that emits items into one that emits indications of the amount of time elapsed between those emissions, along with the original emissions.
 --- Only works for CooperativeScheduler
 -- @returns {Observable}
 function Observable:TimeInterval(scheduler)
@@ -736,7 +736,33 @@ function Observable:TimeInterval(scheduler)
       util.tryWithObserver(observer, function(...)
         local dt = scheduler:getCurrentTime() - lastTime
         lastTime = scheduler:getCurrentTime()
-        return observer:onNext(dt)
+        return observer:onNext(dt,...)
+      end, ...)
+    end
+
+    local function onError(e)
+      return observer:onError(e)
+    end
+
+    local function onCompleted()
+      return observer:onCompleted()
+    end
+
+    return self:subscribe(onNext, onError, onCompleted)
+  end)
+end
+
+--- Attach a timestamp to each item emitted by an Observable indicating when it was emitted, along with the original emissions.
+--- Only works for CooperativeScheduler
+-- @returns {Observable}
+function Observable:Timestamp(scheduler)  
+  return Observable.create(function(observer)
+    local function onNext(...)
+      util.tryWithObserver(observer, function(...)
+        return observer:onNext({
+            timeStamp = scheduler:getCurrentTime(),
+            ...
+        })
       end, ...)
     end
 
