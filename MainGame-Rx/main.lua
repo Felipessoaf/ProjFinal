@@ -2,14 +2,17 @@
 local rx = require 'rx'
 require 'rx-love'
 
--- Enemies module
-local Enemies = require 'Enemies'
-
 -- MapManager module
 local MapManager = require 'MapManager'
 
+-- CollisionManager module
+local CollisionManager = require 'CollisionManager'
+
 -- Player module
 local Player = require 'Player'
+
+-- Enemies module
+local Enemies = require 'Enemies'
 
 -- MovingPlats module
 local MovingPlats = require 'MovingPlats'
@@ -19,9 +22,6 @@ local FallingPlats = require 'FallingPlats'
 
 -- Shield module
 local Shield = require 'Shield'
-
--- CollisionManager module
-local CollisionManager = require 'CollisionManager'
 
 local scheduler = rx.CooperativeScheduler.create()
 

@@ -158,17 +158,12 @@ function CollisionManager.Init(scheduler)
             other = a:getUserData().properties
         end
 
-
         if other.tag ~= "EnemyRange" and other.tag ~= "shield"  then
             shot.reset()
         end
     end)
     enemyShotHitHero:subscribe(function(a, b, coll)
-        b:getUserData().properties.fired = false 
-        scheduler:schedule(function()
-            coroutine.yield(.01)
-            b:getUserData().properties.body:setActive(false)
-        end)
+        b:getUserData().properties.reset()
             
         a:getUserData().properties.health:onNext(hero.health:getValue() - 10)
     end)
