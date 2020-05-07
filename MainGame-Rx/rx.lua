@@ -758,10 +758,11 @@ end
 function Observable:Timestamp(scheduler)  
   return Observable.create(function(observer)
     local function onNext(...)
+      local values = util.pack(...)
       util.tryWithObserver(observer, function(...)
         return observer:onNext({
-            timeStamp = scheduler:getCurrentTime(),
-            ...
+            time = scheduler:getCurrentTime(),
+            other = util.unpack(values)
         })
       end, ...)
     end

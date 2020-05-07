@@ -49,19 +49,43 @@ function Shield.Create(posX, posY, scheduler)
             return key == "f"
         end)
         :Timestamp(scheduler)
+        -- :map(function(time, ...)
+        --     return {
+        --         time = time,
+        --         other = ...
+        --     }
+        -- end)
+        -- :execute(function(info)
+        --     print(info.time)
+        --     print(info.other)
+        -- end)
 
     local touchedShotTimeStamp = shield.touchedShot:Timestamp(scheduler)
+        -- :map(function(time, ...)
+        --     return {
+        --         time = time,
+        --         other = ...
+        --     }
+        -- end)
 
     touchedShotTimeStamp
         :combineLatest(activatedTimeStamp, function (shotInfo, activatedInfo)
-            return math.abs(shotInfo.timeStamp - activatedInfo.timeStamp) < 0.5
+            -- print(shotInfo.time)
+            -- print(shotInfo.other)
+            -- print(activatedInfo.time)
+            -- print(activatedInfo.other)
+            return math.abs(shotInfo.time - activatedInfo.time) < 0.5
         end)
         :filter(function(inTime)
             return inTime
         end)
         :subscribe(function(shotInfo, activatedInfo)
             print("DEFEND")
-            -- print(unpack(shotInfo))
+            -- shotInfo.other.reset()
+            -- print(shotInfo.time)
+            -- print(shotInfo.other)
+            -- print(activatedInfo.time)
+            -- print(activatedInfo.other)
         end)
 
     
