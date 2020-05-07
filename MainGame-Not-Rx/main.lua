@@ -2,23 +2,26 @@
 local rx = require 'rx'
 require 'rx-love'
 
--- Enemies module
-local Enemies = require 'Enemies'
-
 -- MapManager module
 local MapManager = require 'MapManager'
-
--- Player module
-local Player = require 'Player'
-
--- MovingPlats module
-local MovingPlats = require 'MovingPlats'
 
 -- CollisionManager module
 local CollisionManager = require 'CollisionManager'
 
+-- Player module
+local Player = require 'Player'
+
+-- Enemies module
+local Enemies = require 'Enemies'
+
+-- MovingPlats module
+local MovingPlats = require 'MovingPlats'
+
 -- FallingPlats module
 local FallingPlats = require 'FallingPlats'
+
+-- Shield module
+local Shield = require 'Shield'
 
 local scheduler = rx.CooperativeScheduler.create()
 
@@ -34,6 +37,8 @@ function love.load()
     movingPlats = MovingPlats.Init()
     
     fallingPlats = FallingPlats.Init()
+    
+    shield = Shield.Init(scheduler)
 
     CollisionManager.Init()
 end

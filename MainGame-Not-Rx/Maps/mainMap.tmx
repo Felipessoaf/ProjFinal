@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.3.2" orientation="orthogonal" renderorder="left-up" compressionlevel="0" width="150" height="70" tilewidth="32" tileheight="32" infinite="0" nextlayerid="12" nextobjectid="20">
+<map version="1.2" tiledversion="1.3.2" orientation="orthogonal" renderorder="left-up" compressionlevel="0" width="150" height="70" tilewidth="32" tileheight="32" infinite="0" nextlayerid="13" nextobjectid="22">
  <editorsettings>
   <export target="mainMap.lua" format="lua"/>
  </editorsettings>
@@ -410,7 +410,10 @@
   </object>
  </objectgroup>
  <objectgroup id="11" name="fallingPlats">
-  <object id="18" name="fallingPlat" x="1285" y="1079.33"/>
+  <object id="18" name="fallingPlat" x="1693" y="715.33"/>
+ </objectgroup>
+ <objectgroup id="12" name="coletaveis">
+  <object id="21" name="shield" x="1962.84" y="991.166"/>
  </objectgroup>
  <layer id="7" name="Sea" width="150" height="70">
   <data encoding="csv">
@@ -564,6 +567,6 @@
 </data>
  </layer>
  <objectgroup id="5" name="spawn">
-  <object id="1" name="spawn" x="1101.33" y="1128.67"/>
+  <object id="1" name="spawn" x="1904" y="878.003"/>
  </objectgroup>
 </map>

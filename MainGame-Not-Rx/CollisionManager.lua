@@ -52,6 +52,17 @@ function beginContact(a, b, coll)
         b:getUserData().properties.touchedPlayer()
     end
 
+    -- Trata colisao player com shield
+    if a:getUserData().properties.tag == "Hero" and b:getUserData().properties.tag == "shield" then
+        a:getUserData().properties.item:onNext(b:getUserData().properties)
+        b:getUserData().properties.touchedPlayer:onNext(a:getUserData().properties.body) 
+    end
+
+    -- Trata colisao enemyShot com shield
+    if a:getUserData().properties.tag == "EnemyShot" and b:getUserData().properties.tag == "shield" then
+        b:getUserData().properties.touchedShot:onNext(a:getUserData().properties) 
+    end
+
     -- Trata colisao player com enemyRange
     if a:getUserData().properties.tag == "Hero" and b:getUserData().properties.tag == "EnemyRange" then
         local enemyRange, hero = b:getUserData().properties, a:getUserData().properties
@@ -59,10 +70,12 @@ function beginContact(a, b, coll)
         hero.inEnemyRange = enemyRange
     end
     
+    -- Trata colisao de tiro do player
     if a:getUserData().properties.tag == "Shot" or b:getUserData().properties.tag == "Shot" then
         checkShotHit(a, b)
     end
     
+    -- Trata colisao de tiro do inimigo
     if a:getUserData().properties.tag == "EnemyShot" or b:getUserData().properties.tag == "EnemyShot" then
         checkEnemyShotHit(a, b)
     end
@@ -99,19 +112,31 @@ function checkShotHit(a, b)
         killEnemy(other) 
     end
 
-    if other.tag ~= "EnemyRange" then
+    if other.tag ~= "EnemyRange" and other.tag ~= "shield"  then
         shot.fired = false 
         table.insert(CollisionManager.shotsToDisable, shot)
     end
 end
 
 function checkEnemyShotHit(a, b)
+    local shot = {}
+    local other = {}
+    if a:getUserData().properties.tag == "EnemyShot" then
+        shot = a:getUserData().properties
+        other = b:getUserData().properties
+    else
+        shot = b:getUserData().properties
+        other = a:getUserData().properties
+    end
+
     if a:getUserData().properties.tag == "Hero" then
         a:getUserData().properties.damage(10)
     end
 
-    b:getUserData().properties.fired = false 
-    table.insert(CollisionManager.enemyShotsToDisable, b:getUserData().properties)
+    if other.tag ~= "EnemyRange" and other.tag ~= "shield"  then
+        b:getUserData().properties.fired = false 
+        table.insert(CollisionManager.enemyShotsToDisable, b:getUserData().properties)
+    end
 end
 
 function killEnemy(enemy)

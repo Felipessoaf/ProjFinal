@@ -8,8 +8,8 @@ return {
   height = 70,
   tilewidth = 32,
   tileheight = 32,
-  nextlayerid = 12,
-  nextobjectid = 20,
+  nextlayerid = 13,
+  nextobjectid = 22,
   properties = {},
   tilesets = {
     {
@@ -602,8 +602,34 @@ return {
           name = "fallingPlat",
           type = "",
           shape = "rectangle",
-          x = 1285,
-          y = 1079.33,
+          x = 1693,
+          y = 715.33,
+          width = 0,
+          height = 0,
+          rotation = 0,
+          visible = true,
+          properties = {}
+        }
+      }
+    },
+    {
+      type = "objectgroup",
+      id = 12,
+      name = "coletaveis",
+      visible = true,
+      opacity = 1,
+      offsetx = 0,
+      offsety = 0,
+      draworder = "topdown",
+      properties = {},
+      objects = {
+        {
+          id = 21,
+          name = "shield",
+          type = "",
+          shape = "rectangle",
+          x = 1962.84,
+          y = 991.166,
           width = 0,
           height = 0,
           rotation = 0,
@@ -804,8 +830,8 @@ return {
           name = "spawn",
           type = "",
           shape = "rectangle",
-          x = 1101.33,
-          y = 1128.67,
+          x = 1904,
+          y = 878.003,
           width = 0,
           height = 0,
           rotation = 0,
