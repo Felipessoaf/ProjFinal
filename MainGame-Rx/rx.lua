@@ -726,6 +726,7 @@ function Observable:delay(time, scheduler)
 end
 
 --- Convert an Observable that emits items into one that emits indications of the amount of time elapsed between those emissions.
+--- Only works for CooperativeScheduler
 -- @returns {Observable}
 function Observable:TimeInterval(scheduler)
   local lastTime = scheduler:getCurrentTime()
@@ -733,8 +734,9 @@ function Observable:TimeInterval(scheduler)
   return Observable.create(function(observer)
     local function onNext(...)
       util.tryWithObserver(observer, function(...)
-        print(scheduler:getCurrentTime())
-        return observer:onNext(...)
+        local dt = scheduler:getCurrentTime() - lastTime
+        lastTime = scheduler:getCurrentTime()
+        return observer:onNext(dt)
       end, ...)
     end
 
