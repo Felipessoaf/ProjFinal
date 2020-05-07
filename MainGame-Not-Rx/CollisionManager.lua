@@ -54,13 +54,13 @@ function beginContact(a, b, coll)
 
     -- Trata colisao player com shield
     if a:getUserData().properties.tag == "Hero" and b:getUserData().properties.tag == "shield" then
-        a:getUserData().properties.item:onNext(b:getUserData().properties)
-        b:getUserData().properties.touchedPlayer:onNext(a:getUserData().properties.body) 
+        a:getUserData().properties.item = b:getUserData().properties
+        b:getUserData().properties.touchedPlayer()
     end
 
     -- Trata colisao enemyShot com shield
     if a:getUserData().properties.tag == "EnemyShot" and b:getUserData().properties.tag == "shield" then
-        b:getUserData().properties.touchedShot:onNext(a:getUserData().properties) 
+        b:getUserData().properties.touchedShot(a:getUserData().properties) 
     end
 
     -- Trata colisao player com enemyRange
@@ -134,8 +134,7 @@ function checkEnemyShotHit(a, b)
     end
 
     if other.tag ~= "EnemyRange" and other.tag ~= "shield"  then
-        b:getUserData().properties.fired = false 
-        table.insert(CollisionManager.enemyShotsToDisable, b:getUserData().properties)
+        b:getUserData().properties.reset()
     end
 end
 

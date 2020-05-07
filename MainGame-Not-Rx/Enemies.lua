@@ -1,6 +1,9 @@
 -- Layers module
 local Layers = require 'Layers'
 
+-- CollisionManager module
+local CollisionManager = require 'CollisionManager'
+
 local Enemies = {}
 
 function Enemies.Init()
@@ -79,6 +82,10 @@ function Enemies.CreateShooter(posX, posY)
         shot.fixture:setCategory(3)
         shot.fixture:setMask(3)
         shot.fixture:setSensor(true)
+        shot.reset = function()
+            shot.fired = false 
+            table.insert(CollisionManager.enemyShotsToDisable, shot)
+        end
         table.insert(enemy.shots, shot)
     end
 

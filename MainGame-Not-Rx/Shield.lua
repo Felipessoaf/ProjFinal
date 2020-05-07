@@ -29,36 +29,10 @@ function Shield.Create(posX, posY, scheduler)
 	shield.initX = posX
 	shield.initY = posY
 	shield.radius = 10
-	shield.initRadius = 25
-    -- shield.touchedPlayer = rx.BehaviorSubject.create()
-    -- shield.playerPressed = rx.BehaviorSubject.create()
-    -- shield.touchedShot = rx.BehaviorSubject.create()
-
-    -- shield.touchedPlayer
-    --     :subscribe(function(val)
-    --         shield.shape:setRadius(shield.initRadius)
-    --     end)
-
-    -- local activatedTimeStamp = shield.playerPressed
-    --     :skip(1)
-    --     :filter(function(key)
-    --         return key == "f"
-    --     end)
-    --     :Timestamp(scheduler)
-
-    -- local touchedShotTimeStamp = shield.touchedShot:Timestamp(scheduler)
-
-    -- touchedShotTimeStamp
-    --     :combineLatest(activatedTimeStamp, function (shotInfo, activatedInfo)
-    --         return shotInfo, activatedInfo
-    --     end)
-    --     :filter(function(shotInfo, activatedInfo)
-    --         return math.abs(shotInfo.time - activatedInfo.time) < 0.5
-    --     end)
-    --     :subscribe(function(shotInfo, activatedInfo)
-    --         shotInfo.other.reset()
-    --     end)
-
+    shield.initRadius = 25
+    shield.activatedTimeStamp = -1
+    shield.touchedShotTimeStamp = -1
+    shield.touchedShotObj = nil
     
 	-- Physics
 	shield.body = love.physics.newBody(world, shield.initX, shield.initY, "kinematic")
@@ -85,6 +59,35 @@ function Shield.Create(posX, posY, scheduler)
         -- love.graphics.setColor(1, 1, 1)
         -- love.graphics.setPointSize(5)
         -- love.graphics.points(math.floor(plat.body:getX()), math.floor(plat.body:getY()))
+    end
+
+    local function checkActivation()
+        if shield.activatedTimeStamp > 0 and 
+        shield.touchedShotTimeStamp > 0 and 
+        math.abs(shield.activatedTimeStamp - shield.touchedShotTimeStamp) < 0.5 and
+        shield.touchedShotObj ~= nil then
+            shield.touchedShotObj.reset()
+            shield.touchedShotObj = nil
+        end
+    end
+
+    shield.touchedPlayer = function()
+        shield.shape:setRadius(shield.initRadius)
+    end
+
+    shield.playerPressed = function(key)
+        if key == "f" then
+            shield.activatedTimeStamp = love.timer.getTime()
+        end
+
+        checkActivation()
+    end
+
+    shield.touchedShot = function(shot)
+        shield.touchedShotTimeStamp = love.timer.getTime()
+        shield.touchedShotObj = shot
+
+        checkActivation()
     end
 
     Shield.shield = shield 
