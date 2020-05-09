@@ -19,6 +19,8 @@ function Enemies.Init(scheduler)
 			Enemies.CreateShooter(object.x, object.y, scheduler)
         elseif object.name == "patrolSpawn" then
 			Enemies.CreatePatrol(object.x, object.y)
+        elseif object.name == "quickTimeSpawn" then
+			Enemies.CreateQuickTime(object.x, object.y)
         end
 	end
     
@@ -206,6 +208,53 @@ function Enemies.CreatePatrol(posX, posY)
 
         love.graphics.setColor(unpack(enemyRange.color))
         love.graphics.polygon("fill", enemyRange.body:getWorldPoints(enemyRange.shape:getPoints()))
+	end
+
+   table.insert(Enemies.enemies, enemy)  
+end
+
+function Enemies.CreateQuickTime(posX, posY)
+	local enemy = {}
+	-- Properties
+	enemy.tag = "Enemy"
+	enemy.initX = posX
+	enemy.initY = posY
+	enemy.width = 40
+	enemy.height = 20
+	enemy.alive = true
+
+	enemy.shots = {}
+
+	-- Physics
+	enemy.body = love.physics.newBody(world, enemy.initX, enemy.initY, "dynamic")
+	enemy.body:setFixedRotation(true)
+	enemy.shape = love.physics.newRectangleShape(enemy.width, enemy.height)
+	enemy.fixture = love.physics.newFixture(enemy.body, enemy.shape, 2)
+	enemy.fixture:setUserData({properties = enemy})
+	enemy.fixture:setCategory(3)
+
+    -- -- Area alcance visao
+    local quickTimeRange = {}
+    quickTimeRange.tag = "QuickTimeRange"
+    quickTimeRange.color = {64/255, 86/255, 1, 0.3}
+    quickTimeRange.matchColor = {0, 1, 0, 0.5}
+    quickTimeRange.wrongColor = {1, 0, 0, 0.5}
+    quickTimeRange.body = love.physics.newBody(world, enemy.initX, enemy.initY)
+    quickTimeRange.shape = love.physics.newRectangleShape(300, 100)
+    -- attach shape to body
+    quickTimeRange.fixture = love.physics.newFixture(quickTimeRange.body, quickTimeRange.shape)
+    quickTimeRange.fixture:setUserData({properties = quickTimeRange})
+    quickTimeRange.fixture:setSensor(true)
+
+	-- Functions
+	enemy.draw = function()
+		love.graphics.setColor(242/255, 130/255, 250/255)
+		love.graphics.polygon("fill", enemy.body:getWorldPoints(enemy.shape:getPoints()))
+		love.graphics.setColor(0, 0, 0)
+		love.graphics.polygon("line", enemy.body:getWorldPoints(enemy.shape:getPoints()))
+
+        love.graphics.setColor(unpack(quickTimeRange.color))
+        love.graphics.polygon("fill", quickTimeRange.body:getWorldPoints(quickTimeRange.shape:getPoints()))
 	end
 
    table.insert(Enemies.enemies, enemy)  

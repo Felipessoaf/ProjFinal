@@ -134,7 +134,7 @@ function CollisionManager.Init(scheduler)
             killEnemy(other) 
         end
 
-        if other.tag ~= "EnemyRange" and other.tag ~= "shield"  then
+        if other.tag ~= "EnemyRange" and other.tag ~= "shield" and other.tag ~= "QuickTimeRange" then
             shot.fired = false 
             scheduler:schedule(function()
                 coroutine.yield(.01)
@@ -158,7 +158,7 @@ function CollisionManager.Init(scheduler)
             other = a:getUserData().properties
         end
 
-        if other.tag ~= "EnemyRange" and other.tag ~= "shield"  then
+        if other.tag ~= "EnemyRange" and other.tag ~= "shield" and other.tag ~= "QuickTimeRange"  then
             shot.reset()
         end
     end)
