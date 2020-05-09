@@ -48,6 +48,7 @@ function Player.Init(scheduler)
     hero.speed = 150
     hero.jumpCount = 2
     hero.item = rx.BehaviorSubject.create()
+    hero.quickTimeRange = rx.BehaviorSubject.create()
 
 	-- Physics
     hero.body = love.physics.newBody(world, hero.initX, hero.initY, "dynamic")
@@ -171,6 +172,14 @@ function Player.Init(scheduler)
             item.playerPressed:onNext(key)
         end)
 
+    love.keypressed
+        :filter(function (key)
+            return hero.quickTimeRange:getValue() ~= nil
+        end)
+        :subscribe(function (key, item)
+            -- print(hero.quickTimeRange:getValue().tag)
+            hero.quickTimeRange:getValue().playerPressed:onNext(key)
+        end)
     
     -- TODO: consertar isso, o reset tem q destruir td antes de loadar de novo?
     love.update

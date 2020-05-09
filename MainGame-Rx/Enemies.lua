@@ -221,9 +221,15 @@ function Enemies.CreateQuickTime(posX, posY)
 	enemy.initY = posY
 	enemy.width = 40
 	enemy.height = 20
-	enemy.alive = true
+    enemy.alive = true
 
-	enemy.shots = {}
+    enemy.shots = {}
+    enemy.sequence = {
+        "down",
+        "up",
+        "left",
+        "right"
+    }
 
 	-- Physics
 	enemy.body = love.physics.newBody(world, enemy.initX, enemy.initY, "dynamic")
@@ -231,7 +237,16 @@ function Enemies.CreateQuickTime(posX, posY)
 	enemy.shape = love.physics.newRectangleShape(enemy.width, enemy.height)
 	enemy.fixture = love.physics.newFixture(enemy.body, enemy.shape, 2)
 	enemy.fixture:setUserData({properties = enemy})
-	enemy.fixture:setCategory(3)
+    enemy.fixture:setCategory(3)
+
+    --Wall
+    local wall = {}
+	wall.body = love.physics.newBody(world, enemy.initX + 50, enemy.initY, "static")
+	wall.body:setFixedRotation(true)
+	wall.shape = love.physics.newRectangleShape(enemy.width, enemy.height*30)
+	wall.fixture = love.physics.newFixture(wall.body, wall.shape, 2)
+	wall.fixture:setUserData({properties = wall})
+	wall.fixture:setCategory(3)
 
     -- -- Area alcance visao
     local quickTimeRange = {}
@@ -241,18 +256,34 @@ function Enemies.CreateQuickTime(posX, posY)
     quickTimeRange.wrongColor = {1, 0, 0, 0.5}
     quickTimeRange.body = love.physics.newBody(world, enemy.initX, enemy.initY)
     quickTimeRange.shape = love.physics.newRectangleShape(300, 100)
-    -- attach shape to body
     quickTimeRange.fixture = love.physics.newFixture(quickTimeRange.body, quickTimeRange.shape)
     quickTimeRange.fixture:setUserData({properties = quickTimeRange})
     quickTimeRange.fixture:setSensor(true)
+    quickTimeRange.playerPressed = rx.BehaviorSubject.create()
+    quickTimeRange.playerInRange = rx.BehaviorSubject.create()
+
+    quickTimeRange.playerPressed:zip(rx.Observable.fromTable(enemy.sequence, pairs, false)):dump()
 
 	-- Functions
-	enemy.draw = function()
+    enemy.draw = function()
+        --enemy
 		love.graphics.setColor(242/255, 130/255, 250/255)
 		love.graphics.polygon("fill", enemy.body:getWorldPoints(enemy.shape:getPoints()))
 		love.graphics.setColor(0, 0, 0)
-		love.graphics.polygon("line", enemy.body:getWorldPoints(enemy.shape:getPoints()))
+        love.graphics.polygon("line", enemy.body:getWorldPoints(enemy.shape:getPoints()))
+        
+        --wall
+		love.graphics.setColor(125/255, 92/255, 0)
+		love.graphics.polygon("fill", wall.body:getWorldPoints(wall.shape:getPoints()))
+		love.graphics.setColor(0, 0, 0)
+        love.graphics.polygon("line", wall.body:getWorldPoints(wall.shape:getPoints()))
+        
+        for i, key in pairs(enemy.sequence) do 
+            love.graphics.setNewFont(15)
+            love.graphics.print(key, enemy.initX - 30, (enemy.initY - enemy.height) - 20 * (#enemy.sequence - i))
+        end
 
+        --range
         love.graphics.setColor(unpack(quickTimeRange.color))
         love.graphics.polygon("fill", quickTimeRange.body:getWorldPoints(quickTimeRange.shape:getPoints()))
 	end

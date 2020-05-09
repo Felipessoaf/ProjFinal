@@ -71,6 +71,25 @@ function CollisionManager.Init(scheduler)
             return {state = "exit", enemyRange = b:getUserData().properties}
         end)
 
+    -- Trata colisao player com quickTimeRange
+    beginContact
+        :filter(function(a, b, coll) 
+            return a:getUserData().properties.tag == "Hero" and b:getUserData().properties.tag == "QuickTimeRange" 
+        end)
+        :subscribe(function (a, b, coll)
+            a:getUserData().properties.quickTimeRange:onNext(b:getUserData().properties)
+            b:getUserData().properties.playerInRange:onNext(a:getUserData().properties) 
+        end)
+
+    endContact
+        :filter(function(a, b, coll) 
+            return a:getUserData().properties.tag == "Hero" and b:getUserData().properties.tag == "QuickTimeRange" 
+        end)
+        :subscribe(function (a, b, coll)
+            a:getUserData().properties.quickTimeRange:onNext(nil)
+            b:getUserData().properties.playerInRange:onNext(nil) 
+        end)
+
     rangeState = enterRange:merge(exitRange)
 
     enterRange:subscribe(function (info)
