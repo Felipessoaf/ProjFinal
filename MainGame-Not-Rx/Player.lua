@@ -40,7 +40,7 @@ function Player.Init()
     hero.height = 30
     hero.speed = 150
     hero.jumpCount = 2
-    hero.item = {}
+    hero.item = nil
     
 	-- Physics
     hero.body = love.physics.newBody(world, hero.initX, hero.initY, "dynamic")
@@ -122,6 +122,10 @@ function Player.Init()
                 hero.backHealth = hero.health
             end
         end
+
+        if hero.item ~= nil then
+            hero.item.body:setPosition(hero.body:getPosition())
+        end
     end
 
     hero.keypressed = function (key)
@@ -135,7 +139,9 @@ function Player.Init()
             hero.inEnemyRange.color = hero.inEnemyRange.safeColor
         end
 
-        hero.item.playerPressed(key)
+        if hero.item ~= nil then
+            hero.item.playerPressed(key)
+        end
     end
 
     hero.keyreleased = function (key)
