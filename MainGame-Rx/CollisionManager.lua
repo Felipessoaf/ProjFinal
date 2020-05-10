@@ -216,18 +216,4 @@ function enemyShoot(shotsTable, pos)
         end)
 end
 
-function killEnemy(enemy)
-    CollisionManager.scheduler:schedule(function()
-        coroutine.yield(.01)
-        rx.Observable.fromTable(enemy.shots, pairs, false)
-            :subscribe(function(shot)
-                shot.body:setActive(false)
-                shot.fixture:setMask(2,3)
-            end)
-        enemy.shots = {}
-        enemy.body:setActive(false)
-    end)
-    enemy.alive = false
-end
-
 return CollisionManager

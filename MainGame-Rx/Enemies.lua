@@ -12,6 +12,8 @@ function Enemies.Init(scheduler)
    local enemyLayer = map:addCustomLayer(Layers.enemy.name, Layers.enemy.number)
 
    Enemies.enemies = {}
+    
+   Enemies.scheduler = scheduler
 
 	-- Get enemies spawn objects
 	for k, object in pairs(map.objects) do
@@ -271,6 +273,38 @@ function Enemies.CreateQuickTime(posX, posY, scheduler)
         end)
     quickTimeRange.enterSequence = rx.BehaviorSubject.create()
 
+    local right, wrong = quickTimeRange.playerPressed
+        :filter(function(key)
+            return key == "down" or key == "up" or key == "left" or key == "right" and enemy.sequenceTries >= 0
+        end)
+        :zip(rx.Observable.fromTable(enemy.sequence, pairs, false))
+        :partition(function(try, step)
+            return try == step
+        end)
+
+    right
+        :execute(function()
+            quickTimeRange.color = quickTimeRange.matchColor
+            enemy.sequenceTries = enemy.sequenceTries + 1
+        end)
+        :filter(function()
+            return enemy.sequenceTries == #enemy.sequence
+        end)
+        :subscribe(function(try, step)
+            killEnemy(enemy)            
+            wall.body:setActive(false)
+        end)
+
+    wrong
+        :execute(function()
+            quickTimeRange.color = quickTimeRange.wrongColor
+            enemy.sequenceTries = -1
+        end)
+        :delay(1, scheduler)
+        :subscribe(function(try, step)
+            enemy.resetSequence()
+        end)
+
 	-- Functions
     enemy.draw = function()
         --enemy
@@ -298,40 +332,23 @@ function Enemies.CreateQuickTime(posX, posY, scheduler)
     enemy.resetSequence = function()
         enemy.sequenceTries = 0
         quickTimeRange.color = quickTimeRange.defaultColor
-
-        local right, wrong = quickTimeRange.playerPressed
-            :filter(function(key)
-                return key == "down" or key == "up" or key == "left" or key == "right" and enemy.sequenceTries >= 0
-            end)
-            :zip(rx.Observable.fromTable(enemy.sequence, pairs, false))
-            :partition(function(try, step)
-                return try == step
-            end)
-
-        right
-            :execute(function()
-                quickTimeRange.color = quickTimeRange.matchColor
-                enemy.sequenceTries = enemy.sequenceTries + 1
-            end)
-            :filter(function()
-                return enemy.sequenceTries == #enemy.sequence
-            end)
-            :subscribe(function(try, step)
-                print("YEAH")
-            end)
-
-        wrong
-            :execute(function()
-                quickTimeRange.color = quickTimeRange.wrongColor
-                enemy.sequenceTries = -1
-            end)
-            :delay(1, scheduler)
-            :subscribe(function(try, step)
-                enemy.resetSequence()
-            end)
     end
 
     table.insert(Enemies.enemies, enemy)  
+end
+
+function killEnemy(enemy)
+    Enemies.scheduler:schedule(function()
+        coroutine.yield(.01)
+        rx.Observable.fromTable(enemy.shots, pairs, false)
+            :subscribe(function(shot)
+                shot.body:setActive(false)
+                shot.fixture:setMask(2,3)
+            end)
+        enemy.shots = {}
+        enemy.body:setActive(false)
+    end)
+    enemy.alive = false
 end
 
 return Enemies
