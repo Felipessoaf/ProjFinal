@@ -20,7 +20,7 @@ function Enemies.Init(scheduler)
         elseif object.name == "patrolSpawn" then
 			Enemies.CreatePatrol(object.x, object.y)
         elseif object.name == "quickTimeSpawn" then
-			Enemies.CreateQuickTime(object.x, object.y)
+			Enemies.CreateQuickTime(object.x, object.y, scheduler)
         end
 	end
     
@@ -213,7 +213,7 @@ function Enemies.CreatePatrol(posX, posY)
    table.insert(Enemies.enemies, enemy)  
 end
 
-function Enemies.CreateQuickTime(posX, posY)
+function Enemies.CreateQuickTime(posX, posY, scheduler)
 	local enemy = {}
 	-- Properties
 	enemy.tag = "Enemy"
@@ -251,7 +251,8 @@ function Enemies.CreateQuickTime(posX, posY)
     -- -- Area alcance visao
     local quickTimeRange = {}
     quickTimeRange.tag = "QuickTimeRange"
-    quickTimeRange.color = {64/255, 86/255, 1, 0.3}
+    quickTimeRange.defaultColor = {64/255, 86/255, 1, 0.3}
+    quickTimeRange.color = quickTimeRange.defaultColor
     quickTimeRange.matchColor = {0, 1, 0, 0.5}
     quickTimeRange.wrongColor = {1, 0, 0, 0.5}
     quickTimeRange.body = love.physics.newBody(world, enemy.initX, enemy.initY)
@@ -295,15 +296,38 @@ function Enemies.CreateQuickTime(posX, posY)
     end
     
     enemy.resetSequence = function()
-        enemy.sequenceSubject = rx.BehaviorSubject.create()
+        enemy.sequenceTries = 0
+        quickTimeRange.color = quickTimeRange.defaultColor
 
-        quickTimeRange.playerPressed
+        local right, wrong = quickTimeRange.playerPressed
             :filter(function(key)
-                return key == "down" or key == "up" or key == "left" or key == "right"
+                return key == "down" or key == "up" or key == "left" or key == "right" and enemy.sequenceTries >= 0
             end)
             :zip(rx.Observable.fromTable(enemy.sequence, pairs, false))
-            :subscribe(function(...)
-                print(...)
+            :partition(function(try, step)
+                return try == step
+            end)
+
+        right
+            :execute(function()
+                quickTimeRange.color = quickTimeRange.matchColor
+                enemy.sequenceTries = enemy.sequenceTries + 1
+            end)
+            :filter(function()
+                return enemy.sequenceTries == #enemy.sequence
+            end)
+            :subscribe(function(try, step)
+                print("YEAH")
+            end)
+
+        wrong
+            :execute(function()
+                quickTimeRange.color = quickTimeRange.wrongColor
+                enemy.sequenceTries = -1
+            end)
+            :delay(1, scheduler)
+            :subscribe(function(try, step)
+                enemy.resetSequence()
             end)
     end
 
