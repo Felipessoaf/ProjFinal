@@ -283,19 +283,20 @@ function Enemies.CreateQuickTime(posX, posY, scheduler)
             quickTimeRange.sequence:onNext(enemy.sequence[enemy.sequenceTries])
         end)
 
-    local right, wrong = trySequence
+    local match, wrong = trySequence
         :zip(quickTimeRange.sequence)
         :partition(function(try, answer)
             return try == answer
         end)
 
-    right
+    local onTime, miss = match
         :TimeInterval(scheduler)
-        --tem q particionar e fazer o efeito de errar se passar do tempo
-        :filter(function(dt, try, answer)
+        :partition(function(dt, try, answer)
             print(dt, try, answer)
             return dt < 0.5 or enemy.sequenceTries == 1
         end)
+
+    onTime
         :execute(function()
             quickTimeRange.color = quickTimeRange.matchColor
             enemy.sequenceTries = enemy.sequenceTries + 1
@@ -309,8 +310,10 @@ function Enemies.CreateQuickTime(posX, posY, scheduler)
         end)
 
     wrong
+        :merge(miss)
         :execute(function(try, answer)
-            print(try, answer)
+            -- ta sendo chamado mesmo dps de ter saido do range e qnd reseta o jogo começa a chamar duplicado
+            hero.health:onNext(hero.health:getValue() - 10)
             quickTimeRange.color = quickTimeRange.wrongColor
             enemy.sequenceTries = -1
         end)
