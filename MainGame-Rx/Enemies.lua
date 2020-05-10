@@ -285,11 +285,17 @@ function Enemies.CreateQuickTime(posX, posY, scheduler)
 
     local right, wrong = trySequence
         :zip(quickTimeRange.sequence)
-        :partition(function(try, step)
-            return try == step
+        :partition(function(try, answer)
+            return try == answer
         end)
 
     right
+        :TimeInterval(scheduler)
+        --tem q particionar e fazer o efeito de errar se passar do tempo
+        :filter(function(dt, try, answer)
+            print(dt, try, answer)
+            return dt < 0.5 or enemy.sequenceTries == 1
+        end)
         :execute(function()
             quickTimeRange.color = quickTimeRange.matchColor
             enemy.sequenceTries = enemy.sequenceTries + 1
@@ -297,13 +303,14 @@ function Enemies.CreateQuickTime(posX, posY, scheduler)
         :filter(function()
             return enemy.sequenceTries == #enemy.sequence+1
         end)
-        :subscribe(function(try, step)
+        :subscribe(function()
             killEnemy(enemy)            
             wall.body:setActive(false)
         end)
 
     wrong
-        :execute(function()
+        :execute(function(try, answer)
+            print(try, answer)
             quickTimeRange.color = quickTimeRange.wrongColor
             enemy.sequenceTries = -1
         end)
