@@ -177,7 +177,6 @@ function Player.Init(scheduler)
             return hero.quickTimeRange:getValue() ~= nil
         end)
         :subscribe(function (key, item)
-            -- print(hero.quickTimeRange:getValue().tag)
             hero.quickTimeRange:getValue().playerPressed:onNext(key)
         end)
     

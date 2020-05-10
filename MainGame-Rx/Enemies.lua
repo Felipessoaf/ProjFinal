@@ -261,8 +261,14 @@ function Enemies.CreateQuickTime(posX, posY)
     quickTimeRange.fixture:setSensor(true)
     quickTimeRange.playerPressed = rx.BehaviorSubject.create()
     quickTimeRange.playerInRange = rx.BehaviorSubject.create()
-
-    quickTimeRange.playerPressed:zip(rx.Observable.fromTable(enemy.sequence, pairs, false)):dump()
+    quickTimeRange.playerInRange
+        :filter(function(value)
+            return value ~= nil
+        end)
+        :subscribe(function()
+            enemy.resetSequence()
+        end)
+    quickTimeRange.enterSequence = rx.BehaviorSubject.create()
 
 	-- Functions
     enemy.draw = function()
@@ -286,9 +292,22 @@ function Enemies.CreateQuickTime(posX, posY)
         --range
         love.graphics.setColor(unpack(quickTimeRange.color))
         love.graphics.polygon("fill", quickTimeRange.body:getWorldPoints(quickTimeRange.shape:getPoints()))
-	end
+    end
+    
+    enemy.resetSequence = function()
+        enemy.sequenceSubject = rx.BehaviorSubject.create()
 
-   table.insert(Enemies.enemies, enemy)  
+        quickTimeRange.playerPressed
+            :filter(function(key)
+                return key == "down" or key == "up" or key == "left" or key == "right"
+            end)
+            :zip(rx.Observable.fromTable(enemy.sequence, pairs, false))
+            :subscribe(function(...)
+                print(...)
+            end)
+    end
+
+    table.insert(Enemies.enemies, enemy)  
 end
 
 return Enemies
