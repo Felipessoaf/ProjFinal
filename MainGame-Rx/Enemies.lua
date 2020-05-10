@@ -271,13 +271,20 @@ function Enemies.CreateQuickTime(posX, posY, scheduler)
         :subscribe(function()
             enemy.resetSequence()
         end)
-    quickTimeRange.enterSequence = rx.BehaviorSubject.create()
+    quickTimeRange.sequence = rx.BehaviorSubject.create()
 
-    local right, wrong = quickTimeRange.playerPressed
+    local trySequence = quickTimeRange.playerPressed
         :filter(function(key)
-            return key == "down" or key == "up" or key == "left" or key == "right" and enemy.sequenceTries >= 0
+            return key == "down" or key == "up" or key == "left" or key == "right" and enemy.sequenceTries > 0
         end)
-        :zip(rx.Observable.fromTable(enemy.sequence, pairs, false))
+    
+    trySequence
+        :subscribe(function()
+            quickTimeRange.sequence:onNext(enemy.sequence[enemy.sequenceTries])
+        end)
+
+    local right, wrong = trySequence
+        :zip(quickTimeRange.sequence)
         :partition(function(try, step)
             return try == step
         end)
@@ -288,7 +295,7 @@ function Enemies.CreateQuickTime(posX, posY, scheduler)
             enemy.sequenceTries = enemy.sequenceTries + 1
         end)
         :filter(function()
-            return enemy.sequenceTries == #enemy.sequence
+            return enemy.sequenceTries == #enemy.sequence+1
         end)
         :subscribe(function(try, step)
             killEnemy(enemy)            
@@ -330,7 +337,7 @@ function Enemies.CreateQuickTime(posX, posY, scheduler)
     end
     
     enemy.resetSequence = function()
-        enemy.sequenceTries = 0
+        enemy.sequenceTries = 1
         quickTimeRange.color = quickTimeRange.defaultColor
     end
 
