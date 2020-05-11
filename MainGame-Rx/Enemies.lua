@@ -292,11 +292,13 @@ function Enemies.CreateQuickTime(posX, posY, scheduler)
     local onTime, miss = match
         :TimeInterval(scheduler)
         :partition(function(dt, try, answer)
+            print(dt, try, answer)
             return dt < 0.5 or enemy.sequenceTries == 1
         end)
 
     onTime
         :execute(function()
+            print("ontime")
             quickTimeRange.color = quickTimeRange.matchColor
             enemy.sequenceTries = enemy.sequenceTries + 1
         end)
@@ -312,6 +314,7 @@ function Enemies.CreateQuickTime(posX, posY, scheduler)
     wrong
         :merge(miss)
         :execute(function()
+            print("wrong miss")
             hero.health:onNext(hero.health:getValue() - 10)
             quickTimeRange.color = quickTimeRange.wrongColor
             enemy.sequenceTries = -1
@@ -336,6 +339,12 @@ function Enemies.CreateQuickTime(posX, posY, scheduler)
         love.graphics.polygon("line", wall.body:getWorldPoints(wall.shape:getPoints()))
         
         for i, key in pairs(enemy.sequence) do 
+            if enemy.sequenceTries ~= nil and i < enemy.sequenceTries then
+                love.graphics.setColor(0, 1, 0)
+            else 
+                love.graphics.setColor(0, 0, 0)
+            end
+
             love.graphics.setNewFont(15)
             love.graphics.print(key, enemy.initX - 30, (enemy.initY - enemy.height) - 20 * (#enemy.sequence - i))
         end
