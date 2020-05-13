@@ -289,16 +289,47 @@ function Enemies.CreateQuickTime(posX, posY, scheduler)
             return try == answer
         end)
 
-    local onTime, miss = match
+    local timeIntervalMatch1 = match
         :TimeInterval(scheduler)
-        :partition(function(dt, try, answer)
-            print(dt, try, answer)
+
+    local timeIntervalMatch2 = match
+        :TimeInterval(scheduler)
+
+    local miss = timeIntervalMatch1
+        :filter(function(dt, try, answer)
+            print("miss interval: "..dt)
+            return dt > 0.5 and enemy.sequenceTries > 1
+        end)
+        -- :partition(function(dt, try, answer)
+        --     -- print(dt, try, answer)
+        --     -- print(dt < 0.5 or enemy.sequenceTries == 1)
+        --     return dt < 0.5 or enemy.sequenceTries == 1
+        -- end)
+
+    local onTime = timeIntervalMatch2
+        :filter(function(dt, try, answer)
+            print("onTime interval: "..dt)
             return dt < 0.5 or enemy.sequenceTries == 1
         end)
 
+    miss
+        :merge(wrong)
+        :execute(function(...)
+            print("miss wrong")
+            print(...)
+            hero.health:onNext(hero.health:getValue() - 10)
+            quickTimeRange.color = quickTimeRange.wrongColor
+            enemy.sequenceTries = -1
+        end)
+        :delay(1, scheduler)
+        :subscribe(function(try, step)
+            enemy.resetSequence()
+        end)
+
     onTime
-        :execute(function()
+        :execute(function(...)
             print("ontime")
+            print(...)
             quickTimeRange.color = quickTimeRange.matchColor
             enemy.sequenceTries = enemy.sequenceTries + 1
         end)
@@ -309,19 +340,6 @@ function Enemies.CreateQuickTime(posX, posY, scheduler)
             killEnemy(enemy)            
             wall.body:setActive(false)
             quickTimeRange.body:setActive(false)
-        end)
-
-    wrong
-        :merge(miss)
-        :execute(function()
-            print("wrong miss")
-            hero.health:onNext(hero.health:getValue() - 10)
-            quickTimeRange.color = quickTimeRange.wrongColor
-            enemy.sequenceTries = -1
-        end)
-        :delay(1, scheduler)
-        :subscribe(function(try, step)
-            enemy.resetSequence()
         end)
 
 	-- Functions
