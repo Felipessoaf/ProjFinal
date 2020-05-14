@@ -727,6 +727,7 @@ end
 
 --- Convert an Observable that emits items into one that emits indications of the amount of time elapsed between those emissions, along with the original emissions.
 --- Only works for CooperativeScheduler
+--- Doesn't work properly with partition
 -- @returns {Observable}
 function Observable:TimeInterval(scheduler)
   local lastTime = scheduler:getCurrentTime()
