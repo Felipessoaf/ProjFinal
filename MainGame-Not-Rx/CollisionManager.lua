@@ -72,8 +72,8 @@ function beginContact(a, b, coll)
 
     -- Trata colisao player com quickTimeRange
     if a:getUserData().properties.tag == "Hero" and b:getUserData().properties.tag == "QuickTimeRange" then
-        a:getUserData().properties.quickTimeRange:onNext(b:getUserData().properties)
-        b:getUserData().properties.playerInRange:onNext(a:getUserData().properties) 
+        a:getUserData().properties.quickTimeRange = b:getUserData().properties
+        b:getUserData().properties.playerInRange()
     end
     
     -- Trata colisao de tiro do player
@@ -97,8 +97,7 @@ function endContact(a, b, coll)
 
     -- Trata colisao player com quickTimeRange
     if a:getUserData().properties.tag == "Hero" and b:getUserData().properties.tag == "QuickTimeRange" then
-        a:getUserData().properties.quickTimeRange:onNext(nil)
-        b:getUserData().properties.playerInRange:onNext(nil) 
+        a:getUserData().properties.quickTimeRange = nil
     end
 end
 

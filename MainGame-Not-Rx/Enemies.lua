@@ -265,72 +265,64 @@ function Enemies.CreateQuickTime(posX, posY)
     quickTimeRange.fixture = love.physics.newFixture(quickTimeRange.body, quickTimeRange.shape)
     quickTimeRange.fixture:setUserData({properties = quickTimeRange})
     quickTimeRange.fixture:setSensor(true)
-    quickTimeRange.playerPressed = rx.BehaviorSubject.create()
-    quickTimeRange.playerInRange = rx.BehaviorSubject.create()
-    quickTimeRange.playerInRange
-        :filter(function(value)
-            return value ~= nil
-        end)
-        :subscribe(function()
-            enemy.resetSequence()
-        end)
-    quickTimeRange.sequence = rx.BehaviorSubject.create()
-
-    local trySequence = quickTimeRange.playerPressed
-        :filter(function(key)
-            return key == "down" or key == "up" or key == "left" or key == "right" and enemy.sequenceTries > 0
-        end)
+    quickTimeRange.lastMatchTime = love.timer.getTime()
+    quickTimeRange.timeToReset = 0
     
-    trySequence
-        :subscribe(function()
-            quickTimeRange.sequence:onNext(enemy.sequence[enemy.sequenceTries])
-        end)
+    quickTimeRange.playerPressed = function(key)
+        if key == "down" or key == "up" or key == "left" or key == "right" and enemy.sequenceTries > 0 then
+            if key == enemy.sequence[enemy.sequenceTries] then
+                --match
+                local dt = love.timer.getTime() - quickTimeRange.lastMatchTime
+                if dt < 0.5 or enemy.sequenceTries == 1 then
+                    --onTime
+                    quickTimeRange.lastMatchTime = love.timer.getTime()
+                    quickTimeRange.color = quickTimeRange.matchColor
+                    enemy.sequenceTries = enemy.sequenceTries + 1
 
-    local match, wrong = trySequence
-        :zip(quickTimeRange.sequence)
-        :partition(function(try, answer)
-            return try == answer
-        end)
+                    --finished successfully
+                    if enemy.sequenceTries == #enemy.sequence+1 then
+                        killEnemy(enemy)            
+                        wall.body:setActive(false)
+                        quickTimeRange.body:setActive(false)
+                    end
+                else
+                    --miss
+                    quickTimeRange.missWrong()
+                end
+            else
+                --wrong
+                quickTimeRange.missWrong()
+            end
+        end
+    end
 
-    local miss = match
-        :TimeInterval(scheduler)
-        :filter(function(dt, try, answer)
-            return dt > 0.5 and enemy.sequenceTries > 1
-        end)
+	-- Functions    
+    enemy.resetSequence = function()
+        enemy.sequenceTries = 1
+        quickTimeRange.color = quickTimeRange.defaultColor
+    end
 
-    local onTime = match
-        :TimeInterval(scheduler)
-        :filter(function(dt, try, answer)
-            return dt < 0.5 or enemy.sequenceTries == 1
-        end)
+    quickTimeRange.playerInRange = function()
+        enemy.resetSequence()
+    end
 
-    miss
-        :merge(wrong)
-        :execute(function()
-            hero.health:onNext(hero.health:getValue() - 10)
-            quickTimeRange.color = quickTimeRange.wrongColor
-            enemy.sequenceTries = -1
-        end)
-        :delay(1, scheduler)
-        :subscribe(function(try, step)
+    quickTimeRange.missWrong = function()
+        hero.damage(10)
+        quickTimeRange.color = quickTimeRange.wrongColor
+        enemy.sequenceTries = -1
+
+        quickTimeRange.timeToReset = 1
+        quickTimeRange.shouldReset = true
+    end
+    
+    enemy.update = function (dt)
+        quickTimeRange.timeToReset = quickTimeRange.timeToReset - dt
+        if quickTimeRange.shouldReset and quickTimeRange.timeToReset < 0 then
             enemy.resetSequence()
-        end)
+            quickTimeRange.shouldReset = false
+        end
+    end
 
-    onTime
-        :execute(function()
-            quickTimeRange.color = quickTimeRange.matchColor
-            enemy.sequenceTries = enemy.sequenceTries + 1
-        end)
-        :filter(function()
-            return enemy.sequenceTries == #enemy.sequence+1
-        end)
-        :subscribe(function()
-            killEnemy(enemy)            
-            wall.body:setActive(false)
-            quickTimeRange.body:setActive(false)
-        end)
-
-	-- Functions
     enemy.draw = function()
         --enemy
 		love.graphics.setColor(242/255, 130/255, 250/255)
@@ -358,11 +350,6 @@ function Enemies.CreateQuickTime(posX, posY)
         --range
         love.graphics.setColor(unpack(quickTimeRange.color))
         love.graphics.polygon("fill", quickTimeRange.body:getWorldPoints(quickTimeRange.shape:getPoints()))
-    end
-    
-    enemy.resetSequence = function()
-        enemy.sequenceTries = 1
-        quickTimeRange.color = quickTimeRange.defaultColor
     end
 
     table.insert(Enemies.enemies, enemy)  

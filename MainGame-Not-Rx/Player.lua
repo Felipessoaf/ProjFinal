@@ -41,6 +41,7 @@ function Player.Init()
     hero.speed = 150
     hero.jumpCount = 2
     hero.item = nil
+    hero.quickTimeRange = nil
     
 	-- Physics
     hero.body = love.physics.newBody(world, hero.initX, hero.initY, "dynamic")
@@ -141,6 +142,10 @@ function Player.Init()
 
         if hero.item ~= nil then
             hero.item.playerPressed(key)
+        end
+
+        if hero.quickTimeRange ~= nil then
+            hero.quickTimeRange.playerPressed(key)
         end
     end
 
