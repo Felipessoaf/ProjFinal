@@ -8,12 +8,12 @@ local Layers = require 'Layers'
 local Enemies = {}
 
 function Enemies.Init(scheduler)
-   -- Create new dynamic data layer
-   local enemyLayer = map:addCustomLayer(Layers.enemy.name, Layers.enemy.number)
+    -- Create new dynamic data layer
+    local enemyLayer = map:addCustomLayer(Layers.enemy.name, Layers.enemy.number)
 
-   Enemies.enemies = {}
-    
-   Enemies.scheduler = scheduler
+    Enemies.enemies = {}
+        
+    Enemies.scheduler = scheduler
 
 	-- Get enemies spawn objects
 	for k, object in pairs(map.objects) do

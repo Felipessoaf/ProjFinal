@@ -7,10 +7,10 @@ local CollisionManager = require 'CollisionManager'
 local Enemies = {}
 
 function Enemies.Init()
-   -- Create new dynamic data layer
-   local enemyLayer = map:addCustomLayer(Layers.enemy.name, Layers.enemy.number)
+    -- Create new dynamic data layer
+    local enemyLayer = map:addCustomLayer(Layers.enemy.name, Layers.enemy.number)
 
-   Enemies.enemies = {}
+    Enemies.enemies = {}
 
 	-- Get enemies spawn objects
 	for k, object in pairs(map.objects) do
@@ -18,6 +18,8 @@ function Enemies.Init()
 			Enemies.CreateShooter(object.x, object.y)
         elseif object.name == "patrolSpawn" then
 			Enemies.CreatePatrol(object.x, object.y)
+        elseif object.name == "quickTimeSpawn" then
+			Enemies.CreateQuickTime(object.x, object.y)
         end
 	end
     
@@ -214,6 +216,161 @@ function Enemies.CreatePatrol(posX, posY)
 	end
 
     table.insert(Enemies.enemies, enemy)  
+end
+
+function Enemies.CreateQuickTime(posX, posY)
+	local enemy = {}
+	-- Properties
+	enemy.tag = "Enemy"
+	enemy.initX = posX
+	enemy.initY = posY
+	enemy.width = 40
+	enemy.height = 20
+    enemy.alive = true
+
+    enemy.shots = {}
+    enemy.sequence = {
+        "down",
+        "up",
+        "left",
+        "right"
+    }
+
+	-- Physics
+	enemy.body = love.physics.newBody(world, enemy.initX, enemy.initY, "dynamic")
+	enemy.body:setFixedRotation(true)
+	enemy.shape = love.physics.newRectangleShape(enemy.width, enemy.height)
+	enemy.fixture = love.physics.newFixture(enemy.body, enemy.shape, 2)
+	enemy.fixture:setUserData({properties = enemy})
+    enemy.fixture:setCategory(3)
+
+    --Wall
+    local wall = {}
+	wall.body = love.physics.newBody(world, enemy.initX + 50, enemy.initY, "static")
+	wall.body:setFixedRotation(true)
+	wall.shape = love.physics.newRectangleShape(enemy.width, enemy.height*30)
+	wall.fixture = love.physics.newFixture(wall.body, wall.shape, 2)
+	wall.fixture:setUserData({properties = wall})
+	wall.fixture:setCategory(3)
+
+    -- -- Area alcance visao
+    local quickTimeRange = {}
+    quickTimeRange.tag = "QuickTimeRange"
+    quickTimeRange.defaultColor = {64/255, 86/255, 1, 0.3}
+    quickTimeRange.color = quickTimeRange.defaultColor
+    quickTimeRange.matchColor = {0, 1, 0, 0.5}
+    quickTimeRange.wrongColor = {1, 0, 0, 0.5}
+    quickTimeRange.body = love.physics.newBody(world, enemy.initX, enemy.initY)
+    quickTimeRange.shape = love.physics.newRectangleShape(300, 100)
+    quickTimeRange.fixture = love.physics.newFixture(quickTimeRange.body, quickTimeRange.shape)
+    quickTimeRange.fixture:setUserData({properties = quickTimeRange})
+    quickTimeRange.fixture:setSensor(true)
+    quickTimeRange.playerPressed = rx.BehaviorSubject.create()
+    quickTimeRange.playerInRange = rx.BehaviorSubject.create()
+    quickTimeRange.playerInRange
+        :filter(function(value)
+            return value ~= nil
+        end)
+        :subscribe(function()
+            enemy.resetSequence()
+        end)
+    quickTimeRange.sequence = rx.BehaviorSubject.create()
+
+    local trySequence = quickTimeRange.playerPressed
+        :filter(function(key)
+            return key == "down" or key == "up" or key == "left" or key == "right" and enemy.sequenceTries > 0
+        end)
+    
+    trySequence
+        :subscribe(function()
+            quickTimeRange.sequence:onNext(enemy.sequence[enemy.sequenceTries])
+        end)
+
+    local match, wrong = trySequence
+        :zip(quickTimeRange.sequence)
+        :partition(function(try, answer)
+            return try == answer
+        end)
+
+    local miss = match
+        :TimeInterval(scheduler)
+        :filter(function(dt, try, answer)
+            return dt > 0.5 and enemy.sequenceTries > 1
+        end)
+
+    local onTime = match
+        :TimeInterval(scheduler)
+        :filter(function(dt, try, answer)
+            return dt < 0.5 or enemy.sequenceTries == 1
+        end)
+
+    miss
+        :merge(wrong)
+        :execute(function()
+            hero.health:onNext(hero.health:getValue() - 10)
+            quickTimeRange.color = quickTimeRange.wrongColor
+            enemy.sequenceTries = -1
+        end)
+        :delay(1, scheduler)
+        :subscribe(function(try, step)
+            enemy.resetSequence()
+        end)
+
+    onTime
+        :execute(function()
+            quickTimeRange.color = quickTimeRange.matchColor
+            enemy.sequenceTries = enemy.sequenceTries + 1
+        end)
+        :filter(function()
+            return enemy.sequenceTries == #enemy.sequence+1
+        end)
+        :subscribe(function()
+            killEnemy(enemy)            
+            wall.body:setActive(false)
+            quickTimeRange.body:setActive(false)
+        end)
+
+	-- Functions
+    enemy.draw = function()
+        --enemy
+		love.graphics.setColor(242/255, 130/255, 250/255)
+		love.graphics.polygon("fill", enemy.body:getWorldPoints(enemy.shape:getPoints()))
+		love.graphics.setColor(0, 0, 0)
+        love.graphics.polygon("line", enemy.body:getWorldPoints(enemy.shape:getPoints()))
+        
+        --wall
+		love.graphics.setColor(125/255, 92/255, 0)
+		love.graphics.polygon("fill", wall.body:getWorldPoints(wall.shape:getPoints()))
+		love.graphics.setColor(0, 0, 0)
+        love.graphics.polygon("line", wall.body:getWorldPoints(wall.shape:getPoints()))
+        
+        for i, key in pairs(enemy.sequence) do 
+            if enemy.sequenceTries ~= nil and i < enemy.sequenceTries then
+                love.graphics.setColor(0, 1, 0)
+            else 
+                love.graphics.setColor(0, 0, 0)
+            end
+
+            love.graphics.setNewFont(15)
+            love.graphics.print(key, enemy.initX - 30, (enemy.initY - enemy.height) - 20 * (#enemy.sequence - i))
+        end
+
+        --range
+        love.graphics.setColor(unpack(quickTimeRange.color))
+        love.graphics.polygon("fill", quickTimeRange.body:getWorldPoints(quickTimeRange.shape:getPoints()))
+    end
+    
+    enemy.resetSequence = function()
+        enemy.sequenceTries = 1
+        quickTimeRange.color = quickTimeRange.defaultColor
+    end
+
+    table.insert(Enemies.enemies, enemy)  
+end
+
+function killEnemy(enemy)
+    table.insert(CollisionManager.enemiesToDisable, enemy)
+    enemy.alive = false
 end
 
 return Enemies

@@ -69,6 +69,12 @@ function beginContact(a, b, coll)
         enemyRange.color = enemyRange.dangerColor
         hero.inEnemyRange = enemyRange
     end
+
+    -- Trata colisao player com quickTimeRange
+    if a:getUserData().properties.tag == "Hero" and b:getUserData().properties.tag == "QuickTimeRange" then
+        a:getUserData().properties.quickTimeRange:onNext(b:getUserData().properties)
+        b:getUserData().properties.playerInRange:onNext(a:getUserData().properties) 
+    end
     
     -- Trata colisao de tiro do player
     if a:getUserData().properties.tag == "Shot" or b:getUserData().properties.tag == "Shot" then
@@ -82,10 +88,17 @@ function beginContact(a, b, coll)
 end
 
 function endContact(a, b, coll)
+    -- Trata colisao player com enemyRange
     if a:getUserData().properties.tag == "Hero" and b:getUserData().properties.tag == "EnemyRange" then
         local enemyRange = b:getUserData().properties
         enemyRange.color = enemyRange.outRangeColor
         hero.inEnemyRange = nil
+    end
+
+    -- Trata colisao player com quickTimeRange
+    if a:getUserData().properties.tag == "Hero" and b:getUserData().properties.tag == "QuickTimeRange" then
+        a:getUserData().properties.quickTimeRange:onNext(nil)
+        b:getUserData().properties.playerInRange:onNext(nil) 
     end
 end
 
@@ -112,7 +125,7 @@ function checkShotHit(a, b)
         killEnemy(other) 
     end
 
-    if other.tag ~= "EnemyRange" and other.tag ~= "shield"  then
+    if other.tag ~= "EnemyRange" and other.tag ~= "shield" and other.tag ~= "QuickTimeRange" then
         shot.fired = false 
         table.insert(CollisionManager.shotsToDisable, shot)
     end
@@ -133,14 +146,9 @@ function checkEnemyShotHit(a, b)
         a:getUserData().properties.damage(10)
     end
 
-    if other.tag ~= "EnemyRange" and other.tag ~= "shield"  then
+    if other.tag ~= "EnemyRange" and other.tag ~= "shield" and other.tag ~= "QuickTimeRange" then
         b:getUserData().properties.reset()
     end
-end
-
-function killEnemy(enemy)
-    table.insert(CollisionManager.enemiesToDisable, enemy)
-    enemy.alive = false
 end
 
 return CollisionManager

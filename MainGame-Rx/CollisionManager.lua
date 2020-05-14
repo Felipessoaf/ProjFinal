@@ -177,7 +177,7 @@ function CollisionManager.Init(scheduler)
             other = a:getUserData().properties
         end
 
-        if other.tag ~= "EnemyRange" and other.tag ~= "shield" and other.tag ~= "QuickTimeRange"  then
+        if other.tag ~= "EnemyRange" and other.tag ~= "shield" and other.tag ~= "QuickTimeRange" then
             shot.reset()
         end
     end)
