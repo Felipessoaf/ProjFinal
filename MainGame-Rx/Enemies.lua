@@ -289,34 +289,42 @@ function Enemies.CreateQuickTime(posX, posY, scheduler)
             return try == answer
         end)
 
-    local timeIntervalMatch1 = match
+    local miss = match
         :TimeInterval(scheduler)
-
-    local timeIntervalMatch2 = match
-        :TimeInterval(scheduler)
-
-    local miss = timeIntervalMatch1
         :filter(function(dt, try, answer)
-            print("miss interval: "..dt)
+            -- print("miss interval: "..dt)
             return dt > 0.5 and enemy.sequenceTries > 1
         end)
-        -- :partition(function(dt, try, answer)
-        --     -- print(dt, try, answer)
-        --     -- print(dt < 0.5 or enemy.sequenceTries == 1)
-        --     return dt < 0.5 or enemy.sequenceTries == 1
-        -- end)
 
-    local onTime = timeIntervalMatch2
+    local onTime = match
+        :TimeInterval(scheduler)
         :filter(function(dt, try, answer)
-            print("onTime interval: "..dt)
+            -- print("onTime interval: "..dt)
             return dt < 0.5 or enemy.sequenceTries == 1
         end)
+
+    -- local miss = timeIntervalMatchMiss
+    --     :filter(function(dt, try, answer)
+    --         -- print("miss interval: "..dt)
+    --         return dt > 0.5 and enemy.sequenceTries > 1
+    --     end)
+    --     -- :partition(function(dt, try, answer)
+    --     --     -- print(dt, try, answer)
+    --     --     -- print(dt < 0.5 or enemy.sequenceTries == 1)
+    --     --     return dt < 0.5 or enemy.sequenceTries == 1
+    --     -- end)
+
+    -- local onTime = timeIntervalMatchOnTime
+    --     :filter(function(dt, try, answer)
+    --         -- print("onTime interval: "..dt)
+    --         return dt < 0.5 or enemy.sequenceTries == 1
+    --     end)
 
     miss
         :merge(wrong)
         :execute(function(...)
-            print("miss wrong")
-            print(...)
+            -- print("miss wrong")
+            -- print(...)
             hero.health:onNext(hero.health:getValue() - 10)
             quickTimeRange.color = quickTimeRange.wrongColor
             enemy.sequenceTries = -1
@@ -328,8 +336,8 @@ function Enemies.CreateQuickTime(posX, posY, scheduler)
 
     onTime
         :execute(function(...)
-            print("ontime")
-            print(...)
+            -- print("ontime")
+            -- print(...)
             quickTimeRange.color = quickTimeRange.matchColor
             enemy.sequenceTries = enemy.sequenceTries + 1
         end)

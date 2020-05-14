@@ -736,7 +736,6 @@ function Observable:TimeInterval(scheduler)
       local values = util.pack(...)
       util.tryWithObserver(observer, function(...)
         local dt = scheduler:getCurrentTime() - lastTime
-        print("dt rx lua: "..dt)
         lastTime = scheduler:getCurrentTime()
         return observer:onNext(dt,util.unpack(values))
       end, ...)
