@@ -292,39 +292,18 @@ function Enemies.CreateQuickTime(posX, posY, scheduler)
     local miss = match
         :TimeInterval(scheduler)
         :filter(function(dt, try, answer)
-            -- print("miss interval: "..dt)
             return dt > 0.5 and enemy.sequenceTries > 1
         end)
 
     local onTime = match
         :TimeInterval(scheduler)
         :filter(function(dt, try, answer)
-            -- print("onTime interval: "..dt)
             return dt < 0.5 or enemy.sequenceTries == 1
         end)
 
-    -- local miss = timeIntervalMatchMiss
-    --     :filter(function(dt, try, answer)
-    --         -- print("miss interval: "..dt)
-    --         return dt > 0.5 and enemy.sequenceTries > 1
-    --     end)
-    --     -- :partition(function(dt, try, answer)
-    --     --     -- print(dt, try, answer)
-    --     --     -- print(dt < 0.5 or enemy.sequenceTries == 1)
-    --     --     return dt < 0.5 or enemy.sequenceTries == 1
-    --     -- end)
-
-    -- local onTime = timeIntervalMatchOnTime
-    --     :filter(function(dt, try, answer)
-    --         -- print("onTime interval: "..dt)
-    --         return dt < 0.5 or enemy.sequenceTries == 1
-    --     end)
-
     miss
         :merge(wrong)
-        :execute(function(...)
-            -- print("miss wrong")
-            -- print(...)
+        :execute(function()
             hero.health:onNext(hero.health:getValue() - 10)
             quickTimeRange.color = quickTimeRange.wrongColor
             enemy.sequenceTries = -1
@@ -335,9 +314,7 @@ function Enemies.CreateQuickTime(posX, posY, scheduler)
         end)
 
     onTime
-        :execute(function(...)
-            -- print("ontime")
-            -- print(...)
+        :execute(function()
             quickTimeRange.color = quickTimeRange.matchColor
             enemy.sequenceTries = enemy.sequenceTries + 1
         end)
