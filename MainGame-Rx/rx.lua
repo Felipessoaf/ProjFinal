@@ -731,12 +731,13 @@ end
 -- @returns {Observable}
 function Observable:TimeInterval(scheduler)
   local lastTime = scheduler:getCurrentTime()
+  --todo: criar tabela de controle do dt e lastime para cada observer
   
   return Observable.create(function(observer)
     local function onNext(...)
       local values = util.pack(...)
       util.tryWithObserver(observer, function(...)
-        local dt = scheduler:getCurrentTime() - lastTime
+        local dt = scheduler:getCurrentTime() - lastTime--(tabelaObserver.lastTime or lastTime)
         lastTime = scheduler:getCurrentTime()
         return observer:onNext(dt,util.unpack(values))
       end, ...)

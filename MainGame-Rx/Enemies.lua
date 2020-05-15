@@ -216,6 +216,9 @@ function Enemies.CreatePatrol(posX, posY)
 end
 
 function Enemies.CreateQuickTime(posX, posY, scheduler)
+    --todo: como seria pra adicionar um timer pra dar erro se passar o tempo (0.5) sem apertar nada
+    --todo: tentar implementação mais simples
+    
 	local enemy = {}
 	-- Properties
 	enemy.tag = "Enemy"
@@ -275,6 +278,7 @@ function Enemies.CreateQuickTime(posX, posY, scheduler)
 
     local trySequence = quickTimeRange.playerPressed
         :filter(function(key)
+            --todo: transformar em tabela {"key"=true...}
             return key == "down" or key == "up" or key == "left" or key == "right" and enemy.sequenceTries > 0
         end)
     
