@@ -39,7 +39,6 @@ function FallingPlats.Create(posX, posY)
     plat.Ground = true
     plat.previousTime = -1
     plat.timeToFall = 1
-    plat.lastTime = -1
     plat.state = 0
 
     plat.touchedPlayer = function()

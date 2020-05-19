@@ -42,7 +42,7 @@ function CollisionManager.Init(scheduler)
         end)
         :subscribe(function(a, b, coll) 
             a:getUserData().properties.item:onNext(b:getUserData().properties)
-            b:getUserData().properties.touchedPlayer:onNext(a:getUserData().properties.body) 
+            b:getUserData().properties.touchedPlayer:onNext(true) 
         end)
 
     -- Trata colisao enemyShot com shield
