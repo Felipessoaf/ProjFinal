@@ -9,7 +9,7 @@ return {
   tilewidth = 32,
   tileheight = 32,
   nextlayerid = 13,
-  nextobjectid = 24,
+  nextobjectid = 25,
   properties = {},
   tilesets = {
     {
@@ -537,6 +537,21 @@ return {
           properties = {
             ["enemyType"] = "quickTime"
           }
+        },
+        {
+          id = 24,
+          name = "bossSpawn",
+          type = "",
+          shape = "rectangle",
+          x = 3728,
+          y = 1200,
+          width = 0,
+          height = 0,
+          rotation = 0,
+          visible = true,
+          properties = {
+            ["enemyType"] = "boss"
+          }
         }
       }
     },
@@ -845,8 +860,8 @@ return {
           name = "spawn",
           type = "",
           shape = "rectangle",
-          x = 1060,
-          y = 1118,
+          x = 3493.33,
+          y = 999.818,
           width = 0,
           height = 0,
           rotation = 0,

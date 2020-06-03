@@ -202,18 +202,4 @@ function postS(a, b, coll, normalimpulse, tangentimpulse)
     postSolve:onNext(a, b, coll, normalimpulse, tangentimpulse)
 end
 
-function enemyShoot(shotsTable, pos)
-    rx.Observable.fromTable(shotsTable, pairs, false)
-        :filter(function(shot)
-            return not shot.fired
-        end)
-        :first()
-        :subscribe(function(shot)
-            shot.body:setLinearVelocity(-shot.speed, 0)
-            shot.body:setPosition(unpack(pos))
-            shot.fired = true
-            shot.body:setActive(true)
-        end)
-end
-
 return CollisionManager

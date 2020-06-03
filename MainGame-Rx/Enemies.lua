@@ -15,6 +15,17 @@ function Enemies.Init(scheduler)
         
     Enemies.scheduler = scheduler
 
+    -- Commom Observables/schedulers
+    Enemies.shootScheduler = rx.Subject.create()
+
+	scheduler:schedule(function()
+        coroutine.yield(1)
+        while true do
+            Enemies.shootScheduler:onNext()
+            coroutine.yield(math.random())
+        end
+    end)
+
 	-- Get enemies spawn objects
 	for k, object in pairs(map.objects) do
         if object.name == "shooterSpawn" then
@@ -23,11 +34,12 @@ function Enemies.Init(scheduler)
 			Enemies.CreatePatrol(object.x, object.y)
         elseif object.name == "quickTimeSpawn" then
 			Enemies.CreateQuickTime(object.x, object.y, scheduler)
+        elseif object.name == "bossSpawn" then
+			Enemies.CreateBoss(object.x, object.y, scheduler)
         end
 	end
     
     -- Draw enemies
-    -- TODO: Separar em tabelas diferentes enemies alive vs not alive
     enemyLayer.draw = function(self)
         local enemiesAlive = rx.Observable.fromTable(Enemies.enemies, pairs, false)
                                 :filter(function(enemy)
@@ -37,7 +49,7 @@ function Enemies.Init(scheduler)
         enemiesAlive:subscribe(function(enemy)
                 enemy.draw()
                 end)
-   end
+    end
    
    return Enemies.enemies
 end
@@ -62,44 +74,16 @@ function Enemies.CreateShooter(posX, posY, scheduler)
 	enemy.fixture:setUserData({properties = enemy})
 	enemy.fixture:setCategory(3)
 
-	rx.Observable.fromRange(1, 10)
-		:subscribe(function ()
-			local shot = {}
-			shot.tag = "EnemyShot"
-			shot.width = 3
-			shot.height = 3
-			shot.fired = false
-			shot.speed = 100
-			shot.body = love.physics.newBody(world, -8000, -8000, "dynamic")
-			shot.body:setActive(false)
-			shot.body:setFixedRotation(true)
-			shot.body:setGravityScale(0)
-			shot.body:setSleepingAllowed(true)
-			shot.body:setBullet(true)
-			shot.shape = love.physics.newRectangleShape(shot.width, shot.height)
-			shot.fixture = love.physics.newFixture(shot.body, shot.shape, 2)
-			shot.fixture:setUserData({properties = shot})
-			shot.fixture:setCategory(3)
-			shot.fixture:setMask(3)
-            shot.fixture:setSensor(true)
-            shot.reset = function()
-                shot.fired = false 
-                scheduler:schedule(function()
-                    coroutine.yield(.01)
-                    shot.body:setActive(false)
-                end)
-            end
-			table.insert(enemy.shots, shot)
-		end)
+    initializeShots(enemy.shots, 10, scheduler)
 
-	-- Atira
-	scheduler:schedule(function()
-			coroutine.yield(1)
-			while true and enemy.alive do
-				enemyShoot(enemy.shots, {enemy.body:getX(), enemy.body:getY()})
-				coroutine.yield(math.random(.5,2))
-			end
-		end)
+    -- Atira
+    Enemies.shootScheduler
+        :filter(function()
+            return enemy.alive and math.random() > 0.3
+        end)
+        :subscribe(function()
+            enemyShoot(enemy.shots, {enemy.body:getX(), enemy.body:getY()})
+        end)
 
    	-- Checa alerta perigo
     local alertaPerigo = {}
@@ -275,11 +259,18 @@ function Enemies.CreateQuickTime(posX, posY, scheduler)
             enemy.resetSequence()
         end)
     quickTimeRange.sequence = rx.BehaviorSubject.create()
+    -- quickTimeRange.acceptedKeys = {
+    --     down = true,
+    --     up = true,
+    --     left = true,
+    --     right = true
+    -- }
 
     local trySequence = quickTimeRange.playerPressed
         :filter(function(key)
             --todo: transformar em tabela {"key"=true...}
             return key == "down" or key == "up" or key == "left" or key == "right" and enemy.sequenceTries > 0
+            -- return quickTimeRange.acceptedKeys[key] and enemy.sequenceTries > 0
         end)
     
     trySequence
@@ -290,12 +281,14 @@ function Enemies.CreateQuickTime(posX, posY, scheduler)
     local match, wrong = trySequence
         :zip(quickTimeRange.sequence)
         :partition(function(try, answer)
+            -- print(try, answer)
             return try == answer
         end)
 
     local miss = match
         :TimeInterval(scheduler)
         :filter(function(dt, try, answer)
+            -- print(dt, try, answer)
             return dt > 0.5 and enemy.sequenceTries > 1
         end)
 
@@ -369,6 +362,81 @@ function Enemies.CreateQuickTime(posX, posY, scheduler)
     table.insert(Enemies.enemies, enemy)  
 end
 
+function Enemies.CreateBoss(posX, posY, scheduler)
+    
+	local enemy = {}
+	-- Properties
+	enemy.tag = "Boss"
+	enemy.initX = posX
+	enemy.initY = posY
+	enemy.width = 80
+	enemy.height = 100
+    enemy.alive = true
+    enemy.shooterColor = {135/255, 0, 168/255}
+    enemy.patrolColor = {247/255, 154/255, 22/255}
+    enemy.quickTimeColor = {242/255, 130/255, 250/255}
+    enemy.currentColor = enemy.shooterColor
+    enemy.health = 100
+    enemy.state = 1
+
+    enemy.shots = {}
+
+	-- Physics
+	enemy.body = love.physics.newBody(world, enemy.initX, enemy.initY, "dynamic")
+	enemy.body:setFixedRotation(true)
+	enemy.shape = love.physics.newRectangleShape(enemy.width, enemy.height)
+	enemy.fixture = love.physics.newFixture(enemy.body, enemy.shape, 2)
+	enemy.fixture:setUserData({properties = enemy})
+    enemy.fixture:setCategory(3)
+
+    initializeShots(enemy.shots, 40, scheduler)
+
+    -- Atira
+    Enemies.shootScheduler
+        :filter(function()
+            return enemy.alive and enemy.state == 1
+        end)
+        :subscribe(function()
+            local ytop = enemy.body:getY() - enemy.height/2
+            enemyShoot(enemy.shots, {enemy.body:getX(), ytop + enemy.height*1/5})
+            enemyShoot(enemy.shots, {enemy.body:getX(), ytop + enemy.height*2/5})
+            enemyShoot(enemy.shots, {enemy.body:getX(), ytop + enemy.height*3/5})
+            enemyShoot(enemy.shots, {enemy.body:getX(), ytop + enemy.height*4/5})
+        end)
+
+    -- Functions
+    enemy.damage = function(val)
+        enemy.health = enemy.health - val
+    end
+
+    enemy.draw = function()
+        --enemy
+		love.graphics.setColor(unpack(enemy.currentColor))
+		love.graphics.polygon("fill", enemy.body:getWorldPoints(enemy.shape:getPoints()))
+		love.graphics.setColor(0, 0, 0)
+        love.graphics.polygon("line", enemy.body:getWorldPoints(enemy.shape:getPoints()))
+
+        --health
+        love.graphics.setColor(1,0,0)
+        love.graphics.rectangle("fill", enemy.body:getX() - 50, enemy.body:getY() - enemy.height * 3/4, enemy.health, 10)
+        love.graphics.setColor(0,0,0)
+        love.graphics.rectangle("line", enemy.body:getX() - 50, enemy.body:getY() - enemy.height * 3/4, 100, 10)
+        
+		-- let's draw our enemy shots
+		love.graphics.setColor(0, 0, 0)
+		rx.Observable.fromTable(enemy.shots, pairs, false)
+			:filter(function(shot)
+				return shot.fired
+			end)
+			:subscribe(function(shot)
+				love.graphics.polygon("fill", shot.body:getWorldPoints(shot.shape:getPoints()))
+			end)
+
+    end
+
+    table.insert(Enemies.enemies, enemy)  
+end
+
 function killEnemy(enemy)
     Enemies.scheduler:schedule(function()
         coroutine.yield(.01)
@@ -381,6 +449,52 @@ function killEnemy(enemy)
         enemy.body:setActive(false)
     end)
     enemy.alive = false
+end
+
+function initializeShots(tb, count, scheduler)
+    rx.Observable.fromRange(1, count)
+		:subscribe(function ()
+			local shot = {}
+			shot.tag = "EnemyShot"
+			shot.width = 3
+			shot.height = 3
+			shot.fired = false
+			shot.speed = 100
+			shot.body = love.physics.newBody(world, -8000, -8000, "dynamic")
+			shot.body:setActive(false)
+			shot.body:setFixedRotation(true)
+			shot.body:setGravityScale(0)
+			shot.body:setSleepingAllowed(true)
+			shot.body:setBullet(true)
+			shot.shape = love.physics.newRectangleShape(shot.width, shot.height)
+			shot.fixture = love.physics.newFixture(shot.body, shot.shape, 2)
+			shot.fixture:setUserData({properties = shot})
+			shot.fixture:setCategory(3)
+			shot.fixture:setMask(3)
+            shot.fixture:setSensor(true)
+            shot.reset = function()
+                shot.fired = false 
+                scheduler:schedule(function()
+                    coroutine.yield(.01)
+                    shot.body:setActive(false)
+                end)
+            end
+			table.insert(tb, shot)
+		end)
+end
+
+function enemyShoot(shotsTable, pos)
+    rx.Observable.fromTable(shotsTable, pairs, false)
+        :filter(function(shot)
+            return not shot.fired
+        end)
+        :first()
+        :subscribe(function(shot)
+            shot.body:setLinearVelocity(-shot.speed, 0)
+            shot.body:setPosition(unpack(pos))
+            shot.fired = true
+            shot.body:setActive(true)
+        end)
 end
 
 return Enemies

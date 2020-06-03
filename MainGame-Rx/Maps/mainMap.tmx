@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.3.2" orientation="orthogonal" renderorder="left-up" compressionlevel="0" width="150" height="70" tilewidth="32" tileheight="32" infinite="0" nextlayerid="13" nextobjectid="24">
+<map version="1.2" tiledversion="1.3.2" orientation="orthogonal" renderorder="left-up" compressionlevel="0" width="150" height="70" tilewidth="32" tileheight="32" infinite="0" nextlayerid="13" nextobjectid="25">
  <editorsettings>
   <export target="mainMap.lua" format="lua"/>
  </editorsettings>
@@ -393,6 +393,11 @@
     <property name="enemyType" value="quickTime"/>
    </properties>
   </object>
+  <object id="24" name="bossSpawn" x="3728" y="1200">
+   <properties>
+    <property name="enemyType" value="boss"/>
+   </properties>
+  </object>
  </objectgroup>
  <objectgroup id="10" name="movingPlats">
   <object id="14" name="horizontalPlat" x="1658.5" y="985.5">
@@ -572,6 +577,6 @@
 </data>
  </layer>
  <objectgroup id="5" name="spawn">
-  <object id="1" name="spawn" x="1060" y="1118"/>
+  <object id="1" name="spawn" x="3493.33" y="999.818"/>
  </objectgroup>
 </map>

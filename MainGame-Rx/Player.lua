@@ -186,7 +186,8 @@ function Player.Init(scheduler)
             return hero.body:getY() > 1500
         end)
         :subscribe(function()
-            love.load()
+            -- love.load()
+            love.event.quit("restart")
         end)
 	
     love.update
