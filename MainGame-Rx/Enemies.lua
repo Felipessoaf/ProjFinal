@@ -258,6 +258,7 @@ function Enemies.CreateQuickTime(posX, posY, scheduler)
         :subscribe(function()
             enemy.resetSequence()
         end)
+
     quickTimeRange.sequence = rx.BehaviorSubject.create()
     -- quickTimeRange.acceptedKeys = {
     --     down = true,
@@ -381,6 +382,16 @@ function Enemies.CreateBoss(posX, posY, scheduler)
     enemy.maxState = 3
 
     enemy.shots = {}
+    enemy.sequence = {
+        "up",
+        "up",
+        "down",
+        "down",
+        "left",
+        "right",
+        "left",
+        "right"
+    }
 
 	-- Physics
 	enemy.body = love.physics.newBody(world, enemy.initX, enemy.initY, "dynamic")
@@ -404,6 +415,28 @@ function Enemies.CreateBoss(posX, posY, scheduler)
     enemyRange.fixture = love.physics.newFixture(enemyRange.body, enemyRange.shape)
     enemyRange.fixture:setUserData({properties = enemyRange})
     enemyRange.fixture:setSensor(true)
+
+    -- -- Area quicktime
+    local quickTimeRange = {}
+    quickTimeRange.tag = "QuickTimeRange"
+    quickTimeRange.defaultColor = {64/255, 86/255, 1, 0.3}
+    quickTimeRange.color = quickTimeRange.defaultColor
+    quickTimeRange.matchColor = {0, 1, 0, 0.5}
+    quickTimeRange.wrongColor = {1, 0, 0, 0.5}
+    quickTimeRange.body = love.physics.newBody(world, enemy.initX, enemy.initY)
+    quickTimeRange.shape = love.physics.newRectangleShape(350, 500)
+    quickTimeRange.fixture = love.physics.newFixture(quickTimeRange.body, quickTimeRange.shape)
+    quickTimeRange.fixture:setUserData({properties = quickTimeRange})
+    quickTimeRange.fixture:setSensor(true)
+    quickTimeRange.playerPressed = rx.BehaviorSubject.create()
+    quickTimeRange.playerInRange = rx.BehaviorSubject.create()
+    quickTimeRange.playerInRange
+        :filter(function(value)
+            return value ~= nil
+        end)
+        :subscribe(function()
+            enemy.resetSequence()
+        end)
 
     -- Change state
     scheduler:schedule(function()
@@ -431,6 +464,11 @@ function Enemies.CreateBoss(posX, posY, scheduler)
     enemy.damage = function(val)
         enemy.health = enemy.health - val
     end
+    
+    enemy.resetSequence = function()
+        enemy.sequenceTries = 1
+        quickTimeRange.color = quickTimeRange.defaultColor
+    end
 
     enemy.draw = function()
         --enemyrange
@@ -438,6 +476,25 @@ function Enemies.CreateBoss(posX, posY, scheduler)
             love.graphics.setColor(unpack(enemyRange.color))
             love.graphics.polygon("fill", enemyRange.body:getWorldPoints(enemyRange.shape:getPoints()))
         end
+
+        --quicktime
+        if enemy.state == 3 then         
+            for i, key in pairs(enemy.sequence) do 
+                if enemy.sequenceTries ~= nil and i < enemy.sequenceTries then
+                    love.graphics.setColor(0, 1, 0)
+                else 
+                    love.graphics.setColor(0, 0, 0)
+                end
+    
+                love.graphics.setNewFont(15)
+                love.graphics.print(key, enemy.initX - 30, (enemy.initY - enemy.height) - 20 * (#enemy.sequence - i))
+            end
+    
+            --range
+            love.graphics.setColor(unpack(quickTimeRange.color))
+            love.graphics.polygon("fill", quickTimeRange.body:getWorldPoints(quickTimeRange.shape:getPoints()))
+        end
+        
 
         --enemy
 		love.graphics.setColor(unpack(enemy.currentColor))
@@ -519,7 +576,7 @@ function enemyShoot(shotsTable, pos)
         end)
         :first()
         :subscribe(function(shot)
-            shot.body:setLinearVelocity(-shot.speed, 0)
+            shot.body:setLinearVelocity(pos[1] > heroPosX and -shot.speed or shot.speed, 0)
             shot.body:setPosition(unpack(pos))
             shot.fired = true
             shot.body:setActive(true)
