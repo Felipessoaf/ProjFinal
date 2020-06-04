@@ -378,6 +378,7 @@ function Enemies.CreateBoss(posX, posY, scheduler)
     enemy.currentColor = enemy.shooterColor
     enemy.health = 100
     enemy.state = 1
+    enemy.maxState = 3
 
     enemy.shots = {}
 
@@ -391,6 +392,28 @@ function Enemies.CreateBoss(posX, posY, scheduler)
 
     initializeShots(enemy.shots, 40, scheduler)
 
+    -- -- Area alcance visao
+    local enemyRange = {}
+    enemyRange.tag = "EnemyRange"
+    enemyRange.color = {1, 132/255, 0, 0.5}
+    enemyRange.outRangeColor = {1, 132/255, 0, 0.5}
+    enemyRange.safeColor = {0, 1, 0, 0.5}
+    enemyRange.dangerColor = {1, 0, 0, 0.5}
+    enemyRange.body = love.physics.newBody(world, enemy.initX, enemy.initY)
+    enemyRange.shape = love.physics.newRectangleShape(350, 500)
+    enemyRange.fixture = love.physics.newFixture(enemyRange.body, enemyRange.shape)
+    enemyRange.fixture:setUserData({properties = enemyRange})
+    enemyRange.fixture:setSensor(true)
+
+    -- Change state
+    scheduler:schedule(function()
+        while true do
+            coroutine.yield(3)
+            local next = enemy.state + 1
+            enemy.state = next <= enemy.maxState and next or 1
+        end
+    end)
+
     -- Atira
     Enemies.shootScheduler
         :filter(function()
@@ -403,13 +426,19 @@ function Enemies.CreateBoss(posX, posY, scheduler)
             enemyShoot(enemy.shots, {enemy.body:getX(), ytop + enemy.height*3/5})
             enemyShoot(enemy.shots, {enemy.body:getX(), ytop + enemy.height*4/5})
         end)
-
+    
     -- Functions
     enemy.damage = function(val)
         enemy.health = enemy.health - val
     end
 
     enemy.draw = function()
+        --enemyrange
+        if enemy.state == 2 then 
+            love.graphics.setColor(unpack(enemyRange.color))
+            love.graphics.polygon("fill", enemyRange.body:getWorldPoints(enemyRange.shape:getPoints()))
+        end
+
         --enemy
 		love.graphics.setColor(unpack(enemy.currentColor))
 		love.graphics.polygon("fill", enemy.body:getWorldPoints(enemy.shape:getPoints()))
