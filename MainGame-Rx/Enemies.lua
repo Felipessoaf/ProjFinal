@@ -172,18 +172,7 @@ function Enemies.CreatePatrol(posX, posY)
 	enemy.fixture:setCategory(3)
 
     -- -- Area alcance visao
-    local enemyRange = {}
-    enemyRange.tag = "EnemyRange"
-    enemyRange.color = {1, 132/255, 0, 0.5}
-    enemyRange.outRangeColor = {1, 132/255, 0, 0.5}
-    enemyRange.safeColor = {0, 1, 0, 0.5}
-    enemyRange.dangerColor = {1, 0, 0, 0.5}
-    enemyRange.body = love.physics.newBody(world, enemy.initX, enemy.initY)
-    enemyRange.shape = love.physics.newRectangleShape(300, 100)
-    -- attach shape to body
-    enemyRange.fixture = love.physics.newFixture(enemyRange.body, enemyRange.shape)
-    enemyRange.fixture:setUserData({properties = enemyRange})
-    enemyRange.fixture:setSensor(true)
+    local enemyRange = createRange(enemy)
 
 	-- Functions
 	enemy.draw = function()
@@ -238,92 +227,12 @@ function Enemies.CreateQuickTime(posX, posY, scheduler)
 	wall.fixture:setCategory(3)
 
     -- -- Area alcance visao
-    local quickTimeRange = {}
-    quickTimeRange.tag = "QuickTimeRange"
-    quickTimeRange.defaultColor = {64/255, 86/255, 1, 0.3}
-    quickTimeRange.color = quickTimeRange.defaultColor
-    quickTimeRange.matchColor = {0, 1, 0, 0.5}
-    quickTimeRange.wrongColor = {1, 0, 0, 0.5}
-    quickTimeRange.body = love.physics.newBody(world, enemy.initX, enemy.initY)
-    quickTimeRange.shape = love.physics.newRectangleShape(300, 100)
-    quickTimeRange.fixture = love.physics.newFixture(quickTimeRange.body, quickTimeRange.shape)
-    quickTimeRange.fixture:setUserData({properties = quickTimeRange})
-    quickTimeRange.fixture:setSensor(true)
-    quickTimeRange.playerPressed = rx.BehaviorSubject.create()
-    quickTimeRange.playerInRange = rx.BehaviorSubject.create()
-    quickTimeRange.playerInRange
-        :filter(function(value)
-            return value ~= nil
-        end)
-        :subscribe(function()
-            enemy.resetSequence()
-        end)
-
-    quickTimeRange.sequence = rx.BehaviorSubject.create()
-    -- quickTimeRange.acceptedKeys = {
-    --     down = true,
-    --     up = true,
-    --     left = true,
-    --     right = true
-    -- }
-
-    local trySequence = quickTimeRange.playerPressed
-        :filter(function(key)
-            --todo: transformar em tabela {"key"=true...}
-            return key == "down" or key == "up" or key == "left" or key == "right" and enemy.sequenceTries > 0
-            -- return quickTimeRange.acceptedKeys[key] and enemy.sequenceTries > 0
-        end)
-    
-    trySequence
-        :subscribe(function()
-            quickTimeRange.sequence:onNext(enemy.sequence[enemy.sequenceTries])
-        end)
-
-    local match, wrong = trySequence
-        :zip(quickTimeRange.sequence)
-        :partition(function(try, answer)
-            -- print(try, answer)
-            return try == answer
-        end)
-
-    local miss = match
-        :TimeInterval(scheduler)
-        :filter(function(dt, try, answer)
-            -- print(dt, try, answer)
-            return dt > 0.5 and enemy.sequenceTries > 1
-        end)
-
-    local onTime = match
-        :TimeInterval(scheduler)
-        :filter(function(dt, try, answer)
-            return dt < 0.5 or enemy.sequenceTries == 1
-        end)
-
-    miss
-        :merge(wrong)
-        :execute(function()
-            hero.health:onNext(hero.health:getValue() - 10)
-            quickTimeRange.color = quickTimeRange.wrongColor
-            enemy.sequenceTries = -1
-        end)
-        :delay(1, scheduler)
-        :subscribe(function(try, step)
-            enemy.resetSequence()
-        end)
-
-    onTime
-        :execute(function()
-            quickTimeRange.color = quickTimeRange.matchColor
-            enemy.sequenceTries = enemy.sequenceTries + 1
-        end)
-        :filter(function()
-            return enemy.sequenceTries == #enemy.sequence+1
-        end)
-        :subscribe(function()
-            killEnemy(enemy)            
-            wall.body:setActive(false)
-            quickTimeRange.body:setActive(false)
-        end)
+    local onMatch = function()
+        killEnemy(enemy)            
+        wall.body:setActive(false)
+        quickTimeRange.body:setActive(false)
+    end
+    local quickTimeRange = createQuickRange(enemy, scheduler, onMatch)
 
 	-- Functions
     enemy.draw = function()
@@ -377,9 +286,10 @@ function Enemies.CreateBoss(posX, posY, scheduler)
     enemy.patrolColor = {247/255, 154/255, 22/255}
     enemy.quickTimeColor = {242/255, 130/255, 250/255}
     enemy.currentColor = enemy.shooterColor
-    enemy.health = 100
+    enemy.health = rx.BehaviorSubject.create(100)
     enemy.state = 1
     enemy.maxState = 3
+    enemy.shotHit = rx.Subject.create()
 
     enemy.shots = {}
     enemy.sequence = {
@@ -404,44 +314,17 @@ function Enemies.CreateBoss(posX, posY, scheduler)
     initializeShots(enemy.shots, 40, scheduler)
 
     -- -- Area alcance visao
-    local enemyRange = {}
-    enemyRange.tag = "EnemyRange"
-    enemyRange.color = {1, 132/255, 0, 0.5}
-    enemyRange.outRangeColor = {1, 132/255, 0, 0.5}
-    enemyRange.safeColor = {0, 1, 0, 0.5}
-    enemyRange.dangerColor = {1, 0, 0, 0.5}
-    enemyRange.body = love.physics.newBody(world, enemy.initX, enemy.initY)
-    enemyRange.shape = love.physics.newRectangleShape(350, 500)
-    enemyRange.fixture = love.physics.newFixture(enemyRange.body, enemyRange.shape)
-    enemyRange.fixture:setUserData({properties = enemyRange})
-    enemyRange.fixture:setSensor(true)
+    local enemyRange = createRange(enemy)
 
     -- -- Area quicktime
-    local quickTimeRange = {}
-    quickTimeRange.tag = "QuickTimeRange"
-    quickTimeRange.defaultColor = {64/255, 86/255, 1, 0.3}
-    quickTimeRange.color = quickTimeRange.defaultColor
-    quickTimeRange.matchColor = {0, 1, 0, 0.5}
-    quickTimeRange.wrongColor = {1, 0, 0, 0.5}
-    quickTimeRange.body = love.physics.newBody(world, enemy.initX, enemy.initY)
-    quickTimeRange.shape = love.physics.newRectangleShape(350, 500)
-    quickTimeRange.fixture = love.physics.newFixture(quickTimeRange.body, quickTimeRange.shape)
-    quickTimeRange.fixture:setUserData({properties = quickTimeRange})
-    quickTimeRange.fixture:setSensor(true)
-    quickTimeRange.playerPressed = rx.BehaviorSubject.create()
-    quickTimeRange.playerInRange = rx.BehaviorSubject.create()
-    quickTimeRange.playerInRange
-        :filter(function(value)
-            return value ~= nil
-        end)
-        :subscribe(function()
-            enemy.resetSequence()
-        end)
+    local quickTimeRange = createQuickRange(enemy, scheduler, function()
+        enemy.damage(10)
+    end)
 
     -- Change state
     scheduler:schedule(function()
         while true do
-            coroutine.yield(3)
+            coroutine.yield(5)
             local next = enemy.state + 1
             enemy.state = next <= enemy.maxState and next or 1
         end
@@ -459,10 +342,19 @@ function Enemies.CreateBoss(posX, posY, scheduler)
             enemyShoot(enemy.shots, {enemy.body:getX(), ytop + enemy.height*3/5})
             enemyShoot(enemy.shots, {enemy.body:getX(), ytop + enemy.height*4/5})
         end)
+
+    -- Recebe tiro
+    enemy.shotHit
+        :filter(function()
+            return (enemy.state == 1) or (enemy.state == 2 and enemyRange.color == enemyRange.safeColor)
+        end)
+        :subscribe(function()
+            enemy.damage(10)
+        end)
     
     -- Functions
     enemy.damage = function(val)
-        enemy.health = enemy.health - val
+        enemy.health:onNext(enemy.health:getValue() - val)
     end
     
     enemy.resetSequence = function()
@@ -504,7 +396,7 @@ function Enemies.CreateBoss(posX, posY, scheduler)
 
         --health
         love.graphics.setColor(1,0,0)
-        love.graphics.rectangle("fill", enemy.body:getX() - 50, enemy.body:getY() - enemy.height * 3/4, enemy.health, 10)
+        love.graphics.rectangle("fill", enemy.body:getX() - 50, enemy.body:getY() - enemy.height * 3/4, enemy.health:getValue(), 10)
         love.graphics.setColor(0,0,0)
         love.graphics.rectangle("line", enemy.body:getX() - 50, enemy.body:getY() - enemy.height * 3/4, 100, 10)
         
@@ -581,6 +473,111 @@ function enemyShoot(shotsTable, pos)
             shot.fired = true
             shot.body:setActive(true)
         end)
+end
+
+function createRange(enemy)
+    local enemyRange = {}
+    enemyRange.tag = "EnemyRange"
+    enemyRange.color = {1, 132/255, 0, 0.5}
+    enemyRange.outRangeColor = {1, 132/255, 0, 0.5}
+    enemyRange.safeColor = {0, 1, 0, 0.5}
+    enemyRange.dangerColor = {1, 0, 0, 0.5}
+    enemyRange.body = love.physics.newBody(world, enemy.initX, enemy.initY)
+    enemyRange.shape = love.physics.newRectangleShape(350, 500)
+    enemyRange.fixture = love.physics.newFixture(enemyRange.body, enemyRange.shape)
+    enemyRange.fixture:setUserData({properties = enemyRange})
+    enemyRange.fixture:setSensor(true)
+
+    return enemyRange
+end
+
+function createQuickRange(enemy, scheduler, onMatch)
+    local quickTimeRange = {}
+    quickTimeRange.tag = "QuickTimeRange"
+    quickTimeRange.defaultColor = {64/255, 86/255, 1, 0.3}
+    quickTimeRange.color = quickTimeRange.defaultColor
+    quickTimeRange.matchColor = {0, 1, 0, 0.5}
+    quickTimeRange.wrongColor = {1, 0, 0, 0.5}
+    quickTimeRange.body = love.physics.newBody(world, enemy.initX, enemy.initY)
+    quickTimeRange.shape = love.physics.newRectangleShape(350, 500)
+    quickTimeRange.fixture = love.physics.newFixture(quickTimeRange.body, quickTimeRange.shape)
+    quickTimeRange.fixture:setUserData({properties = quickTimeRange})
+    quickTimeRange.fixture:setSensor(true)
+    quickTimeRange.playerPressed = rx.BehaviorSubject.create()
+    quickTimeRange.playerInRange = rx.BehaviorSubject.create()
+    quickTimeRange.playerInRange
+        :filter(function(value)
+            return value ~= nil
+        end)
+        :subscribe(function()
+            enemy.resetSequence()
+        end) 
+
+    quickTimeRange.sequence = rx.BehaviorSubject.create()
+    -- quickTimeRange.acceptedKeys = {
+    --     down = true,
+    --     up = true,
+    --     left = true,
+    --     right = true
+    -- }
+
+    local trySequence = quickTimeRange.playerPressed
+        :filter(function(key)
+            --todo: transformar em tabela {"key"=true...}
+            return key == "down" or key == "up" or key == "left" or key == "right" and enemy.sequenceTries > 0
+            -- return quickTimeRange.acceptedKeys[key] and enemy.sequenceTries > 0
+        end)
+    
+    trySequence
+        :subscribe(function()
+            quickTimeRange.sequence:onNext(enemy.sequence[enemy.sequenceTries])
+        end)
+
+    local match, wrong = trySequence
+        :zip(quickTimeRange.sequence)
+        :partition(function(try, answer)
+            -- print(try, answer)
+            return try == answer
+        end)
+
+    local miss = match
+        :TimeInterval(scheduler)
+        :filter(function(dt, try, answer)
+            -- print(dt, try, answer)
+            return dt > 0.5 and enemy.sequenceTries > 1
+        end)
+
+    local onTime = match
+        :TimeInterval(scheduler)
+        :filter(function(dt, try, answer)
+            return dt < 0.5 or enemy.sequenceTries == 1
+        end)
+
+    miss
+        :merge(wrong)
+        :execute(function()
+            hero.health:onNext(hero.health:getValue() - 10)
+            quickTimeRange.color = quickTimeRange.wrongColor
+            enemy.sequenceTries = -1
+        end)
+        :delay(1, scheduler)
+        :subscribe(function(try, step)
+            enemy.resetSequence()
+        end)
+
+    onTime
+        :execute(function()
+            quickTimeRange.color = quickTimeRange.matchColor
+            enemy.sequenceTries = enemy.sequenceTries + 1
+        end)
+        :filter(function()
+            return enemy.sequenceTries == #enemy.sequence+1
+        end)
+        :subscribe(function()
+            onMatch()
+        end)
+
+    return quickTimeRange
 end
 
 return Enemies

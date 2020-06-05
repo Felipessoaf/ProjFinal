@@ -136,7 +136,6 @@ function CollisionManager.Init(scheduler)
 
     -- Trata colisao de tiro do player
     shotHit = beginContact:filter(function(a, b, coll) return a:getUserData().properties.tag == "Shot" or b:getUserData().properties.tag == "Shot" end)
-    shotHitEnemy = rx.BehaviorSubject.create()
 
     shotHit:subscribe(function(a, b, coll) 
         local shot = {}
@@ -151,6 +150,8 @@ function CollisionManager.Init(scheduler)
 
         if other.tag == "Enemy" then
             killEnemy(other) 
+        elseif other.tag == "Boss" then
+            other.shotHit:onNext()
         end
 
         if other.tag ~= "EnemyRange" and other.tag ~= "shield" and other.tag ~= "QuickTimeRange" then

@@ -509,27 +509,12 @@ return {
           }
         },
         {
-          id = 22,
-          name = "shooterSpawn",
-          type = "",
-          shape = "rectangle",
-          x = 3188,
-          y = 1008,
-          width = 0,
-          height = 0,
-          rotation = 0,
-          visible = true,
-          properties = {
-            ["enemyType"] = "shooter"
-          }
-        },
-        {
           id = 23,
           name = "quickTimeSpawn",
           type = "",
           shape = "rectangle",
-          x = 1344,
-          y = 1066,
+          x = 3181.67,
+          y = 1004.5,
           width = 0,
           height = 0,
           rotation = 0,
@@ -860,8 +845,8 @@ return {
           name = "spawn",
           type = "",
           shape = "rectangle",
-          x = 3436.33,
-          y = 1001.82,
+          x = 3085.66,
+          y = 996.487,
           width = 0,
           height = 0,
           rotation = 0,

@@ -383,12 +383,7 @@
     <property name="enemyType" value="patrol"/>
    </properties>
   </object>
-  <object id="22" name="shooterSpawn" x="3188" y="1008">
-   <properties>
-    <property name="enemyType" value="shooter"/>
-   </properties>
-  </object>
-  <object id="23" name="quickTimeSpawn" x="1344" y="1066">
+  <object id="23" name="quickTimeSpawn" x="3181.67" y="1004.5">
    <properties>
     <property name="enemyType" value="quickTime"/>
    </properties>
@@ -577,6 +572,6 @@
 </data>
  </layer>
  <objectgroup id="5" name="spawn">
-  <object id="1" name="spawn" x="3436.33" y="1001.82"/>
+  <object id="1" name="spawn" x="3085.66" y="996.487"/>
  </objectgroup>
 </map>
