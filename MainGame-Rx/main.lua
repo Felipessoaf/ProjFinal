@@ -40,7 +40,7 @@ love.load:subscribe(function (arg)
     
     shield = Shield.Init(scheduler)
 
-    CollisionManager.Init(scheduler)
+    CollisionManager.Init(scheduler)    
 end)
 
 love.update:subscribe(function (dt)
@@ -54,11 +54,16 @@ end)
 love.draw:subscribe(function ()
 
     heroPosX, heroPosY = hero.body:getPosition();
-    local tx,ty = -heroPosX + love.graphics.getWidth()/2, -heroPosY + love.graphics.getHeight() * 3/4;
+    local tx,ty = -heroPosX + love.graphics.getWidth()/2 - 50, -heroPosY + love.graphics.getHeight() * 3/4;
 	
     -- Draw world
 	love.graphics.setColor(1, 1, 1)
-	map:draw(tx,ty)
+    map:draw(tx,ty)
+    
+    -- Texto inimigos
+    love.graphics.setColor(0, 0, 0)
+    font = love.graphics.setNewFont(20)
+    love.graphics.print(Enemies.stateText or "", love.graphics.getWidth()/2 - font:getWidth(Enemies.stateText or "")/2, 20)
 
 	-- Draw Collision Map (useful for debugging)
 	-- love.graphics.setColor(1, 0, 0)

@@ -35,7 +35,7 @@ function Enemies.Init(scheduler)
         elseif object.name == "quickTimeSpawn" then
 			Enemies.CreateQuickTime(object.x, object.y, scheduler)
         elseif object.name == "bossSpawn" then
-			Enemies.CreateBoss(object.x, object.y, scheduler)
+			-- Enemies.CreateBoss(object.x, object.y, scheduler)
         end
 	end
     
@@ -50,8 +50,10 @@ function Enemies.Init(scheduler)
                 enemy.draw()
                 end)
     end
+
+    Enemies.stateText = "Enemies Left: " .. tostring(#Enemies.enemies)
    
-   return Enemies.enemies
+    return Enemies.enemies
 end
 
 function Enemies.CreateShooter(posX, posY, scheduler)
@@ -436,6 +438,27 @@ function killEnemy(enemy)
         enemy.body:setActive(false)
     end)
     enemy.alive = false
+
+
+    rx.Observable.fromTable(Enemies.enemies, pairs, false)
+        :count(function(enemy)
+            return enemy.alive
+        end)
+        :subscribe(function(value)
+            Enemies.stateText = "Enemies Left: " .. tostring(value)
+        end)
+
+    rx.Observable.fromTable(Enemies.enemies, pairs, false)
+        :all(function(enemy)
+            return not enemy.alive
+        end)
+        :filter(function(value)
+            return value == true
+        end)
+        :subscribe(function()
+            Enemies.stateText = "Congratulations"
+        end)
+    
 end
 
 function initializeShots(tb, count, scheduler)
