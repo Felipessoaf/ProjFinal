@@ -171,7 +171,7 @@ function Enemies.CreatePatrol(posX, posY)
 	enemy.fixture:setUserData({properties = enemy})
 	enemy.fixture:setCategory(3)
 
-    -- -- Area alcance visao
+    -- Area alcance visao
     local enemyRange = createRange(enemy)
 
 	-- Functions
@@ -226,9 +226,9 @@ function Enemies.CreateQuickTime(posX, posY, scheduler)
 	wall.fixture:setUserData({properties = wall})
 	wall.fixture:setCategory(3)
 
-    -- -- Area alcance visao
+    -- Area alcance visao
     local onMatch = function()
-        killEnemy(enemy)            
+        killEnemy(enemy)
         wall.body:setActive(false)
         quickTimeRange.body:setActive(false)
     end
@@ -313,10 +313,10 @@ function Enemies.CreateBoss(posX, posY, scheduler)
 
     initializeShots(enemy.shots, 40, scheduler)
 
-    -- -- Area alcance visao
+    -- Area alcance visao
     local enemyRange = createRange(enemy)
 
-    -- -- Area quicktime
+    -- Area quicktime
     local quickTimeRange = createQuickRange(enemy, scheduler, function()
         enemy.damage(10)
     end)
@@ -350,6 +350,15 @@ function Enemies.CreateBoss(posX, posY, scheduler)
         end)
         :subscribe(function()
             enemy.damage(10)
+        end)
+
+    -- Checa vida
+    enemy.health
+        :filter(function(val)
+            return val <= 0
+        end)
+        :subscribe(function()            
+            killEnemy(enemy)
         end)
     
     -- Functions
