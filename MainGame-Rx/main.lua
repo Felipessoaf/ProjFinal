@@ -54,7 +54,7 @@ end)
 love.draw:subscribe(function ()
 
     heroPosX, heroPosY = hero.body:getPosition();
-    local tx,ty = -heroPosX + love.graphics.getWidth()/2 - 50, -heroPosY + love.graphics.getHeight() * 3/4;
+    local tx,ty = -heroPosX + love.graphics.getWidth()/2, -heroPosY + love.graphics.getHeight() * 3/4;
 	
     -- Draw world
 	love.graphics.setColor(1, 1, 1)

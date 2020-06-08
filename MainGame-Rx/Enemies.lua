@@ -35,7 +35,7 @@ function Enemies.Init(scheduler)
         elseif object.name == "quickTimeSpawn" then
 			Enemies.CreateQuickTime(object.x, object.y, scheduler)
         elseif object.name == "bossSpawn" then
-			-- Enemies.CreateBoss(object.x, object.y, scheduler)
+			Enemies.CreateBoss(object.x, object.y, scheduler)
         end
 	end
     
@@ -174,7 +174,7 @@ function Enemies.CreatePatrol(posX, posY)
 	enemy.fixture:setCategory(3)
 
     -- Area alcance visao
-    local enemyRange = createRange(enemy)
+    local enemyRange = createRange(enemy, 300, 100)
 
 	-- Functions
 	enemy.draw = function()
@@ -228,7 +228,7 @@ function Enemies.CreateQuickTime(posX, posY, scheduler)
 	wall.fixture:setUserData({properties = wall})
 	wall.fixture:setCategory(3)
 
-    -- Area alcance visao
+    -- Area quicktime
     local onMatch = function()
         killEnemy(enemy)
         wall.body:setActive(false)
@@ -316,7 +316,7 @@ function Enemies.CreateBoss(posX, posY, scheduler)
     initializeShots(enemy.shots, 40, scheduler)
 
     -- Area alcance visao
-    local enemyRange = createRange(enemy)
+    local enemyRange = createRange(enemy, 350, 500)
 
     -- Area quicktime
     local quickTimeRange = createQuickRange(enemy, scheduler, function()
@@ -439,7 +439,7 @@ function killEnemy(enemy)
     end)
     enemy.alive = false
 
-
+    -- Atualiza texto
     rx.Observable.fromTable(Enemies.enemies, pairs, false)
         :count(function(enemy)
             return enemy.alive
@@ -456,9 +456,8 @@ function killEnemy(enemy)
             return value == true
         end)
         :subscribe(function()
-            Enemies.stateText = "Congratulations"
-        end)
-    
+            Enemies.stateText = "CONGRATULATIONS!"
+        end)    
 end
 
 function initializeShots(tb, count, scheduler)
@@ -507,7 +506,7 @@ function enemyShoot(shotsTable, pos)
         end)
 end
 
-function createRange(enemy)
+function createRange(enemy, width, height)
     local enemyRange = {}
     enemyRange.tag = "EnemyRange"
     enemyRange.color = {1, 132/255, 0, 0.5}
@@ -515,7 +514,7 @@ function createRange(enemy)
     enemyRange.safeColor = {0, 1, 0, 0.5}
     enemyRange.dangerColor = {1, 0, 0, 0.5}
     enemyRange.body = love.physics.newBody(world, enemy.initX, enemy.initY)
-    enemyRange.shape = love.physics.newRectangleShape(350, 500)
+    enemyRange.shape = love.physics.newRectangleShape(width, height)
     enemyRange.fixture = love.physics.newFixture(enemyRange.body, enemyRange.shape)
     enemyRange.fixture:setUserData({properties = enemyRange})
     enemyRange.fixture:setSensor(true)

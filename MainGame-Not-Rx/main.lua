@@ -54,6 +54,7 @@ function love.update(dt)
     hero.update(dt)
     
     -- Updates Enemies
+    Enemies.update(dt)
     for _, enemy in pairs(enemies) do
         enemy.update(dt)
     end
@@ -90,6 +91,11 @@ function love.draw()
     -- Draw world
 	love.graphics.setColor(1, 1, 1)
 	map:draw(tx,ty)
+    
+    -- Texto inimigos
+    love.graphics.setColor(0, 0, 0)
+    font = love.graphics.setNewFont(20)
+    love.graphics.print(Enemies.stateText or "", love.graphics.getWidth()/2 - font:getWidth(Enemies.stateText or "")/2, 20)
 
 	-- Draw Collision Map (useful for debugging)
 	-- love.graphics.setColor(1, 0, 0)

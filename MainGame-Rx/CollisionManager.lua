@@ -149,7 +149,7 @@ function CollisionManager.Init(scheduler)
         end
 
         if other.tag == "Enemy" then
-            killEnemy(other) 
+            killEnemy(other)
         elseif other.tag == "Boss" then
             other.shotHit:onNext()
         end

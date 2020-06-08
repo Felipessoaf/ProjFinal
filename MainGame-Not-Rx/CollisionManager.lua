@@ -121,7 +121,9 @@ function checkShotHit(a, b)
     end
 
     if other.tag == "Enemy" then
-        killEnemy(other) 
+        killEnemy(other)
+    elseif other.tag == "Boss" then
+        other.shotHit()
     end
 
     if other.tag ~= "EnemyRange" and other.tag ~= "shield" and other.tag ~= "QuickTimeRange" then
