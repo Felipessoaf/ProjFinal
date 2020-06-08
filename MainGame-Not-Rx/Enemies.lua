@@ -25,7 +25,7 @@ function Enemies.Init()
         elseif object.name == "quickTimeSpawn" then
 			Enemies.CreateQuickTime(object.x, object.y)
         elseif object.name == "bossSpawn" then
-			Enemies.CreateBoss(object.x, object.y, scheduler)
+			-- Enemies.CreateBoss(object.x, object.y)
         end
 	end
     
@@ -166,7 +166,7 @@ function Enemies.CreatePatrol(posX, posY)
 	enemy.fixture:setUserData({properties = enemy})
 	enemy.fixture:setCategory(3)
 
-    -- -- Area alcance visao
+    -- Area alcance visao
     local enemyRange = createRange(enemy, 300, 100)
 
 	-- Functions
@@ -222,13 +222,13 @@ function Enemies.CreateQuickTime(posX, posY)
 	wall.fixture:setUserData({properties = wall})
 	wall.fixture:setCategory(3)
 
-    -- -- Area quicktime
-    local onMatch = function()
+    -- Area quicktime
+    local quickTimeRange = createQuickRange(enemy)
+    quickTimeRange.onMatch = function()
         killEnemy(enemy)
         wall.body:setActive(false)
         quickTimeRange.body:setActive(false)
     end
-    local quickTimeRange = createQuickRange(enemy, onMatch)
 
     enemy.draw = function()
         --enemy
@@ -262,7 +262,7 @@ function Enemies.CreateQuickTime(posX, posY)
     table.insert(Enemies.enemies, enemy)  
 end
 
-function Enemies.CreateBoss(posX, posY, scheduler)
+function Enemies.CreateBoss(posX, posY)
 	local enemy = {}
 	-- Properties
 	enemy.tag = "Boss"
@@ -298,7 +298,7 @@ function Enemies.CreateBoss(posX, posY, scheduler)
 	enemy.body:setFixedRotation(true)
 	enemy.shape = love.physics.newRectangleShape(enemy.width, enemy.height)
 	enemy.fixture = love.physics.newFixture(enemy.body, enemy.shape, 2)
-	enemy.fixture:setUserData({properties = enemy})
+	enemy.fixture:setUserData({properties = enemy}) 
     enemy.fixture:setCategory(3)
 
     initializeShots(enemy.shots, 40)
@@ -307,9 +307,10 @@ function Enemies.CreateBoss(posX, posY, scheduler)
     local enemyRange = createRange(enemy, 350, 500)
 
     -- Area quicktime
-    local quickTimeRange = createQuickRange(enemy, function()
+    local quickTimeRange = createQuickRange(enemy)
+    quickTimeRange.onMatch = function()
         enemy.damage(10)
-    end)
+    end
 
     -- Functions
     enemy.damage = function(val)
@@ -410,7 +411,7 @@ function killEnemy(enemy)
     -- Atualiza texto
     local count = 0
     local allDefeated = true
-    for k, shot in pairs(Enemies.enemies) do
+    for k, enemy in pairs(Enemies.enemies) do
         if enemy.alive then
             count = count + 1
             allDefeated = false
@@ -420,7 +421,7 @@ function killEnemy(enemy)
     if allDefeated then
         Enemies.stateText = "CONGRATULATIONS!"
     else
-        Enemies.stateText = "Enemies Left: " .. tostring(value)
+        Enemies.stateText = "Enemies Left: " .. tostring(count)
     end   
 end
 
@@ -509,7 +510,7 @@ function createQuickRange(enemy, onMatch)
 
                     --finished successfully
                     if enemy.sequenceTries == #enemy.sequence+1 then
-                        onMatch()
+                        quickTimeRange.onMatch()
                     end
                 else
                     --miss
