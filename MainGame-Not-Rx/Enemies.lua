@@ -25,7 +25,7 @@ function Enemies.Init()
         elseif object.name == "quickTimeSpawn" then
 			Enemies.CreateQuickTime(object.x, object.y)
         elseif object.name == "bossSpawn" then
-			-- Enemies.CreateBoss(object.x, object.y)
+			Enemies.CreateBoss(object.x, object.y)
         end
 	end
     
@@ -91,7 +91,6 @@ function Enemies.CreateShooter(posX, posY)
     enemy.shootSchedule = function()
         if math.random() > 0.3 then
             enemyShoot(enemy.shots, {enemy.body:getX(), enemy.body:getY()})
-            enemy.nextShotTimeInterval = math.random(.5,2)
         end
     end
 
@@ -279,7 +278,7 @@ function Enemies.CreateBoss(posX, posY)
     enemy.state = 1
     enemy.maxState = 3
     enemy.lastChange = love.timer.getTime()
-    enemy.TimeToChange = 0.5
+    enemy.TimeToChange = 5
 
     enemy.shots = {}
     enemy.sequence = {
@@ -490,7 +489,7 @@ function createQuickRange(enemy, onMatch)
     quickTimeRange.matchColor = {0, 1, 0, 0.5}
     quickTimeRange.wrongColor = {1, 0, 0, 0.5}
     quickTimeRange.body = love.physics.newBody(world, enemy.initX, enemy.initY)
-    quickTimeRange.shape = love.physics.newRectangleShape(300, 100)
+    quickTimeRange.shape = love.physics.newRectangleShape(350, 500)
     quickTimeRange.fixture = love.physics.newFixture(quickTimeRange.body, quickTimeRange.shape)
     quickTimeRange.fixture:setUserData({properties = quickTimeRange})
     quickTimeRange.fixture:setSensor(true)

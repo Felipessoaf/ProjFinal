@@ -147,7 +147,7 @@ function checkEnemyShotHit(a, b)
         a:getUserData().properties.damage(10)
     end
 
-    if other.tag ~= "EnemyRange" and other.tag ~= "shield" and other.tag ~= "QuickTimeRange" then
+    if other.tag ~= "EnemyRange" and other.tag ~= "shield" and other.tag ~= "QuickTimeRange" and other.tag ~= "Enemy" and other.tag ~= "EnemyShot" then
         b:getUserData().properties.reset()
     end
 end
