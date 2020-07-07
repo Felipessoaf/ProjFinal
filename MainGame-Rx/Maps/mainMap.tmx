@@ -572,6 +572,6 @@
 </data>
  </layer>
  <objectgroup id="5" name="spawn">
-  <object id="1" name="spawn" x="1912.32" y="985.82"/>
+  <object id="1" name="spawn" x="1054.32" y="1120.15"/>
  </objectgroup>
 </map>

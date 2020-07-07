@@ -50,7 +50,6 @@ function Enemies.Init()
             Enemies.lastShotTime = curTime
             Enemies.nextShotTimeInterval = math.random()
         end
-        
     end
 
     Enemies.stateText = "Enemies Left: " .. tostring(#Enemies.enemies)
